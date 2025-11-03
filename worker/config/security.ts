@@ -187,14 +187,15 @@ export function getSecureHeadersConfig(env: Env): SecureHeadersConfig {
                 "ws://localhost:*",
                 "wss://localhost:*",
                 `wss://${env.CUSTOM_DOMAIN || '*'}`,
-                // Allow preview tunnels (trycloudflare)
+                // Allow preview tunnels (trycloudflare) and Cloudflare preview domain
                 "https://*.trycloudflare.com",
+                "https://*.build-preview.cloudflare.dev",
                 // API endpoints
                 "https://api.github.com",
                 "https://api.cloudflare.com"
             ],
-            // Allow embedding preview iframes from trycloudflare tunnels
-            frameSrc: ["'self'", "https://*.trycloudflare.com"],
+            // Allow embedding preview iframes from tunnels and Cloudflare preview domain
+            frameSrc: ["'self'", "https://*.trycloudflare.com", "https://*.build-preview.cloudflare.dev"],
             objectSrc: ["'none'"],
             mediaSrc: ["'self'"],
             workerSrc: ["'self'", "blob:"],
