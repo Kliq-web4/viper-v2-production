@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { ArrowRight, Info } from 'react-feather';
+import { ArrowRight, Info } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/contexts/auth-context';
 import {
