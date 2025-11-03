@@ -115,11 +115,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check authentication status
   const checkAuth = useCallback(async () => {
     try {
+      // Load existing token from localStorage
+      const existingToken = localStorage.getItem('authToken');
+      if (existingToken) {
+        setToken(existingToken);
+      }
+      
       const response = await apiClient.getProfile(true);
       
       if (response.success && response.data?.user) {
         setUser({ ...response.data.user, isAnonymous: false } as AuthUser);
-        setToken(null); // Profile endpoint doesn't return token, cookies are used
         setSession({
           userId: response.data.user.id,
           email: response.data.user.email,
@@ -133,12 +138,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setToken(null);
         setSession(null);
+        localStorage.removeItem('authToken');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
       setToken(null);
       setSession(null);
+      localStorage.removeItem('authToken');
     } finally {
       setIsLoading(false);
     }
@@ -211,7 +218,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.success && response.data) {
         setUser({ ...response.data.user, isAnonymous: false } as AuthUser);
-        setToken(null); // Using cookies for authentication
+        
+        // Store JWT token in localStorage for API authentication
+        const accessToken = (response.data as any).accessToken;
+        if (accessToken) {
+          localStorage.setItem('authToken', accessToken);
+          setToken(accessToken);
+        }
+        
         setSession({
           userId: response.data.user.id,
           email: response.data.user.email,
@@ -249,7 +263,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.success && response.data) {
         setUser({ ...response.data.user, isAnonymous: false } as AuthUser);
-        setToken(null); // Using cookies for authentication
+        
+        // Store JWT token in localStorage for API authentication
+        const accessToken = (response.data as any).accessToken;
+        if (accessToken) {
+          localStorage.setItem('authToken', accessToken);
+          setToken(accessToken);
+        }
+        
         setSession({
           userId: response.data.user.id,
           email: response.data.user.email,
@@ -287,6 +308,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setToken(null);
       setSession(null);
+      localStorage.removeItem('authToken');
       if (refreshTimerRef.current) {
         clearInterval(refreshTimerRef.current);
       }

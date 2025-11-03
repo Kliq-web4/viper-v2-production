@@ -144,15 +144,9 @@ interface PublicAppsParams extends PaginationParams {
 /**
  * Unified API Client class
  */
-interface CSRFTokenInfo {
-	token: string;
-	expiresAt: number;
-}
-
 class ApiClient {
 	private baseUrl: string;
 	private defaultHeaders: Record<string, string>;
-	private csrfTokenInfo: CSRFTokenInfo | null = null;
 
 	constructor(config: ApiClientConfig = {}) {
 		this.baseUrl = config.baseUrl || '';
@@ -168,81 +162,21 @@ class ApiClient {
 	private getAuthHeaders(): Record<string, string> {
 		const headers: Record<string, string> = {};
 
-		// Add session token for anonymous users if not authenticated
-		// This will be handled automatically by cookies/credentials for authenticated users
-		const sessionToken = localStorage.getItem('anonymous_session_token');
-		if (sessionToken && !document.cookie.includes('session=')) {
-			headers['X-Session-Token'] = sessionToken;
+		// Add JWT token from localStorage
+		const authToken = localStorage.getItem('authToken');
+		if (authToken) {
+			headers['Authorization'] = `Bearer ${authToken}`;
 		}
 
-		// Add CSRF token for state-changing requests
-		if (this.csrfTokenInfo && !this.isCSRFTokenExpired()) {
-			headers['X-CSRF-Token'] = this.csrfTokenInfo.token;
+		// Add session token for anonymous users if not authenticated
+		const sessionToken = localStorage.getItem('anonymous_session_token');
+		if (sessionToken && !authToken) {
+			headers['X-Session-Token'] = sessionToken;
 		}
 
 		return headers;
 	}
 
-	/**
-	 * Fetch CSRF token from server with expiration handling
-	 */
-	private async fetchCsrfToken(): Promise<boolean> {
-		try {
-			const response = await fetch(`${this.baseUrl}/api/auth/csrf-token`, {
-				method: 'GET',
-				credentials: 'include',
-			});
-			
-			if (response.ok) {
-				const data: ApiResponse<CsrfTokenResponseData> = await response.json();
-				if (data.data?.token) {
-					const expiresIn = data.data.expiresIn || 7200; // Default 2 hours
-					this.csrfTokenInfo = {
-						token: data.data.token,
-						expiresAt: Date.now() + (expiresIn * 1000)
-					};
-					return true;
-				}
-			}
-			return false;
-		} catch (error) {
-			console.warn('Failed to fetch CSRF token:', error);
-			return false;
-		}
-	}
-
-	/**
-	 * Public method to refresh CSRF token
-	 * Should be called after authentication operations that rotate the token
-	 */
-	async refreshCsrfToken(): Promise<void> {
-		await this.fetchCsrfToken();
-	}
-
-
-	/**
-	 * Check if CSRF token is expired
-	 */
-	private isCSRFTokenExpired(): boolean {
-		if (!this.csrfTokenInfo) return true;
-		return Date.now() >= this.csrfTokenInfo.expiresAt;
-	}
-
-	/**
-	 * Ensure CSRF token exists and is valid for state-changing requests
-	 */
-	private async ensureCsrfToken(method: string): Promise<boolean> {
-		if (!['POST', 'PUT', 'DELETE', 'PATCH'].includes(method.toUpperCase())) {
-			return true;
-		}
-		
-		// Fetch new token if none exists or current one is expired
-		if (!this.csrfTokenInfo || this.isCSRFTokenExpired()) {
-			return await this.fetchCsrfToken();
-		}
-		
-		return true;
-	}
 
 	/**
 	 * Ensure session token exists for anonymous users
@@ -310,15 +244,6 @@ class ApiClient {
         noToast: boolean = false,
 	): Promise<{ response: Response; data: ApiResponse<T> | null }> {
 		this.ensureSessionToken();
-		
-		if (!await this.ensureCsrfToken(options.method || 'GET')) {
-			throw new ApiError(
-				500,
-				'Internal Error',
-				'Failed to obtain CSRF token',
-				endpoint,
-			);
-		}
 
 		const url = `${this.baseUrl}${endpoint}`;
 		const config: RequestInit = {
@@ -365,14 +290,6 @@ class ApiClient {
                         toast.error(errorData.message);
                     }
                     switch (errorData.type) {
-                        case SecurityErrorType.CSRF_VIOLATION:
-                            // Handle CSRF failures with retry
-                            if (response.status === 403 && !isRetry) {
-                                // Clear expired token and retry with fresh one
-                                this.csrfTokenInfo = null;
-                                return this.requestRaw(endpoint, options, true);
-                            }
-                            break;
                         case SecurityErrorType.RATE_LIMITED:
                             // Handle rate limiting
                             console.log('Rate limited', errorData);

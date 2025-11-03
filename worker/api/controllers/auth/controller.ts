@@ -22,7 +22,6 @@ import {
 } from '../../../utils/authUtils';
 import { RouteContext } from '../../types/route-context';
 import { authMiddleware } from '../../../middleware/auth/auth';
-import { CsrfService } from '../../../services/csrf/CsrfService';
 import { BaseController } from '../baseController';
 import { createLogger } from '../../../logger';
 /**
@@ -78,11 +77,6 @@ export class AuthController extends BaseController {
                 accessTokenExpiry: SessionService.config.sessionTTL
             });
             
-            // Rotate CSRF token on successful registration if configured
-            if (CsrfService.defaults.rotateOnAuth) {
-                CsrfService.rotateToken(response);
-            }
-            
             return response;
         } catch (error) {
             if (error instanceof SecurityError) {
@@ -133,11 +127,6 @@ export class AuthController extends BaseController {
                 accessTokenExpiry: SessionService.config.sessionTTL
             });
             
-            // Rotate CSRF token on successful login if configured
-            if (CsrfService.defaults.rotateOnAuth) {
-                CsrfService.rotateToken(response);
-            }
-            
             return response;
         } catch (error) {
             if (error instanceof SecurityError) {
@@ -174,9 +163,6 @@ export class AuthController extends BaseController {
             
             clearAuthCookies(response);
             
-            // Clear CSRF token on logout
-            CsrfService.clearTokenCookie(response);
-            
             return response;
         } catch (error) {
             this.logger.error('Logout failed', error);
@@ -187,9 +173,6 @@ export class AuthController extends BaseController {
             });
             
             clearAuthCookies(response);
-            
-            // Clear CSRF token on logout
-            CsrfService.clearTokenCookie(response);
             
             return response;
         }
@@ -610,30 +593,6 @@ export class AuthController extends BaseController {
     }
 
     /**
-     * Get CSRF token with proper expiration and rotation
-     * GET /api/auth/csrf-token
-     */
-    static async getCsrfToken(request: Request, _env: Env, _ctx: ExecutionContext, _routeContext: RouteContext): Promise<Response> {
-        try {
-            const token = CsrfService.getOrGenerateToken(request, false);
-            
-            const response = AuthController.createSuccessResponse({ 
-                token,
-                headerName: CsrfService.defaults.headerName,
-                expiresIn: Math.floor(CsrfService.defaults.tokenTTL / 1000)
-            });
-            
-            // Set the token in cookie with proper expiration
-            const maxAge = Math.floor(CsrfService.defaults.tokenTTL / 1000);
-            CsrfService.setTokenCookie(response, token, maxAge);
-            
-            return response;
-        } catch (error) {
-            return AuthController.handleError(error, 'get CSRF token');
-        }
-    }
-    
-    /**
      * Get available authentication providers
      * GET /api/auth/providers
      */
@@ -650,22 +609,11 @@ export class AuthController extends BaseController {
                 email: true
             };
             
-            // Include CSRF token with provider info
-            const csrfToken = CsrfService.getOrGenerateToken(request, false);
-            
-            const response = AuthController.createSuccessResponse({
+            return AuthController.createSuccessResponse({
                 providers,
                 hasOAuth: providers.google || providers.github,
-                requiresEmailAuth: !providers.google && !providers.github,
-                csrfToken,
-                csrfExpiresIn: Math.floor(CsrfService.defaults.tokenTTL / 1000)
+                requiresEmailAuth: !providers.google && !providers.github
             });
-            
-            // Set CSRF token cookie with proper expiration
-            const maxAge = Math.floor(CsrfService.defaults.tokenTTL / 1000);
-            CsrfService.setTokenCookie(response, csrfToken, maxAge);
-            
-            return response;
         } catch (error) {
             console.error('Get auth providers error:', error);
             return AuthController.createErrorResponse('Failed to get authentication providers', 500);

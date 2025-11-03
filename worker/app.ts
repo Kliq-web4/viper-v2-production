@@ -5,8 +5,6 @@ import { getCORSConfig, getSecureHeadersConfig } from './config/security';
 import { RateLimitService } from './services/rate-limit/rateLimits';
 import { AppEnv } from './types/appenv';
 import { setupRoutes } from './api/routes';
-import { CsrfService } from './services/csrf/CsrfService';
-import { SecurityError, SecurityErrorType } from 'shared/types/errors';
 import { getGlobalConfigurableSettings } from './config';
 import { AuthConfig, setAuthLevel } from './middleware/auth/routeAuth';
 // import { initHonoSentry } from './observability/sentry';
@@ -30,48 +28,6 @@ export function createApp(env: Env): Hono<AppEnv> {
     
     // CORS configuration
     app.use('/api/*', cors(getCORSConfig(env)));
-    
-    // CSRF protection using double-submit cookie pattern with proper GET handling
-    app.use('*', async (c, next) => {
-        const method = c.req.method.toUpperCase();
-        
-        // Skip for WebSocket upgrades
-        const upgradeHeader = c.req.header('upgrade');
-        if (upgradeHeader?.toLowerCase() === 'websocket') {
-            return next();
-        }
-        
-        try {
-            // Handle GET requests - establish CSRF token if needed
-            if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
-                await next();
-                
-                // Only set CSRF token for successful API responses
-                if (c.req.url.startsWith('/api/') && c.res.status < 400) {
-                    await CsrfService.enforce(c.req.raw, c.res);
-                }
-                
-                return;
-            }
-            
-            // Validate CSRF token for state-changing requests
-            await CsrfService.enforce(c.req.raw, undefined);
-            await next();
-        } catch (error) {
-            if (error instanceof SecurityError && error.type === SecurityErrorType.CSRF_VIOLATION) {
-                return new Response(JSON.stringify({ 
-                    error: { 
-                        message: 'CSRF validation failed',
-                        type: SecurityErrorType.CSRF_VIOLATION
-                    }
-                }), {
-                    status: 403,
-                    headers: { 'Content-Type': 'application/json' }
-                });
-            }
-            throw error;
-        }
-    });
 
     app.use('/api/*', async (c, next) => {
         // Apply global config middleware
