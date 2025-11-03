@@ -49,3 +49,6 @@ debug-tools/*.json
 .env.sentry-build-plugin
 data-dump
 debug-tools/extracted
+
+# Local agent rules file
+WARP.md
