@@ -237,10 +237,10 @@ class ApiClient {
 		return data;
 	}
 
-	private async requestRaw<T>(
+private async requestRaw<T>(
 		endpoint: string,
 		options: RequestOptions = {},
-		isRetry: boolean = false,
+		_isRetry: boolean = false,
         noToast: boolean = false,
 	): Promise<{ response: Response; data: ApiResponse<T> | null }> {
 		this.ensureSessionToken();

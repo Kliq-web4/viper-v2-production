@@ -597,7 +597,7 @@ export class AuthController extends BaseController {
      * GET /api/auth/providers
      */
     static async getAuthProviders(
-        request: Request,
+        _request: Request,
         env: Env,
         _ctx: ExecutionContext,
         _context: RouteContext
