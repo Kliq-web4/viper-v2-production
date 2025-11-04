@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { Loader, Check, AlertCircle, ChevronDown, ChevronRight, ArrowUp, Zap, XCircle } from 'lucide-react';
+import { Loader, Check, AlertCircle, ChevronDown, ChevronRight, ArrowUp, XCircle } from 'lucide-react';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type { RefObject } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -182,10 +182,6 @@ interface PhaseTimelineProps {
 	total: number;
 	parentScrollRef?: RefObject<HTMLDivElement | null>;
 	onViewChange?: (view: 'blueprint') => void;
-	// Deployment functionality
-	chatId?: string;
-	isDeploying?: boolean;
-	handleDeployToCloudflare?: (instanceId: string) => void;
 	// Issue tracking and debugging
 	runtimeErrorCount?: number;
 	staticIssueCount?: number;
@@ -272,9 +268,6 @@ export function PhaseTimeline({
 	total,
 	parentScrollRef,
 	onViewChange,
-	chatId,
-	isDeploying,
-	handleDeployToCloudflare,
 	runtimeErrorCount = 0,
 	staticIssueCount = 0,
 	isDebugging = false,
@@ -528,25 +521,6 @@ export function PhaseTimeline({
                                         </span>
                                     </div>
                                 )}
-                                {chatId && handleDeployToCloudflare && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeployToCloudflare(chatId);
-                                        }}
-                                        disabled={!!isDeploying}
-                                        className="ml-2 flex items-center gap-1.5 px-2.5 py-1 bg-accent hover:bg-accent/90 disabled:bg-accent/50 text-white rounded-full text-xs font-medium transition-colors disabled:cursor-not-allowed"
-                                        title={isDeploying ? 'Deploying...' : 'Deploy to Cloudflare'}
-                                        aria-label={isDeploying ? 'Deploying' : 'Deploy to Cloudflare'}
-                                    >
-                                        {isDeploying ? (
-                                            <StatusLoader size="sm" color="accent" />
-                                        ) : (
-                                            <Zap className="w-3 h-3" />
-                                        )}
-                                        <span className="hidden sm:inline">{isDeploying ? 'Deploying...' : 'Deploy'}</span>
-                                    </button>
-                                )}
                             </motion.div>
 
 							{/* Expanded Content */}
@@ -618,23 +592,6 @@ export function PhaseTimeline({
 													Scroll to Top
 												</button>
 
-												{chatId && handleDeployToCloudflare && (
-													<button
-														onClick={(e) => {
-															e.stopPropagation();
-															handleDeployToCloudflare(chatId);
-														}}
-														disabled={isDeploying}
-														className="flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-accent/90 disabled:bg-accent/50 text-white rounded-lg text-xs font-medium transition-colors disabled:cursor-not-allowed"
-													>
-														{isDeploying ? (
-															<StatusLoader size="sm" color="accent" />
-														) : (
-															<Zap className="w-3 h-3" />
-														)}
-														{isDeploying ? 'Deploying...' : 'Deploy to Cloudflare'}
-													</button>
-												)}
 											</div>
 										</div>
 									</motion.div>
@@ -871,12 +828,12 @@ export function PhaseTimeline({
 											);
 										} else if (isPreviewDeploying) {
 											return (
-												<div className="space-y-1 relative bg-orange-50/5 border border-orange-200/20 rounded-lg p-3">
+												<div className="space-y-1 relative bg-accent/10 border border-accent/20 rounded-lg p-3">
 													<div className="flex items-center gap-2">
-														<StatusLoader size="sm" color="orange" />
-														<span className="text-sm font-medium text-orange-400">Deploying preview...</span>
+														<StatusLoader size="sm" color="accent" />
+														<span className="text-sm font-medium text-accent">Deploying preview...</span>
 													</div>
-													<span className="text-xs text-orange-300/80 ml-5">Updating your preview environment</span>
+													<span className="text-xs text-accent/80 ml-5">Updating your preview environment</span>
 												</div>
 											);
 										}
