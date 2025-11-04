@@ -136,7 +136,7 @@ export default function Home() {
 	return (
 		<div className="relative flex flex-col items-center size-full">
 			{/* Mystic purple animated background */}
-			<div className="fixed inset-0 -z-10 pointer-events-none">
+<div className="fixed inset-0 z-0 pointer-events-none">
 				<EtheralShadow
 					className="w-full h-full"
 					color="rgba(139, 92, 246, 0.8)"
