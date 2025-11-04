@@ -16,6 +16,7 @@ import { useDragDrop } from '@/hooks/use-drag-drop';
 import { ImageUploadButton } from '@/components/image-upload-button';
 import { ImageAttachmentPreview } from '@/components/image-attachment-preview';
 import { SUPPORTED_IMAGE_MIME_TYPES } from '@/api-types';
+import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
 
 export default function Home() {
 	const navigate = useNavigate();
@@ -134,33 +135,17 @@ export default function Home() {
 
 	return (
 		<div className="relative flex flex-col items-center size-full">
-			{/* Dotted background pattern - extends to full viewport */}
-			<div className="fixed inset-0 text-accent z-0 opacity-20 pointer-events-none">
-				<svg width="100%" height="100%">
-					<defs>
-						<pattern
-							id=":S2:"
-							viewBox="-6 -6 12 12"
-							patternUnits="userSpaceOnUse"
-							width="12"
-							height="12"
-						>
-							<circle
-								cx="0"
-								cy="0"
-								r="1"
-								fill="currentColor"
-							></circle>
-						</pattern>
-					</defs>
-					<rect
-						width="100%"
-						height="100%"
-						fill="url(#:S2:)"
-					></rect>
-				</svg>
+			{/* Mystic purple animated background */}
+			<div className="fixed inset-0 -z-10 pointer-events-none">
+				<EtheralShadow
+					className="w-full h-full"
+					color="rgba(139, 92, 246, 0.8)"
+					animation={{ scale: 100, speed: 85 }}
+					noise={{ opacity: 0.6, scale: 1.1 }}
+					sizing="fill"
+				/>
 			</div>
-			
+
 			<LayoutGroup>
 				<div className="rounded-md w-full max-w-2xl overflow-hidden">
 					<motion.div
