@@ -41,7 +41,7 @@ import { ResourceProvisioner } from './resourceProvisioner';
 import { TemplateParser } from './templateParser';
 import { ResourceProvisioningResult } from './types';
 import { getPreviewDomain } from '../../utils/urls';
-import { isDev } from 'worker/utils/envs'
+import { isDev, isEnabled } from "../../utils/envs";
 import { FileTreeBuilder } from './fileTreeBuilder';
 // Export the Sandbox class in your Worker
 export { Sandbox as UserAppSandboxService, Sandbox as DeployerService} from "@cloudflare/sandbox";
@@ -928,9 +928,9 @@ export class SandboxSdkClient extends BaseSandboxService {
             // Allocate single port for both dev server and tunnel
             const allocatedPort = await this.allocateAvailablePort();
 
-            // If on local development, start cloudflared tunnel
+            // If explicitly enabled for local development, start cloudflared tunnel
             let tunnelUrlPromise = Promise.resolve('');
-            if (isDev(env) || env.USE_TUNNEL_FOR_PREVIEW) {
+            if (isDev(env) && isEnabled(env.USE_TUNNEL_FOR_PREVIEW)) {
                 this.logger.info('Starting cloudflared tunnel for local development', { instanceId });
                 tunnelUrlPromise = this.startCloudflaredTunnel(instanceId, allocatedPort);
             }
@@ -963,7 +963,7 @@ export class SandboxSdkClient extends BaseSandboxService {
                         }
                     }
 
-                    if(env.USE_TUNNEL_FOR_PREVIEW) {
+                    if (isEnabled(env.USE_TUNNEL_FOR_PREVIEW)) {
                         this.logger.info('Using tunnel url instead for preview as configured', { instanceId, tunnelURL });
                         previewURL = tunnelURL;
                     }
