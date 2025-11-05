@@ -12,8 +12,8 @@ export function getPreviewDomain(env: Env): string {
     if (env.CUSTOM_DOMAIN && env.CUSTOM_DOMAIN.trim() !== '') {
         return env.CUSTOM_DOMAIN;
     }
-    // Default to Cloudflare preview domain when no custom domains are configured
-    return 'build-preview.cloudflare.dev';
+    // Default to custom domain for previews when not explicitly configured
+    return 'web4.sbs';
 }
 
 export function buildUserWorkerUrl(env: Env, deploymentId: string): string {
