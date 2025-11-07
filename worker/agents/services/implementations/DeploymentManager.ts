@@ -210,14 +210,31 @@ export class DeploymentManager extends BaseAgentService implements IDeploymentMa
      * Run static analysis (lint + typecheck) on code
      */
     async runStaticAnalysis(files?: string[]): Promise<StaticAnalysisResponse> {
-        const { sandboxInstanceId } = this.getState();
-
-        if (!sandboxInstanceId) {
-            throw new Error('No sandbox instance available for static analysis');
-        }
-
+        let { sandboxInstanceId } = this.getState();
         const logger = this.getLog();
         const client = this.getClient();
+
+        // Ensure we have an instance to analyze. If missing, create and sync files.
+        if (!sandboxInstanceId) {
+            logger.info('No sandbox instance available for analysis — creating one and syncing files');
+            try {
+                const ensured = await this.ensureInstance(false);
+                sandboxInstanceId = ensured.sandboxInstanceId;
+
+                // Sync current generated files so analysis runs on latest code
+                const filesToWrite = this.getFilesToDeploy([], ensured.redeployed);
+                if (filesToWrite.length > 0) {
+                    await client.writeFiles(
+                        sandboxInstanceId,
+                        filesToWrite,
+                        'chore: sync files before static analysis'
+                    );
+                }
+            } catch (e) {
+                logger.error('Failed to prepare sandbox instance for analysis', e);
+                throw new Error('No sandbox instance available for static analysis');
+            }
+        }
 
         logger.info(`Linting code in sandbox instance ${sandboxInstanceId}`);
 
