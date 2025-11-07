@@ -11,6 +11,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router';
 import { MonacoEditor } from '../../components/monaco-editor/monaco-editor';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Expand, Github, GitBranch, LoaderCircle, RefreshCw, MoreHorizontal, RotateCcw, X } from 'lucide-react';
+import { CloudflareLogo } from '@/components/icons/logos';
 import clsx from 'clsx';
 import { Blueprint } from './components/blueprint';
 import { FileExplorer } from './components/file-explorer';
@@ -125,10 +126,14 @@ const {
 		shouldRefreshPreview,
 		// Preview deployment state
 		isPreviewDeploying,
+		// Cloudflare deployment state
+		isDeploying,
 		// Issue tracking and debugging state
 		runtimeErrorCount,
 		staticIssueCount,
 		isDebugging,
+		// Actions
+		handleDeployToCloudflare,
 	} = useChat({
 		chatId: urlChatId,
 		query: userQuery,
@@ -322,7 +327,11 @@ const {
 		return phaseTimeline.length > 0 && phaseTimeline[0].status === 'completed';
 	}, [phaseTimeline]);
 
-	const isGitHubExportReady = useMemo(() => {
+const isGitHubExportReady = useMemo(() => {
+		return isPhase1Complete && !!urlChatId;
+	}, [isPhase1Complete, urlChatId]);
+
+	const isDeployReady = useMemo(() => {
 		return isPhase1Complete && !!urlChatId;
 	}, [isPhase1Complete, urlChatId]);
 
@@ -846,11 +855,33 @@ const {
 												)}
 												{isDeploying ? 'Deploying...' : 'Save'}
 											</button> */}
-											<ModelConfigInfo
+<ModelConfigInfo
 												configs={modelConfigs}
 												onRequestConfigs={handleRequestConfigs}
 												loading={loadingConfigs}
 											/>
+											<button
+												className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 text-xs font-medium shadow-sm ${
+													isDeployReady
+														? 'bg-orange-500 hover:bg-orange-600 text-white'
+														: 'bg-bg-3 text-text-tertiary cursor-not-allowed'
+												}`}
+												onClick={isDeployReady ? () => handleDeployToCloudflare(urlChatId || '') : undefined}
+												disabled={!isDeployReady || isDeploying}
+												title={isDeployReady ? 'Deploy to Cloudflare' : 'Complete Phase 1 to enable deploy'}
+											>
+												{isDeploying ? (
+													<>
+														<LoaderCircle className="size-3 animate-spin" />
+														Deploying...
+													</>
+												) : (
+													<>
+														<CloudflareLogo width={16} height={8} />
+														Deploy
+													</>
+												)}
+											</button>
 											<button
 												className="group relative flex items-center gap-1.5 p-1.5 group-hover:pl-2 group-hover:pr-2.5 rounded-full group-hover:rounded-md transition-all duration-300 ease-in-out hover:bg-bg-4 border border-transparent hover:border-border-primary hover:shadow-sm overflow-hidden"
 												onClick={() => setIsGitCloneModalOpen(true)}
