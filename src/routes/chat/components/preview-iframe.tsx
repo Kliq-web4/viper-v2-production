@@ -377,24 +377,23 @@ export const PreviewIframe = forwardRef<HTMLIFrameElement, PreviewIframeProps>(
                         />
                     )}
 					<div className="text-center p-8 max-w-md">
-						<RefreshCw className="size-8 text-accent animate-spin mx-auto mb-4" />
-						<h3 className="text-lg font-medium text-text-primary mb-2">
-							Loading Preview
-						</h3>
+                        <img
+                            src="/kliq-logo.png"
+                            alt="web4.sbs loader"
+                            className="mx-auto mb-5 h-14 w-14 select-none animate-pulse"
+                            style={{ filter: 'drop-shadow(0 0 24px rgba(168,85,247,0.45)) drop-shadow(0 0 14px rgba(249,115,22,0.35))' }}
+                        />
+						<h3 className="text-lg font-medium text-text-primary mb-2">Preparing your preview</h3>
 						<p className="text-text-primary/70 text-sm mb-4">
 							{loadState.attempt === 0
-								? 'Checking if your deployed preview is ready...'
-								: `Preview not ready yet. Retrying in ${delaySeconds}s... (attempt ${loadState.attempt}/${MAX_RETRIES})`
+								? 'Booting the app sandbox and wiring services...'
+								: `Still provisioning… retrying in ${delaySeconds}s (attempt ${loadState.attempt}/${MAX_RETRIES})`
 							}
 						</p>
 						{loadState.attempt >= REDEPLOY_AFTER_ATTEMPT && (
-							<p className="text-xs text-accent/70">
-								Auto-redeployment triggered to refresh the preview
-							</p>
+							<p className="text-xs text-accent/70">Auto-refresh triggered to keep the preview up to date</p>
 						)}
-						<div className="text-xs text-text-primary/50 mt-2">
-							Preview URLs may take a moment to become available after deployment
-						</div>
+						<div className="text-xs text-text-primary/50 mt-2">This can take a moment after a fresh deployment</div>
 					</div>
 				</div>
 			);
