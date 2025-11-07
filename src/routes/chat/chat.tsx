@@ -10,8 +10,7 @@ import { ArrowRight, Image as ImageIcon } from 'react-feather';
 import { useParams, useSearchParams, useNavigate } from 'react-router';
 import { MonacoEditor } from '../../components/monaco-editor/monaco-editor';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Expand, Github, GitBranch, LoaderCircle, RefreshCw, MoreHorizontal, RotateCcw, X } from 'lucide-react';
-import { CloudflareLogo } from '@/components/icons/logos';
+import { Expand, Github, GitBranch, LoaderCircle, RefreshCw, MoreHorizontal, RotateCcw, X, Globe } from 'lucide-react';
 import clsx from 'clsx';
 import { Blueprint } from './components/blueprint';
 import { FileExplorer } from './components/file-explorer';
@@ -877,7 +876,7 @@ const isGitHubExportReady = useMemo(() => {
 													</>
 												) : (
 													<>
-														<CloudflareLogo width={16} height={8} />
+														<Globe className="size-3.5" />
 														Deploy
 													</>
 												)}
