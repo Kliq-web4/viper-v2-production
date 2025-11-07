@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { ArrowRight, Info } from 'lucide-react';
+import { ArrowRight, Info, LayoutDashboard, Gamepad2, Users, Box, Share2, Rocket, Puzzle, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/contexts/auth-context';
 import {
@@ -17,6 +17,13 @@ import { ImageUploadButton } from '@/components/image-upload-button';
 import { ImageAttachmentPreview } from '@/components/image-attachment-preview';
 import { SUPPORTED_IMAGE_MIME_TYPES } from '@/api-types';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import openaiLogo from '@/assets/provider-logos/openai.svg';
+import anthropicLogo from '@/assets/provider-logos/anthropic.svg';
+import googleLogo from '@/assets/provider-logos/google.svg';
+import cloudflareLogo from '@/assets/provider-logos/cloudflare.svg';
+import cerebrasLogo from '@/assets/provider-logos/cerebras.svg';
 
 export default function Home() {
 	const navigate = useNavigate();
@@ -37,7 +44,6 @@ export default function Home() {
 		onFilesDropped: addImages,
 		accept: [...SUPPORTED_IMAGE_MIME_TYPES],
 	});
-
 
 	const placeholderPhrases = useMemo(() => [
 		"todo list app",
@@ -64,7 +70,6 @@ export default function Home() {
 	const handleCreateApp = (query: string, mode: AgentMode) => {
 		const encodedQuery = encodeURIComponent(query);
 		const encodedMode = encodeURIComponent(mode);
-		
 		// Encode images as JSON if present
 		const imageParam = images.length > 0 ? `&images=${encodeURIComponent(JSON.stringify(images))}` : '';
 		const intendedUrl = `/chat/new?query=${encodedQuery}&agentMode=${encodedMode}${imageParam}`;
@@ -133,10 +138,24 @@ export default function Home() {
 
 	const discoverLinkRef = useRef<HTMLDivElement>(null);
 
+	const templates = [
+		{ title: 'Reporting Dashboard', description: 'KPIs, charts and filters', icon: LayoutDashboard },
+		{ title: 'Gaming Platform', description: 'Lobby, matchmaking, leaderboards', icon: Gamepad2 },
+		{ title: 'Onboarding Portal', description: 'Sign-up flows and checklists', icon: Users },
+		{ title: 'Room Visualizer', description: 'Interactive layout editor', icon: Box },
+		{ title: 'Networking App', description: 'Profiles, posts and connections', icon: Share2 },
+	] as const;
+
+	const features = [
+		{ title: 'Create at the speed of thought', description: 'Describe what you need. We scaffold pages, flows and components automatically.', icon: Rocket },
+		{ title: 'Flexible building blocks', description: 'Cards, forms, tables and charts built with our UI kit to customize quickly.', icon: Puzzle },
+		{ title: 'Preview and iterate fast', description: 'Run instantly, tweak text or data, and refine with each prompt.', icon: Sparkles },
+	] as const;
+
 	return (
 		<div className="relative flex flex-col items-center size-full">
 			{/* Mystic purple animated background */}
-<div className="fixed inset-0 z-0 pointer-events-none">
+			<div className="fixed inset-0 z-0 pointer-events-none">
 				<EtheralShadow
 					className="w-full h-full"
 					color="rgba(139, 92, 246, 0.8)"
@@ -155,9 +174,12 @@ export default function Home() {
 							"px-6 p-8 flex flex-col items-center z-10",
 							discoverReady ? "mt-48" : "mt-[20vh] sm:mt-[24vh] md:mt-[28vh]"
 						)}>
-						<h1 className="text-shadow-sm text-shadow-red-200 dark:text-shadow-red-900 text-accent font-medium leading-[1.1] tracking-tight text-5xl w-full mb-4 bg-clip-text bg-gradient-to-r from-text-primary to-text-primary/90">
-							What should we build today?
+						<h1 className="text-shadow-sm text-shadow-red-200 dark:text-shadow-red-900 text-accent font-medium leading-[1.1] tracking-tight text-5xl w-full mb-2 bg-clip-text bg-gradient-to-r from-text-primary to-text-primary/90">
+							Turn ideas into working apps in minutes
 						</h1>
+						<p className="text-text-secondary w-full mb-6">
+							Describe what you want. We generate a runnable app you can edit and share.
+						</p>
 
 						<form
 							method="POST"
@@ -220,24 +242,79 @@ export default function Home() {
 								)}
 
 								<div className="flex items-center justify-end ml-4 gap-2">
-								<ImageUploadButton
-									onFilesSelected={addImages}
-									disabled={isProcessing}
-								/>
-								<button
-									type="submit"
-									disabled={!query.trim()}
-									className="bg-accent text-white p-1 rounded-md *:size-5 transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									<ArrowRight />
-								</button>
-							</div>
+									<ImageUploadButton
+										onFilesSelected={addImages}
+										disabled={isProcessing}
+									/>
+									<button
+										type="submit"
+										disabled={!query.trim()}
+										className="bg-accent text-white p-1 rounded-md *:size-5 transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+									>
+										<ArrowRight />
+									</button>
+								</div>
 							</div>
 						</form>
-					</motion.div>
 
+						{/* Templates */}
+						<div className="w-full mt-6">
+							<p className="text-sm text-text-tertiary">Not sure where to start? Try one of these:</p>
+							<div className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+								{templates.map(({ title, description, icon: Icon }) => (
+									<Card key={title} className="border-accent/30 dark:border-accent/40 hover:bg-bg-3/60 transition-colors">
+										<CardHeader variant="minimal" className="flex-row items-center gap-2">
+											<div className="size-7 rounded-md bg-accent/10 text-accent flex items-center justify-center">
+												<Icon className="size-4" />
+											</div>
+											<CardTitle className="text-sm">{title}</CardTitle>
+										</CardHeader>
+										<CardContent className="pt-0">
+											<CardDescription className="text-xs">{description}</CardDescription>
+											<div className="mt-3">
+												<Button variant="ghost" size="sm" onClick={() => handleCreateApp(title, agentMode)}>
+													Use template <ArrowRight className="size-4" />
+												</Button>
+											</div>
+										</CardContent>
+									</Card>
+								))}
+							</div>
+						</div>
+
+						{/* Trust logos */}
+						<div className="w-full mt-8">
+							<p className="text-xs text-text-tertiary text-center">Trusted by teams building with</p>
+							<div className="mt-3 flex flex-wrap items-center justify-center gap-8 opacity-80">
+								<img src={openaiLogo} alt="OpenAI" className="h-6" />
+								<img src={anthropicLogo} alt="Anthropic" className="h-6" />
+								<img src={googleLogo} alt="Google" className="h-6" />
+								<img src={cloudflareLogo} alt="Cloudflare" className="h-6" />
+								<img src={cerebrasLogo} alt="Cerebras" className="h-6" />
+							</div>
+						</div>
+					</motion.div>
 				</div>
 
+				{/* Features section */}
+				<section className="w-full max-w-6xl mx-auto px-4 z-10 mt-10">
+					<h2 className="text-2xl font-medium text-text-secondary/90">Consider yourself limitless.</h2>
+					<div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+						{features.map(({ title, description, icon: Icon }) => (
+							<Card key={title} className="border-accent/30 dark:border-accent/40">
+								<CardHeader>
+									<div className="size-8 rounded-md bg-accent/10 text-accent flex items-center justify-center mb-2">
+										<Icon className="size-4" />
+									</div>
+									<CardTitle className="text-base">{title}</CardTitle>
+									<CardDescription>{description}</CardDescription>
+								</CardHeader>
+							</Card>
+						))}
+					</div>
+				</section>
+
+				{/* Images beta notice */}
 				<AnimatePresence>
 					{images.length > 0 && (
 						<motion.div
@@ -256,6 +333,7 @@ export default function Home() {
 					)}
 				</AnimatePresence>
 
+				{/* Discover section */}
 				<AnimatePresence>
 					{discoverReady && (
 						<motion.section
