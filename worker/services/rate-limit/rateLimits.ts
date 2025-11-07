@@ -1,4 +1,4 @@
-import { RateLimitType, RateLimitStore, RateLimitSettings, DORateLimitConfig, KVRateLimitConfig, DEFAULT_RATE_INCREMENTS_FOR_MODELS } from './config';
+import { RateLimitType, RateLimitStore, RateLimitSettings, DORateLimitConfig, KVRateLimitConfig } from './config';
 import { createObjectLogger } from '../../logger';
 import { AuthUser } from '../../types/auth-types';
 import { extractTokenWithMetadata, extractRequestMetadata } from '../../utils/authUtils';
@@ -235,55 +235,13 @@ export class RateLimitService {
 	}
 
 	static async enforceLLMCallsRateLimit(
-        env: Env,
-		config: RateLimitSettings,
-		userId: string,
-        model: AIModels | string,
-        suffix: string = ""
+        _env: Env,
+		_config: RateLimitSettings,
+		_userId: string,
+        _model: AIModels | string,
+        _suffix: string = ""
 	): Promise<void> {
-		
-		if (!config[RateLimitType.LLM_CALLS].enabled) {
-			return;
-		}
-
-		const identifier = `user:${userId}`;
-		
-		const key = this.buildRateLimitKey(RateLimitType.LLM_CALLS, `${identifier}${suffix}`);
-		
-		try {
-            let incrementBy = 1;
-            if (DEFAULT_RATE_INCREMENTS_FOR_MODELS[model]) {
-                incrementBy = DEFAULT_RATE_INCREMENTS_FOR_MODELS[model];
-            }
-			const success = await this.enforce(env, key, config, RateLimitType.LLM_CALLS, incrementBy);
-			if (!success) {
-				this.logger.warn('LLM calls rate limit exceeded', {
-					identifier,
-					key,
-                    config,
-                    model,
-                    incrementBy
-				});
-				captureSecurityEvent('rate_limit_exceeded', {
-					limitType: RateLimitType.LLM_CALLS,
-					identifier,
-					key,
-                    model,
-                    incrementBy
-				});
-				throw new RateLimitExceededError(
-					`AI inference rate limit exceeded. Consider using lighter models. Maximum ${config.llmCalls.limit} credits per ${config.llmCalls.period / 3600} hour${config.llmCalls.period >= 7200 ? 's' : ''} or ${config.llmCalls.dailyLimit} credits per day. Gemini pro models cost ${DEFAULT_RATE_INCREMENTS_FOR_MODELS[AIModels.GEMINI_2_5_PRO]} credits per call, flash models cost ${DEFAULT_RATE_INCREMENTS_FOR_MODELS[AIModels.GEMINI_2_5_FLASH]} credits per call, and flash lite models cost ${DEFAULT_RATE_INCREMENTS_FOR_MODELS[AIModels.GEMINI_2_5_FLASH_LITE]} credit per call.`,
-					RateLimitType.LLM_CALLS,
-					config.llmCalls.limit,
-					config.llmCalls.period,
-                    [`Please try again in due time when the limit resets for you. Consider using lighter models. Gemini pro models cost ${DEFAULT_RATE_INCREMENTS_FOR_MODELS[AIModels.GEMINI_2_5_PRO]} credits per call, flash models cost ${DEFAULT_RATE_INCREMENTS_FOR_MODELS[AIModels.GEMINI_2_5_FLASH]} credits per call, and flash lite models cost ${DEFAULT_RATE_INCREMENTS_FOR_MODELS[AIModels.GEMINI_2_5_FLASH_LITE]} credit per call.`]
-				);
-			}
-		} catch (error) {
-			if (error instanceof RateLimitExceededError || error instanceof SecurityError) {
-				throw error;
-			}
-			this.logger.error('Failed to enforce LLM calls rate limit', error);
-		}
+		// LLM call rate limiting disabled intentionally.
+		return;
 	}
 }
