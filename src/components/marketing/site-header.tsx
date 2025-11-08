@@ -7,12 +7,28 @@ import {
   NavigationMenuContent,
   NavigationMenuLink,
 } from '@/components/ui/navigation-menu'
+import { useNavigate } from 'react-router'
+import { useAuthGuard } from '@/hooks/useAuthGuard'
 
 export type MarketingHeaderProps = {
   onStart?: () => void
 }
 
 export function MarketingHeader({ onStart }: MarketingHeaderProps) {
+  const navigate = useNavigate();
+  const { requireAuth } = useAuthGuard();
+
+  const handleStart = () => {
+    if (onStart) {
+      onStart();
+      return;
+    }
+    const intendedUrl = `/chat/new`;
+    if (requireAuth({ requireFullAuth: true, actionContext: 'to create applications', intendedUrl })) {
+      navigate(intendedUrl);
+    }
+  };
+
   return (
     <header className="pointer-events-none sticky top-0 z-40">
       <div className="pointer-events-auto backdrop-blur supports-backdrop:backdrop-blur-md bg-bg-3/40 dark:bg-bg-2/40 border-b border-accent/20">
@@ -61,7 +77,7 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
 
             {/* Right actions */}
             <div className="flex items-center gap-2">
-              <Button variant="secondary" size="sm" onClick={onStart}>Start Building</Button>
+              <Button variant="secondary" size="sm" onClick={handleStart}>Start Building</Button>
             </div>
           </div>
         </div>
