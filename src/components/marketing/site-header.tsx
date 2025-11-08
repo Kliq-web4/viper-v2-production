@@ -44,7 +44,7 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
                     <NavigationMenuContent>
                       <div className="grid grid-cols-2 gap-2 p-2 min-w-64">
                         <NavigationMenuLink href="#docs">Docs & FAQs</NavigationMenuLink>
-                        <NavigationMenuLink href="#community">Community</NavigationMenuLink>
+<NavigationMenuLink href="/discover">Community</NavigationMenuLink>
                         <NavigationMenuLink href="#blog">Blog</NavigationMenuLink>
                         <NavigationMenuLink href="#changelog">Changelog</NavigationMenuLink>
                       </div>

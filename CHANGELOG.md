@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased (2025-11-08)
+
+### Added
+- Marketing header and footer (Base44-style) with navigation.
+- Liquid animated background and glass/blur styling for cards.
+- Wide Templates section using shadcn Card components; entire card is clickable.
+- Integrations (Trusted by teams who use) band with enlarged logos.
+- Features, Testimonials, Pricing, FAQs sections with anchors for in-page navigation.
+- Rotating input placeholder (typewriter effect).
+- External pill CTA: “Explore Our Kliq AI x Web4 Playground” linking to http://www.kliqonline.com.
+
+### Changed
+- Home hero and input area revamped; removed example prompt instances below the input.
+- Navigation items wired to sections: #product, #templates, #integrations, #features, #pricing, #docs; Community opens /discover.
+
+---
+
 ## 1.0.0 (2025-11-03)
 
 

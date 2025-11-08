@@ -18,7 +18,7 @@ export function MarketingFooter() {
             <div className="text-sm font-semibold mb-3 text-text-secondary">Resources</div>
             <ul className="space-y-2 text-sm text-text-tertiary">
               <li><a href="#docs" className="hover:underline">Docs & FAQs</a></li>
-              <li><a href="#community" className="hover:underline">Community</a></li>
+<li><a href="/discover" className="hover:underline">Community</a></li>
               <li><a href="#blog" className="hover:underline">Blog</a></li>
               <li><a href="#changelog" className="hover:underline">Changelog</a></li>
             </ul>

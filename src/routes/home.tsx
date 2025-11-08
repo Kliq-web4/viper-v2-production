@@ -288,7 +288,7 @@ useEffect(() => {
 			
 			<main className="relative z-10 flex-1">
 				{/* Hero Section */}
-				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12 md:pt-32 md:pb-16">
+				<section id="product" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12 md:pt-32 md:pb-16">
 					<div className="flex flex-col items-center text-center">
 						<h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight tracking-tight mb-4 text-text-primary">
 							Build something
@@ -400,7 +400,7 @@ onChange={(e) => {
 				</section>
 
 				{/* Templates Section */}
-				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+				<section id="templates" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
 					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-6">
 						{templates.map(({ title, icon: Icon, prompt }) => (
 							<motion.div
@@ -438,7 +438,7 @@ onChange={(e) => {
 					</div>
 				</section>
 
-				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+				<section id="integrations" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
 					<p className="text-sm text-text-tertiary text-center mb-8">Trusted by teams who use</p>
 					<div className="flex flex-wrap items-center justify-center gap-10 md:gap-14 opacity-90">
 						<img src={openaiLogo} alt="OpenAI" className="h-10 md:h-12 xl:h-14" />
@@ -449,7 +449,7 @@ onChange={(e) => {
 					</div>
 				</section>
 
-				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+				<section id="features" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
 					<div className="text-center mb-16">
 						<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-text-primary">Consider yourself limitless.</h2>
 						<p className="text-lg md:text-xl text-text-secondary">If you can describe it, you can build it.</p>
@@ -479,7 +479,7 @@ onChange={(e) => {
 					</div>
 				</section>
 
-				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+				<section id="testimonials" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
 					<div className="text-center mb-12">
 						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">"Okay, this has blown my mind."</h2>
 						<p className="text-lg text-text-secondary">And other great things our users say about us.</p>
@@ -518,7 +518,7 @@ onChange={(e) => {
 				</section>
 
 				{/* Pricing Section */}
-				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+				<section id="pricing" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
 					<div className="text-center mb-12">
 						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">Pricing plans for every need</h2>
 						<p className="text-lg text-text-secondary">Scale as you go with plans designed to match your growth.</p>
@@ -580,7 +580,7 @@ onChange={(e) => {
 				</section>
 
 				{/* FAQs Section */}
-				<section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+				<section id="docs" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
 					<div className="text-center mb-12">
 						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">FAQs</h2>
 					</div>
@@ -652,6 +652,18 @@ onChange={(e) => {
 					)}
 				</AnimatePresence>
 			</main>
+
+			{/* Simple Changelog anchor */}
+			<section id="changelog" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+				<h3 className="text-xl font-semibold mb-3">Changelog</h3>
+				<ul className="list-disc pl-5 text-sm text-text-secondary space-y-1">
+					<li>Landing redesigned with Base44-style layout and shadcn cards.</li>
+					<li>Added liquid animated background; polished glassy cards and hover effects.</li>
+					<li>Wide templates and integrations sections; enlarged logos.</li>
+					<li>Rotating input placeholder; removed example prompt instances.</li>
+					<li>Added marketing header/footer and external Playground CTA.</li>
+				</ul>
+			</section>
 
 			{/* Nudge towards Discover */}
 			{user && <CurvedArrow sourceRef={discoverLinkRef} target={{ x: 50, y: window.innerHeight - 60 }} />}
