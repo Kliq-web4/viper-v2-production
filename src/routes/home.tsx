@@ -381,7 +381,21 @@ onChange={(e) => {
 								</div>
 							</div>
 						</form>
-						
+
+						{/* External CTA */}
+						<div className="mt-4 flex justify-center">
+							<a
+								href="http://www.kliqonline.com"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="group relative inline-flex items-center gap-2 rounded-full border border-accent/30 bg-bg-4/40 dark:bg-bg-2/40 px-4 py-2 text-sm text-text-primary hover:bg-accent/10 transition-colors backdrop-blur supports-backdrop:backdrop-blur-sm"
+							>
+								<span className="font-medium">Explore Our Kliq AI x Web4 Playground</span>
+								<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+								<span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-white/10" />
+							</a>
+						</div>
+
 					</div>
 				</section>
 
