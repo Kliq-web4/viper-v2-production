@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { ArrowRight, Info, LayoutDashboard, Gamepad2, Users, Box, Share2, Rocket, Puzzle, Sparkles } from 'lucide-react';
+import { ArrowRight, Info, LayoutDashboard, Gamepad2, Users, Box, Share2, Rocket, Puzzle, Sparkles, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/contexts/auth-context';
 import {
@@ -22,6 +22,7 @@ import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import openaiLogo from '@/assets/provider-logos/openai.svg';
 import anthropicLogo from '@/assets/provider-logos/anthropic.svg';
 import googleLogo from '@/assets/provider-logos/google.svg';
@@ -150,14 +151,109 @@ export default function Home() {
 	] as const;
 
 	const features = [
-		{ title: 'Create at the speed of thought', description: 'Describe what you need. We scaffold pages, flows and components automatically.', icon: Rocket },
-		{ title: 'Flexible building blocks', description: 'Cards, forms, tables and charts built with our UI kit to customize quickly.', icon: Puzzle },
-		{ title: 'Preview and iterate fast', description: 'Run instantly, tweak text or data, and refine with each prompt.', icon: Sparkles },
+		{ 
+			title: 'Create at the speed of thought', 
+			description: 'Tell us your idea, and watch it transform into a working app—complete with all the necessary components, pages, flows and features.', 
+			icon: Rocket 
+		},
+		{ 
+			title: 'The backend\'s built-in automatically', 
+			description: 'Everything your idea needs to function, like letting users sign in, saving their data, or creating role-based permissions is taken care of behind the scenes.', 
+			icon: Puzzle 
+		},
+		{ 
+			title: 'Ready to use, instantly.', 
+			description: 'Our platform comes with built-in hosting, so when your app is ready the only thing left to do is publish, put it to use, and share it with your friends or community.', 
+			icon: Sparkles 
+		},
+	] as const;
+
+	const testimonials = [
+		{ 
+			quote: "This platform has completely transformed how I build apps. No iterations, no changes, just pure magic.", 
+			author: "Hasan Toor", 
+			handle: "@hasantoxr" 
+		},
+		{ 
+			quote: "Just built this awesome web app! I'm blown away by how fast and intuitive the process is.", 
+			author: "Maria Martin", 
+			handle: "@marias_martin" 
+		},
+		{ 
+			quote: "What makes this different is that the interaction with the AI is seamless and the results are production-ready.", 
+			author: "Gleb Konon", 
+			handle: "" 
+		},
+		{ 
+			quote: "One of the best AI Coders out there. I tried many of them. What sets this apart is the quality and speed.", 
+			author: "Richard Manisa", 
+			handle: "" 
+		},
+		{ 
+			quote: "Perfect for founders who want to build fast without compromising on quality. Highly recommended!", 
+			author: "Masiar Ighani", 
+			handle: "" 
+		},
+		{ 
+			quote: "Amazing understanding of user needs and thorough handling of complex requirements. Impressive work!", 
+			author: "Ariel MI", 
+			handle: "" 
+		},
+		{ 
+			quote: "Start building in minutes. See results immediately. Great!", 
+			author: "Thatweb3guy", 
+			handle: "@myfootyfantasy" 
+		},
+		{ 
+			quote: "Fastest Aha! moment I have ever had.", 
+			author: "Roy Kotzer", 
+			handle: "" 
+		},
+		{ 
+			quote: "This revolutionizes app development by enabling users to create production-ready applications in minutes.", 
+			author: "Erel Cohen", 
+			handle: "" 
+		},
+	] as const;
+
+	const faqs = [
+		{
+			question: "What is this platform?",
+			answer: "This is an AI-powered platform that lets you turn any idea into a fully-functional custom app, without the need for any coding experience."
+		},
+		{
+			question: "Do I need coding experience to use this?",
+			answer: "No. Our platform is designed to be easily accessible to non-technical users. Just describe your software needs in plain language, and our AI will handle the technical implementation."
+		},
+		{
+			question: "What types of applications can I build?",
+			answer: "This platform is versatile and can be used to build a wide range of applications, including but not limited to: personal productivity apps, back-office tools, customer portals, and business process automation tools. You can also use it for rapid prototyping and creating MVPs."
+		},
+		{
+			question: "What kind of integrations does this support?",
+			answer: "Most common integrations are already built into the platform. You can directly send emails, use SMS, connect to any external API, and query databases right out of the box—no complex setup required."
+		},
+		{
+			question: "How are applications deployed?",
+			answer: "We take care of it automatically. The platform comes with built-in hosting, so there's no deployment process. When your app is created, it's instantly live and shareable."
+		},
+		{
+			question: "How does the natural language development process work?",
+			answer: "You simply type in your idea—whether it's a general thought or you have specific requirements—in conversational language. Our AI interprets your instructions and generates the necessary code and structure for your app. You can then review, test, and refine your app through further conversation with the AI."
+		},
+		{
+			question: "Is my data secure?",
+			answer: "Yes, we take data security very seriously. User management and authentication systems are built-in, using best-in-class, industry-standard encryption and security practices to protect your data and your users' information."
+		},
+		{
+			question: "Do I own the applications I create?",
+			answer: "Definitely. All applications and content generated through this platform belong entirely to you. We make no claims of ownership over anything you create using our platform. You're free to use, modify, distribute, or sell the generated applications however you see fit."
+		},
 	] as const;
 
 	return (
-		<div className="relative flex flex-col items-center size-full">
-			{/* Mystic purple animated background */}
+		<div className="relative flex flex-col min-h-screen">
+			{/* Background */}
 			<div className="fixed inset-0 z-0 pointer-events-none">
 				<EtheralShadow
 					className="w-full h-full"
@@ -170,22 +266,28 @@ export default function Home() {
 			</div>
 
 			<MarketingHeader onStart={() => textareaRef.current?.focus()} />
-			<LayoutGroup>
-				<div className="rounded-md w-full max-w-2xl overflow-hidden">
-					<motion.div
-						layout
-						transition={{ layout: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
-						className={clsx(
-							"px-6 p-8 flex flex-col items-center z-10",
-							discoverReady ? "mt-48" : "mt-[20vh] sm:mt-[24vh] md:mt-[28vh]"
-						)}>
-						<h1 className="text-shadow-sm text-shadow-red-200 dark:text-shadow-red-900 text-accent font-medium leading-[1.1] tracking-tight text-5xl w-full mb-2 bg-clip-text bg-gradient-to-r from-text-primary to-text-primary/90">
-							Turn ideas into working apps in minutes
+			
+			<main className="relative z-10 flex-1">
+				{/* Hero Section */}
+				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 md:pt-32 md:pb-24">
+					<div className="flex flex-col items-center text-center">
+						<h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-6 bg-clip-text bg-gradient-to-r from-text-primary to-text-primary/80">
+							Shape your ideas into apps that work your way
 						</h1>
-						<p className="text-text-secondary w-full mb-6">
-							Describe what you want. We generate a runnable app you can edit and share.
+						<p className="text-lg sm:text-xl md:text-2xl text-text-secondary mb-8 max-w-3xl">
+							This platform lets you build fully-functional apps in minutes with just your words. No coding necessary.
 						</p>
+						<Button 
+							size="lg" 
+							className="mb-12"
+							onClick={() => textareaRef.current?.focus()}
+						>
+							Start Now
+						</Button>
+					</div>
 
+					{/* Main Input Area */}
+					<div className="max-w-4xl mx-auto">
 						<form
 							method="POST"
 							onSubmit={(e) => {
@@ -193,9 +295,8 @@ export default function Home() {
 								const query = textareaRef.current!.value;
 								handleCreateApp(query, agentMode);
 							}}
-className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px] bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur supports-backdrop:backdrop-blur-md border border-accent/30 dark:border-accent/40 rounded-[18px] shadow-[0_10px_50px_-20px_rgba(139,92,246,0.35)] p-5 transition-all duration-200"
+							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px] bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur supports-backdrop:backdrop-blur-md border border-accent/30 dark:border-accent/40 rounded-[18px] shadow-[0_10px_50px_-20px_rgba(139,92,246,0.35)] p-5 transition-all duration-200"
 						>
-							{/* subtle animated gradient on hover */}
 							<div className="pointer-events-none absolute -inset-px rounded-[18px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(120% 120% at 50% 0%, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.06) 40%, transparent 70%)' }} />
 							<div 
 								className={clsx(
@@ -210,7 +311,7 @@ className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px
 									</div>
 								)}
 								<textarea
-									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-text-primary/60 text-text-primary"
+									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-text-primary/60 text-text-primary bg-transparent"
 									name="query"
 									value={query}
 									placeholder={`Create a ${currentPlaceholderText}`}
@@ -263,13 +364,13 @@ className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px
 								</div>
 							</div>
 						</form>
-					</motion.div>
-				</div>
+					</div>
+				</section>
 
-				{/* Templates section (wide) */}
-				<section className="w-full max-w-6xl mx-auto px-4 z-10 mt-10 md:mt-14">
-					<p className="text-sm text-text-tertiary">Not sure where to start? Try one of these:</p>
-					<div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5 xl:gap-6">
+				{/* Templates Section */}
+				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+					<p className="text-sm text-text-tertiary mb-6 text-center">Not sure where to start? Try one of these:</p>
+					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-6">
 						{templates.map(({ title, description, icon: Icon }) => (
 							<motion.div
 								key={title}
@@ -279,9 +380,11 @@ className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px
 								transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
 								className="h-full"
 							>
-								<Card className="h-full group relative overflow-hidden border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md transition-colors">
+								<Card className="h-full group relative overflow-hidden border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md transition-colors cursor-pointer hover:border-accent/50"
+									onClick={() => handleCreateApp(title, agentMode)}
+								>
 									<div className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(60% 120% at 50% 0%, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.05) 60%, transparent 100%)' }} />
-									<CardHeader variant="minimal" className="flex-row items-center gap-2">
+									<CardHeader variant="minimal" className="flex-row items-center gap-2 pb-2">
 										<div className="size-7 rounded-md bg-accent/15 text-accent/90 flex items-center justify-center ring-1 ring-accent/30">
 											<Icon className="size-4" />
 										</div>
@@ -289,10 +392,86 @@ className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px
 									</CardHeader>
 									<CardContent className="pt-0">
 										<CardDescription className="text-xs">{description}</CardDescription>
-										<div className="mt-3">
-											<Button variant="ghost" size="sm" onClick={() => handleCreateApp(title, agentMode)}>
-												Use template <ArrowRight className="size-4" />
-											</Button>
+									</CardContent>
+								</Card>
+							</motion.div>
+						))}
+					</div>
+				</section>
+
+				{/* Trusted By Section */}
+				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+					<p className="text-sm text-text-tertiary text-center mb-6">Trusted by 400K+ users</p>
+					<div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-80">
+						<img src={openaiLogo} alt="OpenAI" className="h-6 md:h-8" />
+						<img src={anthropicLogo} alt="Anthropic" className="h-6 md:h-8" />
+						<img src={googleLogo} alt="Google" className="h-6 md:h-8" />
+						<img src={cloudflareLogo} alt="Cloudflare" className="h-6 md:h-8" />
+						<img src={cerebrasLogo} alt="Cerebras" className="h-6 md:h-8" />
+					</div>
+				</section>
+
+				{/* Features Section - Consider yourself limitless */}
+				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+					<div className="text-center mb-12">
+						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">Consider yourself limitless.</h2>
+						<p className="text-lg text-text-secondary">If you can describe it, you can build it.</p>
+					</div>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+						{features.map(({ title, description, icon: Icon }) => (
+							<motion.div 
+								key={title} 
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true }}
+								transition={{ duration: 0.5 }}
+								whileHover={{ y: -4 }}
+							>
+								<Card className="group relative overflow-hidden border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md h-full">
+									<div className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(60% 120% at 50% 0%, rgba(139,92,246,0.22) 0%, rgba(139,92,246,0.05) 60%, transparent 100%)' }} />
+									<CardHeader>
+										<div className="size-10 rounded-md bg-accent/15 text-accent/90 flex items-center justify-center mb-4 ring-1 ring-accent/30">
+											<Icon className="size-5" />
+										</div>
+										<CardTitle className="text-xl mb-3">{title}</CardTitle>
+										<CardDescription className="text-base">{description}</CardDescription>
+									</CardHeader>
+								</Card>
+							</motion.div>
+						))}
+					</div>
+				</section>
+
+				{/* Testimonials Section */}
+				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+					<div className="text-center mb-12">
+						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">"Okay, this has blown my mind."</h2>
+						<p className="text-lg text-text-secondary">And other great things our users say about us.</p>
+					</div>
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						{testimonials.map((testimonial, index) => (
+							<motion.div
+								key={index}
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true }}
+								transition={{ duration: 0.5, delay: index * 0.1 }}
+							>
+								<Card className="h-full border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md">
+									<CardContent className="pt-6">
+										<p className="text-text-secondary mb-4 text-sm leading-relaxed">"{testimonial.quote}"</p>
+										<div className="flex items-center gap-2">
+											<div className="h-8 w-8 rounded-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
+												<span className="text-xs font-semibold text-accent">
+													{testimonial.author.charAt(0)}
+												</span>
+											</div>
+											<div>
+												<p className="text-sm font-medium text-text-primary">{testimonial.author}</p>
+												{testimonial.handle && (
+													<p className="text-xs text-text-tertiary">{testimonial.handle}</p>
+												)}
+											</div>
 										</div>
 									</CardContent>
 								</Card>
@@ -301,37 +480,77 @@ className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px
 					</div>
 				</section>
 
-				{/* Trust logos (wide) */}
-				<section className="w-full max-w-5xl mx-auto px-4 z-10 mt-8 md:mt-10">
-					<p className="text-xs text-text-tertiary text-center">Trusted by teams building with</p>
-					<div className="mt-3 flex flex-wrap items-center justify-center gap-8 opacity-80">
-						<img src={openaiLogo} alt="OpenAI" className="h-6" />
-						<img src={anthropicLogo} alt="Anthropic" className="h-6" />
-						<img src={googleLogo} alt="Google" className="h-6" />
-						<img src={cloudflareLogo} alt="Cloudflare" className="h-6" />
-						<img src={cerebrasLogo} alt="Cerebras" className="h-6" />
+				{/* Pricing Section */}
+				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+					<div className="text-center mb-12">
+						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">Pricing plans for every need</h2>
+						<p className="text-lg text-text-secondary">Scale as you go with plans designed to match your growth.</p>
+					</div>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+						<Card className="border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md">
+							<CardHeader>
+								<CardTitle className="text-2xl mb-2">Start for free.</CardTitle>
+								<CardDescription>Get access to:</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<ul className="space-y-3 mb-6">
+									<li className="flex items-center gap-2 text-sm text-text-secondary">
+										<Check className="size-4 text-accent" />
+										All core features
+									</li>
+									<li className="flex items-center gap-2 text-sm text-text-secondary">
+										<Check className="size-4 text-accent" />
+										Built-in integrations
+									</li>
+									<li className="flex items-center gap-2 text-sm text-text-secondary">
+										<Check className="size-4 text-accent" />
+										Authentication system
+									</li>
+									<li className="flex items-center gap-2 text-sm text-text-secondary">
+										<Check className="size-4 text-accent" />
+										Database functionality
+									</li>
+								</ul>
+								<Button className="w-full" onClick={() => textareaRef.current?.focus()}>
+									Start building
+								</Button>
+							</CardContent>
+						</Card>
+						<Card className="border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md">
+							<CardHeader>
+								<CardTitle className="text-2xl mb-2">Paid plans from</CardTitle>
+								<div className="flex items-baseline gap-2 mb-2">
+									<span className="text-4xl font-bold text-text-primary">$20</span>
+									<span className="text-text-secondary">/ mo</span>
+								</div>
+								<CardDescription>Upgrade as you go for more credits, more features, and more support.</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<Button variant="outline" className="w-full">
+									See all plans
+								</Button>
+							</CardContent>
+						</Card>
 					</div>
 				</section>
 
-				{/* Features section */}
-				<section className="w-full max-w-6xl mx-auto px-4 z-10 mt-10">
-					<h2 className="text-2xl font-medium text-text-secondary/90">Consider yourself limitless.</h2>
-					<div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-{features.map(({ title, description, icon: Icon }) => (
-							<motion.div key={title} whileHover={{ y: -2 }}>
-								<Card className="group relative overflow-hidden border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md">
-									<div className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(60% 120% at 50% 0%, rgba(139,92,246,0.22) 0%, rgba(139,92,246,0.05) 60%, transparent 100%)' }} />
-									<CardHeader>
-										<div className="size-8 rounded-md bg-accent/15 text-accent/90 flex items-center justify-center mb-2 ring-1 ring-accent/30">
-											<Icon className="size-4" />
-										</div>
-										<CardTitle className="text-base">{title}</CardTitle>
-										<CardDescription>{description}</CardDescription>
-									</CardHeader>
-								</Card>
-							</motion.div>
-						))}
+				{/* FAQs Section */}
+				<section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+					<div className="text-center mb-12">
+						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">FAQs</h2>
 					</div>
+					<Accordion type="single" collapsible className="w-full">
+						{faqs.map((faq, index) => (
+							<AccordionItem key={index} value={`item-${index}`} className="border-accent/20">
+								<AccordionTrigger className="text-left text-text-primary hover:text-accent">
+									{faq.question}
+								</AccordionTrigger>
+								<AccordionContent className="text-text-secondary">
+									{faq.answer}
+								</AccordionContent>
+							</AccordionItem>
+						))}
+					</Accordion>
 				</section>
 
 				{/* Images beta notice */}
@@ -341,7 +560,7 @@ className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px
 							initial={{ opacity: 0, y: -10 }}
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -10 }}
-							className="w-full max-w-2xl px-6"
+							className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8"
 						>
 							<div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-bg-4/50 dark:bg-bg-2/50 border border-accent/20 dark:border-accent/30 shadow-sm">
 								<Info className="size-4 text-accent flex-shrink-0 mt-0.5" />
@@ -358,21 +577,18 @@ className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px
 					{discoverReady && (
 						<motion.section
 							key="discover-section"
-							layout
 							initial={{ opacity: 0, height: 0 }}
 							animate={{ opacity: 1, height: "auto" }}
 							exit={{ opacity: 0, height: 0 }}
 							transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-							className={clsx('max-w-6xl mx-auto px-4 z-10', images.length > 0 ? 'mt-10' : 'mt-16 mb-8')}
+							className={clsx('max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16', images.length > 0 ? 'mt-10' : 'mt-16')}
 						>
 							<div className='flex flex-col items-start'>
-								<h2 className="text-2xl font-medium text-text-secondary/80">Discover Apps built by the community</h2>
-								<div ref={discoverLinkRef} className="text-md font-light mb-4 text-text-tertiary hover:underline underline-offset-4 select-text cursor-pointer" onClick={() => navigate('/discover')} >View All</div>
-								<motion.div
-									layout
-									transition={{ duration: 0.4 }}
-									className="grid grid-cols-2 xl:grid-cols-3 gap-6"
-								>
+								<h2 className="text-2xl md:text-3xl font-bold mb-4 text-text-primary">Discover Apps built by the community</h2>
+								<div ref={discoverLinkRef} className="text-md font-light mb-6 text-accent hover:underline underline-offset-4 cursor-pointer" onClick={() => navigate('/discover')}>
+									View All
+								</div>
+								<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
 									<AnimatePresence mode="popLayout">
 										{apps.map(app => (
 											<AppCard
@@ -385,12 +601,12 @@ className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px
 											/>
 										))}
 									</AnimatePresence>
-								</motion.div>
+								</div>
 							</div>
 						</motion.section>
 					)}
 				</AnimatePresence>
-			</LayoutGroup>
+			</main>
 
 			{/* Nudge towards Discover */}
 			{user && <CurvedArrow sourceRef={discoverLinkRef} target={{ x: 50, y: window.innerHeight - 60 }} />}
