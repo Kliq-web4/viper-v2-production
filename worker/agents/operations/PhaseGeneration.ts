@@ -65,30 +65,6 @@ ${PROMPT_UTILS.COMMON_DEP_DOCUMENTATION}
 `;
 
 
-<CLIENT REQUEST>
-"{{query}}"
-</CLIENT REQUEST>
-
-<BLUEPRINT>
-{{blueprint}}
-</BLUEPRINT>
-
-<DEPENDENCIES>
-**Available Dependencies:** You can ONLY import and use dependencies from the following==>
-
-template dependencies:
-{{dependencies}}
-
-additional dependencies/frameworks provided:
-{{blueprintDependencies}}
-
-These are the only dependencies, components and plugins available for the project. No other plugin or component or dependency is available.
-</DEPENDENCIES>
-
-<STARTING TEMPLATE>
-{{template}}
-</STARTING TEMPLATE>`;
-
 const NEXT_PHASE_USER_PROMPT = `**GENERATE THE PHASE**
 {{generateInstructions}}
 Adhere to the following guidelines: 
