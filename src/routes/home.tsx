@@ -369,29 +369,46 @@ export default function Home() {
 
 				{/* Templates Section */}
 				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-					<p className="text-sm text-text-tertiary mb-6 text-center">Not sure where to start? Try one of these:</p>
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-6">
+					<p className="text-sm text-text-tertiary mb-8 text-center">Not sure where to start? Try one of these:</p>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
 						{templates.map(({ title, description, icon: Icon }) => (
 							<motion.div
 								key={title}
-								initial={{ opacity: 0, y: 8 }}
+								initial={{ opacity: 0, y: 20 }}
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true, amount: 0.2 }}
-								transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+								transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+								whileHover={{ y: -8, scale: 1.02 }}
 								className="h-full"
 							>
-								<Card className="h-full group relative overflow-hidden border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md transition-colors cursor-pointer hover:border-accent/50"
+								<Card 
+									className="h-full group relative overflow-hidden border-2 border-accent/20 dark:border-accent/30 bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:border-accent/50"
 									onClick={() => handleCreateApp(title, agentMode)}
 								>
-									<div className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(60% 120% at 50% 0%, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.05) 60%, transparent 100%)' }} />
-									<CardHeader variant="minimal" className="flex-row items-center gap-2 pb-2">
-										<div className="size-7 rounded-md bg-accent/15 text-accent/90 flex items-center justify-center ring-1 ring-accent/30">
-											<Icon className="size-4" />
+									<div className="pointer-events-none absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 50%, transparent 100%)' }} />
+									<CardHeader className="pb-4">
+										<div className="flex items-start gap-4">
+											<div className="size-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/40 text-accent flex items-center justify-center ring-2 ring-accent/20 shadow-md group-hover:scale-110 transition-transform duration-300">
+												<Icon className="size-6" />
+											</div>
+											<div className="flex-1">
+												<CardTitle className="text-xl font-semibold mb-2 group-hover:text-accent transition-colors">{title}</CardTitle>
+												<CardDescription className="text-sm text-text-secondary leading-relaxed">{description}</CardDescription>
+											</div>
 										</div>
-										<CardTitle className="text-sm">{title}</CardTitle>
 									</CardHeader>
 									<CardContent className="pt-0">
-										<CardDescription className="text-xs">{description}</CardDescription>
+										<Button 
+											variant="ghost" 
+											className="w-full justify-start group-hover:bg-accent/10 group-hover:text-accent transition-colors"
+											onClick={(e) => {
+												e.stopPropagation();
+												handleCreateApp(title, agentMode);
+											}}
+										>
+											Use template
+											<ArrowRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
+										</Button>
 									</CardContent>
 								</Card>
 							</motion.div>
@@ -413,28 +430,28 @@ export default function Home() {
 
 				{/* Features Section - Consider yourself limitless */}
 				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">Consider yourself limitless.</h2>
-						<p className="text-lg text-text-secondary">If you can describe it, you can build it.</p>
+					<div className="text-center mb-16">
+						<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-text-primary">Consider yourself limitless.</h2>
+						<p className="text-lg md:text-xl text-text-secondary">If you can describe it, you can build it.</p>
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
 						{features.map(({ title, description, icon: Icon }) => (
 							<motion.div 
 								key={title} 
-								initial={{ opacity: 0, y: 20 }}
+								initial={{ opacity: 0, y: 30 }}
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
 								transition={{ duration: 0.5 }}
-								whileHover={{ y: -4 }}
+								whileHover={{ y: -8, scale: 1.02 }}
 							>
-								<Card className="group relative overflow-hidden border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md h-full">
-									<div className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(60% 120% at 50% 0%, rgba(139,92,246,0.22) 0%, rgba(139,92,246,0.05) 60%, transparent 100%)' }} />
-									<CardHeader>
-										<div className="size-10 rounded-md bg-accent/15 text-accent/90 flex items-center justify-center mb-4 ring-1 ring-accent/30">
-											<Icon className="size-5" />
+								<Card className="group relative overflow-hidden border-2 border-accent/20 dark:border-accent/30 bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-300 h-full">
+									<div className="pointer-events-none absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(139,92,246,0.2) 0%, rgba(139,92,246,0.08) 50%, transparent 100%)' }} />
+									<CardHeader className="pb-6">
+										<div className="size-14 rounded-2xl bg-gradient-to-br from-accent/25 to-accent/45 text-accent flex items-center justify-center mb-6 ring-2 ring-accent/20 shadow-lg group-hover:scale-110 group-hover:ring-accent/40 transition-all duration-300">
+											<Icon className="size-7" />
 										</div>
-										<CardTitle className="text-xl mb-3">{title}</CardTitle>
-										<CardDescription className="text-base">{description}</CardDescription>
+										<CardTitle className="text-2xl font-bold mb-4 group-hover:text-accent transition-colors">{title}</CardTitle>
+										<CardDescription className="text-base text-text-secondary leading-relaxed">{description}</CardDescription>
 									</CardHeader>
 								</Card>
 							</motion.div>
@@ -448,7 +465,7 @@ export default function Home() {
 						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">"Okay, this has blown my mind."</h2>
 						<p className="text-lg text-text-secondary">And other great things our users say about us.</p>
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
 						{testimonials.map((testimonial, index) => (
 							<motion.div
 								key={index}
@@ -456,18 +473,19 @@ export default function Home() {
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
 								transition={{ duration: 0.5, delay: index * 0.1 }}
+								whileHover={{ y: -4 }}
 							>
-								<Card className="h-full border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md">
-									<CardContent className="pt-6">
-										<p className="text-text-secondary mb-4 text-sm leading-relaxed">"{testimonial.quote}"</p>
-										<div className="flex items-center gap-2">
-											<div className="h-8 w-8 rounded-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
-												<span className="text-xs font-semibold text-accent">
+								<Card className="h-full border-2 border-accent/20 dark:border-accent/30 bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300">
+									<CardContent className="pt-6 pb-6">
+										<p className="text-text-secondary mb-6 text-base leading-relaxed">"{testimonial.quote}"</p>
+										<div className="flex items-center gap-3">
+											<div className="h-10 w-10 rounded-full bg-gradient-to-br from-accent/25 to-accent/45 flex items-center justify-center ring-2 ring-accent/20 shadow-md">
+												<span className="text-sm font-semibold text-accent">
 													{testimonial.author.charAt(0)}
 												</span>
 											</div>
 											<div>
-												<p className="text-sm font-medium text-text-primary">{testimonial.author}</p>
+												<p className="text-sm font-semibold text-text-primary">{testimonial.author}</p>
 												{testimonial.handle && (
 													<p className="text-xs text-text-tertiary">{testimonial.handle}</p>
 												)}
@@ -486,47 +504,55 @@ export default function Home() {
 						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">Pricing plans for every need</h2>
 						<p className="text-lg text-text-secondary">Scale as you go with plans designed to match your growth.</p>
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-						<Card className="border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md">
-							<CardHeader>
-								<CardTitle className="text-2xl mb-2">Start for free.</CardTitle>
-								<CardDescription>Get access to:</CardDescription>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+						<Card className="border-2 border-accent/20 dark:border-accent/30 bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300">
+							<CardHeader className="pb-6">
+								<CardTitle className="text-2xl md:text-3xl mb-2 font-bold">Start for free.</CardTitle>
+								<CardDescription className="text-base">Get access to:</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<ul className="space-y-3 mb-6">
-									<li className="flex items-center gap-2 text-sm text-text-secondary">
-										<Check className="size-4 text-accent" />
+								<ul className="space-y-4 mb-8">
+									<li className="flex items-center gap-3 text-base text-text-secondary">
+										<div className="size-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+											<Check className="size-3.5 text-accent" />
+										</div>
 										All core features
 									</li>
-									<li className="flex items-center gap-2 text-sm text-text-secondary">
-										<Check className="size-4 text-accent" />
+									<li className="flex items-center gap-3 text-base text-text-secondary">
+										<div className="size-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+											<Check className="size-3.5 text-accent" />
+										</div>
 										Built-in integrations
 									</li>
-									<li className="flex items-center gap-2 text-sm text-text-secondary">
-										<Check className="size-4 text-accent" />
+									<li className="flex items-center gap-3 text-base text-text-secondary">
+										<div className="size-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+											<Check className="size-3.5 text-accent" />
+										</div>
 										Authentication system
 									</li>
-									<li className="flex items-center gap-2 text-sm text-text-secondary">
-										<Check className="size-4 text-accent" />
+									<li className="flex items-center gap-3 text-base text-text-secondary">
+										<div className="size-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+											<Check className="size-3.5 text-accent" />
+										</div>
 										Database functionality
 									</li>
 								</ul>
-								<Button className="w-full" onClick={() => textareaRef.current?.focus()}>
+								<Button className="w-full text-base h-11" onClick={() => textareaRef.current?.focus()}>
 									Start building
 								</Button>
 							</CardContent>
 						</Card>
-						<Card className="border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md">
-							<CardHeader>
-								<CardTitle className="text-2xl mb-2">Paid plans from</CardTitle>
-								<div className="flex items-baseline gap-2 mb-2">
-									<span className="text-4xl font-bold text-text-primary">$20</span>
-									<span className="text-text-secondary">/ mo</span>
+						<Card className="border-2 border-accent/30 dark:border-accent/40 bg-gradient-to-br from-accent/5 to-accent/10 dark:from-accent/10 dark:to-accent/15 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300">
+							<CardHeader className="pb-6">
+								<CardTitle className="text-2xl md:text-3xl mb-2 font-bold">Paid plans from</CardTitle>
+								<div className="flex items-baseline gap-2 mb-3">
+									<span className="text-5xl font-bold text-text-primary">$20</span>
+									<span className="text-lg text-text-secondary">/ mo</span>
 								</div>
-								<CardDescription>Upgrade as you go for more credits, more features, and more support.</CardDescription>
+								<CardDescription className="text-base">Upgrade as you go for more credits, more features, and more support.</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Button variant="outline" className="w-full">
+								<Button variant="outline" className="w-full text-base h-11 border-2">
 									See all plans
 								</Button>
 							</CardContent>

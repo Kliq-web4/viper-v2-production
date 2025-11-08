@@ -24,7 +24,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         <AppSidebar />
         <SidebarInset className={clsx("bg-bg-3 flex flex-col h-screen relative", pathname !== "/" && "overflow-hidden")}>
-          <GlobalHeader />
+          {pathname !== "/" && <GlobalHeader />}
           <div className={clsx("flex-1 bg-bg-3", pathname !== "/" && "min-h-0 overflow-auto")}>
             {children || <Outlet />}
           </div>

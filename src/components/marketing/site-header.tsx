@@ -21,7 +21,6 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
             {/* Brand */}
             <div className="flex items-center gap-2 select-none">
               <div className="text-lg font-semibold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-violet-500 bg-clip-text text-transparent">web4.sbs</div>
-              <div className="text-xs text-text-tertiary">/ marketing</div>
             </div>
 
             {/* Nav */}
