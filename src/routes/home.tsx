@@ -440,12 +440,25 @@ onChange={(e) => {
 
 				<section id="integrations" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
 					<p className="text-sm text-text-tertiary text-center mb-8">Trusted by teams who use</p>
-					<div className="flex flex-wrap items-center justify-center gap-10 md:gap-14 opacity-90">
-						<img src={openaiLogo} alt="OpenAI" className="h-10 md:h-12 xl:h-14" />
-						<img src={anthropicLogo} alt="Anthropic" className="h-10 md:h-12 xl:h-14" />
-						<img src={googleLogo} alt="Google" className="h-10 md:h-12 xl:h-14" />
-						<img src={cloudflareLogo} alt="Cloudflare" className="h-10 md:h-12 xl:h-14" />
-						<img src={cerebrasLogo} alt="Cerebras" className="h-10 md:h-12 xl:h-14" />
+					<div className="logo-marquee overflow-hidden">
+						{/* Marquee track – duplicates for seamless loop */}
+						<div className="logo-marquee__inner flex items-center opacity-90 gap-[3em]">
+							{/* Set 1 */}
+							<img src="/Kliq-AI-Lazy-loader.png" alt="Kliq AI" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14 object-contain" />
+							<img src={openaiLogo} alt="OpenAI" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14" />
+							<img src={anthropicLogo} alt="Anthropic" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14" />
+							<img src={googleLogo} alt="Google" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14" />
+							<img src={cloudflareLogo} alt="Cloudflare" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14" />
+							<img src={cerebrasLogo} alt="Cerebras" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14" />
+
+							{/* Set 2 (duplicate) */}
+							<img src="/Kliq-AI-Lazy-loader.png" alt="Kliq AI" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14 object-contain" aria-hidden="true" />
+							<img src={openaiLogo} alt="OpenAI" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14" aria-hidden="true" />
+							<img src={anthropicLogo} alt="Anthropic" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14" aria-hidden="true" />
+							<img src={googleLogo} alt="Google" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14" aria-hidden="true" />
+							<img src={cloudflareLogo} alt="Cloudflare" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14" aria-hidden="true" />
+							<img src={cerebrasLogo} alt="Cerebras" loading="lazy" decoding="async" className="h-10 md:h-12 xl:h-14" aria-hidden="true" />
+						</div>
 					</div>
 				</section>
 
