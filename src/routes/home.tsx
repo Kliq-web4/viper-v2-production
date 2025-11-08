@@ -284,7 +284,12 @@ useEffect(() => {
 				<LiquidBackground className="w-full h-full" opacity={0.28} speed={1.2} />
 			</div>
 
-			<MarketingHeader onStart={() => textareaRef.current?.focus()} />
+				<MarketingHeader onStart={() => {
+					const intendedUrl = `/chat/new`;
+					if (requireAuth({ requireFullAuth: true, actionContext: 'to create applications', intendedUrl })) {
+						navigate(intendedUrl);
+					}
+				}} />
 			
 			<main className="relative z-10 flex-1">
 				{/* Hero Section */}
@@ -569,7 +574,12 @@ onChange={(e) => {
 										Database functionality
 									</li>
 								</ul>
-								<Button className="w-full text-base h-11" onClick={() => textareaRef.current?.focus()}>
+								<Button className="w-full text-base h-11" onClick={() => {
+									const intendedUrl = `/chat/new`;
+									if (requireAuth({ requireFullAuth: true, actionContext: 'to create applications', intendedUrl })) {
+										navigate(intendedUrl);
+									}
+								}}>
 									Start building
 								</Button>
 							</CardContent>
