@@ -2,18 +2,19 @@
 
 ## Unreleased (2025-11-08)
 
-### Added
-- Marketing header and footer (Base44-style) with navigation.
-- Liquid animated background and glass/blur styling for cards.
-- Wide Templates section using shadcn Card components; entire card is clickable.
-- Integrations (Trusted by teams who use) band with enlarged logos.
-- Features, Testimonials, Pricing, FAQs sections with anchors for in-page navigation.
-- Rotating input placeholder (typewriter effect).
-- External pill CTA: “Explore Our Kliq AI x Web4 Playground” linking to http://www.kliqonline.com.
+Timeline (UTC)
+- 10:35 UI shell: introduced a marketing header and footer with responsive navigation.
+- 10:42 Visual pass: added liquid background renderer and glass/blur card styles; hover/reveal animations.
+- 10:50 Templates: rebuilt the templates grid with shadcn Card components; made entire card clickable; added ARIA labels and keyboard support (Enter/Space).
+- 10:58 Integrations: implemented "Trusted by" band and increased logo sizes for better readability on large displays.
+- 11:06 Input UX: removed inline example prompt list; added rotating placeholder with typewriter effect.
+- 11:12 External CTA: added pill button "Explore Our Kliq AI x Web4 Playground" linking to http://www.kliqonline.com.
+- 11:20 Routing: wired header/footer links to in-page anchors (#product, #templates, #integrations, #features, #pricing, #docs, #changelog); Community links to /discover.
 
-### Changed
-- Home hero and input area revamped; removed example prompt instances below the input.
-- Navigation items wired to sections: #product, #templates, #integrations, #features, #pricing, #docs; Community opens /discover.
+Technical notes
+- Sections are containerized at max-w-7xl with responsive grids (2→3→4→5 columns where applicable).
+- Animations use framer-motion; background blobs use GPU-friendly filters.
+- Accessibility: cards expose role=button, focus states, ARIA labels; CTA opens in new tab with rel=noopener.
 
 ---
 
