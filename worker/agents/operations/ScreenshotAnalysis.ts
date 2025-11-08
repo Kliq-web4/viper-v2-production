@@ -10,7 +10,7 @@ export interface ScreenshotAnalysisInput {
     screenshotData: ScreenshotData,
 }
 
-const SYSTEM_PROMPT = `You are a UI/UX Quality Assurance Specialist at Cloudflare. Your task is to analyze application screenshots against blueprint specifications and identify visual issues.
+const SYSTEM_PROMPT = `You are a UI/UX Quality Assurance Specialist at Kliq AI. Your task is to analyze application screenshots against blueprint specifications and identify visual issues.
 
 ## ANALYSIS PRIORITIES:
 1. **Missing Elements** - Blueprint components not visible
