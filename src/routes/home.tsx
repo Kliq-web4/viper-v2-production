@@ -22,6 +22,7 @@ import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import openaiLogo from '@/assets/provider-logos/openai.svg';
 import anthropicLogo from '@/assets/provider-logos/anthropic.svg';
@@ -403,13 +404,21 @@ export default function Home() {
 								<Card 
 									className="h-full group relative overflow-hidden border border-accent/10 dark:border-accent/20 bg-bg-4/40 dark:bg-bg-2/40 backdrop-blur supports-backdrop:backdrop-blur-md hover:bg-bg-4/60 dark:hover:bg-bg-2/60 transition-all duration-200 cursor-pointer hover:border-accent/30"
 									onClick={() => handleCreateApp(prompt, agentMode)}
+									role="button"
+									tabIndex={0}
+									onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCreateApp(prompt, agentMode)}
+									aria-label={`${title} template`}
 								>
+									<div className="absolute top-2 left-2 z-10">
+										<Badge variant="secondary">Template</Badge>
+									</div>
 									<CardHeader className="pb-3">
 										<div className="flex flex-col items-center text-center gap-3">
 											<div className="size-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center group-hover:bg-accent/20 transition-colors">
 												<Icon className="size-5" />
 											</div>
 											<CardTitle className="text-sm font-medium">{title}</CardTitle>
+											<div className="text-[11px] text-text-tertiary">Click to start from this template</div>
 										</div>
 									</CardHeader>
 								</Card>
@@ -418,19 +427,17 @@ export default function Home() {
 					</div>
 				</section>
 
-				{/* Trusted By Section */}
-				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-					<p className="text-sm text-text-tertiary text-center mb-6">Trusted by 400K+ users</p>
-					<div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-80">
-						<img src={openaiLogo} alt="OpenAI" className="h-6 md:h-8" />
-						<img src={anthropicLogo} alt="Anthropic" className="h-6 md:h-8" />
-						<img src={googleLogo} alt="Google" className="h-6 md:h-8" />
-						<img src={cloudflareLogo} alt="Cloudflare" className="h-6 md:h-8" />
-						<img src={cerebrasLogo} alt="Cerebras" className="h-6 md:h-8" />
+				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+					<p className="text-sm text-text-tertiary text-center mb-8">Trusted by teams who use</p>
+					<div className="flex flex-wrap items-center justify-center gap-10 md:gap-14 opacity-90">
+						<img src={openaiLogo} alt="OpenAI" className="h-10 md:h-12 xl:h-14" />
+						<img src={anthropicLogo} alt="Anthropic" className="h-10 md:h-12 xl:h-14" />
+						<img src={googleLogo} alt="Google" className="h-10 md:h-12 xl:h-14" />
+						<img src={cloudflareLogo} alt="Cloudflare" className="h-10 md:h-12 xl:h-14" />
+						<img src={cerebrasLogo} alt="Cerebras" className="h-10 md:h-12 xl:h-14" />
 					</div>
 				</section>
 
-				{/* Features Section - Consider yourself limitless */}
 				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
 					<div className="text-center mb-16">
 						<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-text-primary">Consider yourself limitless.</h2>
@@ -461,7 +468,6 @@ export default function Home() {
 					</div>
 				</section>
 
-				{/* Testimonials Section */}
 				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
 					<div className="text-center mb-12">
 						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">"Okay, this has blown my mind."</h2>
