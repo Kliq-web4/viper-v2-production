@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { ArrowRight, Info, LayoutDashboard, Gamepad2, Users, Box, Share2, Rocket, Puzzle, Sparkles, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowRight, Info, LayoutDashboard, Gamepad2, Users, Box, Share2, Rocket, Puzzle, Sparkles, Check } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/contexts/auth-context';
 import {
@@ -8,7 +8,7 @@ import {
 } from '../components/agent-mode-toggle';
 import { useAuthGuard } from '../hooks/useAuthGuard';
 import { usePaginatedApps } from '@/hooks/use-paginated-apps';
-import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AppCard } from '@/components/shared/AppCard';
 import clsx from 'clsx';
 import { useImageUpload } from '@/hooks/use-image-upload';
