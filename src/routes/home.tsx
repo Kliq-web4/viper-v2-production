@@ -653,18 +653,6 @@ onChange={(e) => {
 				</AnimatePresence>
 			</main>
 
-			{/* Simple Changelog anchor */}
-			<section id="changelog" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-				<h3 className="text-xl font-semibold mb-3">Changelog</h3>
-				<ul className="list-disc pl-5 text-sm text-text-secondary space-y-1">
-					<li>Landing redesigned with Base44-style layout and shadcn cards.</li>
-					<li>Added liquid animated background; polished glassy cards and hover effects.</li>
-					<li>Wide templates and integrations sections; enlarged logos.</li>
-					<li>Rotating input placeholder; removed example prompt instances.</li>
-					<li>Added marketing header/footer and external Playground CTA.</li>
-				</ul>
-			</section>
-
 			{/* Nudge towards Discover */}
 			{user && <CurvedArrow sourceRef={discoverLinkRef} target={{ x: 50, y: window.innerHeight - 60 }} />}
 			<MarketingFooter />
