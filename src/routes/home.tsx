@@ -284,12 +284,7 @@ useEffect(() => {
 				<LiquidBackground className="w-full h-full" opacity={0.28} speed={1.2} />
 			</div>
 
-				<MarketingHeader onStart={() => {
-					const intendedUrl = `/chat/new`;
-					if (requireAuth({ requireFullAuth: true, actionContext: 'to create applications', intendedUrl })) {
-						navigate(intendedUrl);
-					}
-				}} />
+				<MarketingHeader />
 			
 			<main className="relative z-10 flex-1">
 				{/* Hero Section */}
