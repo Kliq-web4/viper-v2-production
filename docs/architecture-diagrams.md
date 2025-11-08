@@ -1,6 +1,6 @@
-# Cloudflare Orange Build - Architecture Diagrams
+# Cloudflare VibeSDK Build - Architecture Diagrams
 
-This document contains comprehensive Mermaid diagrams representing the architecture of the Cloudflare Orange Build project.
+This document contains comprehensive Mermaid diagrams representing the architecture of the Cloudflare VibeSDK Build project.
 
 ## Presentation-Ready Architecture Diagram
 

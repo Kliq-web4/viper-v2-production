@@ -585,6 +585,15 @@ export class DeploymentManager extends BaseAgentService implements IDeploymentMa
                 };
             }
         }
+
+        // Inject Supabase env vars if configured at platform level (no user handling)
+        if (typeof this.env.SUPABASE_URL === 'string' && this.env.SUPABASE_URL && typeof this.env.SUPABASE_ANON_KEY === 'string' && this.env.SUPABASE_ANON_KEY) {
+            localEnvVars = {
+                ...localEnvVars,
+                VITE_SUPABASE_URL: this.env.SUPABASE_URL,
+                VITE_SUPABASE_ANON_KEY: this.env.SUPABASE_ANON_KEY,
+            };
+        }
         
         // Create instance
         const client = this.getClient();

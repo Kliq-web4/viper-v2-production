@@ -1705,6 +1705,9 @@ class CloudflareDeploymentManager {
 			'GOOGLE_AI_STUDIO_API_KEY',
 			'OPENROUTER_API_KEY',
 			'GROQ_API_KEY',
+            // Optional: platform-managed Supabase credentials (for no-code integration)
+            'SUPABASE_URL',
+            'SUPABASE_ANON_KEY',
 			'GOOGLE_CLIENT_SECRET',
 			'GOOGLE_CLIENT_ID',
 			'GITHUB_CLIENT_ID',

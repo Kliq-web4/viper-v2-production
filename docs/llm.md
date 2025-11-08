@@ -133,7 +133,7 @@ export const AGENT_CONFIG = {
 
 **File:** `/worker/agents/operations/UserConversationProcessor.ts`
 - Line ~50: System prompt starts
-- Defines Orange AI personality, tool usage rules, behavior
+- Defines Viper AI personality, tool usage rules, behavior
 
 **Task: Add new WebSocket message**
 

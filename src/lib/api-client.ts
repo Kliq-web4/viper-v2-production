@@ -925,6 +925,15 @@ private async requestRaw<T>(
 		);
 	}
 
+	/**
+	 * Add Supabase integration to an existing app (no-code)
+	 */
+	async addSupabaseIntegration(agentId: string): Promise<ApiResponse<{ message: string }>> {
+		return this.request<{ message: string }>(`/api/integrations/supabase/${agentId}/add`, {
+			method: 'POST',
+		});
+	}
+
 	// ===============================
 	// Session Management API Methods
 	// ===============================

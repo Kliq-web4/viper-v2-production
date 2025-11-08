@@ -40,6 +40,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { sendWebSocketMessage } from './utils/websocket-helpers';
+import { apiClient } from '@/lib/api-client';
 
 export default function Chat() {
 	const { chatId: urlChatId } = useParams();
@@ -158,7 +159,8 @@ const {
 	// Debug panel state
 	const [debugMessages, setDebugMessages] = useState<DebugMessage[]>([]);
 
-	const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+const [isAddingSupabase, setIsAddingSupabase] = useState(false);
 	const [isGitCloneModalOpen, setIsGitCloneModalOpen] = useState(false);
 
 	// Model config info state
@@ -179,7 +181,22 @@ const {
 		}));
 	}, [websocket]);
 
-	// Listen for model config info WebSocket messages
+// Add Supabase integration handler
+const handleAddSupabase = useCallback(async () => {
+  if (!urlChatId || isAddingSupabase) return;
+  try {
+    setIsAddingSupabase(true);
+    await apiClient.addSupabaseIntegration(urlChatId);
+    // trigger preview refresh
+    setManualRefreshTrigger(Date.now());
+  } catch (e) {
+    // no-op; ApiClient handles toasts
+  } finally {
+    setIsAddingSupabase(false);
+  }
+}, [urlChatId, isAddingSupabase]);
+
+// Listen for model config info WebSocket messages
 	useEffect(() => {
 		if (!websocket) return;
 
@@ -880,7 +897,24 @@ const isGitHubExportReady = useMemo(() => {
 														Deploy
 													</>
 												)}
-											</button>
+</button>
+                                <button
+                                    className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 text-xs font-medium shadow-sm ${
+                                        isAddingSupabase ? 'bg-gray-600 text-gray-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                    }`}
+                                    onClick={handleAddSupabase}
+                                    disabled={isAddingSupabase}
+                                    title="Add Supabase (no-code)"
+                                >
+                                    {isAddingSupabase ? (
+                                        <>
+                                            <LoaderCircle className="size-3 animate-spin" />
+                                            Adding...
+                                        </>
+                                    ) : (
+                                        <>Add Supabase</>
+                                    )}
+                                </button>
 											<button
 												className="group relative flex items-center gap-1.5 p-1.5 group-hover:pl-2 group-hover:pr-2.5 rounded-full group-hover:rounded-md transition-all duration-300 ease-in-out hover:bg-bg-4 border border-transparent hover:border-border-primary hover:shadow-sm overflow-hidden"
 												onClick={() => setIsGitCloneModalOpen(true)}

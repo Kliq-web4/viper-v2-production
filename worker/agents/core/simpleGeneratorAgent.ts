@@ -37,7 +37,7 @@ import { fixProjectIssues } from '../../services/code-fixer';
 import { GitVersionControl } from '../git';
 import { FastCodeFixerOperation } from '../operations/PostPhaseCodeFixer';
 import { looksLikeCommand, validateAndCleanBootstrapCommands } from '../utils/common';
-import { customizePackageJson, customizeTemplateFiles, generateBootstrapScript, generateProjectName } from '../utils/templateCustomizer';
+import { customizePackageJson, customizeTemplateFiles, generateBootstrapScript, generateProjectName, generateSupabaseClientFile } from '../utils/templateCustomizer';
 import { generateBlueprint } from '../planning/blueprint';
 import { AppService } from '../../database';
 import { RateLimitExceededError } from 'shared/types/errors';
@@ -2234,6 +2234,43 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         } catch (error) {
             this.logger().error('Failed to sync package.json from sandbox', error);
             // Non-critical error - don't throw, just log
+        }
+    }
+
+    /**
+     * Add Supabase integration on-demand (no-code button)
+     * - Ensures supabase client file exists
+     * - Installs @supabase/supabase-js dependency
+     * - Redeploys preview with platform-managed Supabase env vars
+     */
+    async addSupabaseIntegration(): Promise<{ success: boolean; message?: string }> {
+        try {
+            // 1) Ensure client file exists in repo
+            const clientPath = 'src/lib/supabaseClient.ts';
+            const exists = !!this.fileManager.getFile(clientPath);
+            if (!exists) {
+                const clientContent = generateSupabaseClientFile();
+                await this.fileManager.saveGeneratedFile({
+                    filePath: clientPath,
+                    fileContents: clientContent,
+                    filePurpose: 'Supabase client for database access'
+                }, 'feat: add Supabase client');
+                this.broadcast(WebSocketMessageResponses.FILE_GENERATED, {
+                    message: 'Added Supabase client',
+                    file: { filePath: clientPath, fileContents: clientContent, lastDiff: '', language: 'ts' }
+                } as any);
+            }
+
+            // 2) Ensure dependency installed in sandbox and sync package.json
+            await this.execCommands(['bun add @supabase/supabase-js@^2'], true, 60000);
+
+            // 3) Redeploy preview to ensure env vars are applied (DeploymentManager injects Supabase envs if configured)
+            await this.deployToSandbox([], true, 'chore: configure Supabase integration', true);
+
+            return { success: true, message: 'Supabase integrated and preview redeployed' };
+        } catch (error) {
+            this.logger().error('Failed to add Supabase integration', error);
+            return { success: false, message: error instanceof Error ? error.message : String(error) };
         }
     }
 

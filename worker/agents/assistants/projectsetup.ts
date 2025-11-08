@@ -130,7 +130,12 @@ ${error}`);
             this.logger.info(`Generated setup commands: ${results.string}`);
 
             this.save([createAssistantMessage(results.string)]);
-            return { commands: extractCommands(results.string) };
+            // Ensure Supabase client is installed in all generated apps
+            const commands = extractCommands(results.string);
+            if (!commands.some(cmd => cmd.includes('@supabase/supabase-js'))) {
+                commands.unshift('bun add @supabase/supabase-js@^2');
+            }
+            return { commands };
         } catch (error) {
             this.logger.error("Error generating setup commands:", error);
             throw error;

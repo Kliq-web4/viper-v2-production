@@ -10,6 +10,8 @@ export interface CustomizedTemplateFiles {
     'wrangler.jsonc'?: string;
     '.bootstrap.js': string;
     '.gitignore': string;
+    'env.example': string;
+    'src/lib/supabaseClient.ts': string;
 }
 
 /**
@@ -51,6 +53,10 @@ export function customizeTemplateFiles(
     customized['.gitignore'] = updateGitignore(
         templateFiles['.gitignore'] || ''
     );
+
+    // 5. Add Supabase integration scaffolding
+    customized['env.example'] = generateEnvExample();
+    customized['src/lib/supabaseClient.ts'] = generateSupabaseClientFile();
     
     return customized;
 }
@@ -63,6 +69,11 @@ export function customizePackageJson(content: string, projectName: string): stri
     pkg.name = projectName;
     pkg.scripts = pkg.scripts || {};
     pkg.scripts.prepare = 'bun .bootstrap.js || true';
+    // Ensure Supabase client dependency is present for generated apps
+    pkg.dependencies = pkg.dependencies || {};
+    if (!pkg.dependencies['@supabase/supabase-js']) {
+        pkg.dependencies['@supabase/supabase-js'] = '^2';
+    }
     return JSON.stringify(pkg, null, 2);
 }
 
@@ -78,6 +89,17 @@ function customizeWranglerJsonc(content: string, projectName: string): string {
         }
     });
     return applyEdits(content, edits);
+}
+
+/**
+ * Generate basic env example file for frontend variables
+ */
+export function generateEnvExample(): string {
+    return `# Copy to .env and fill in your values
+# Vite exposes only variables prefixed with VITE_
+VITE_SUPABASE_URL="https://YOUR_PROJECT_ID.supabase.co"
+VITE_SUPABASE_ANON_KEY="YOUR_ANON_PUBLIC_KEY"
+`;
 }
 
 /**
@@ -199,14 +221,50 @@ function runSetupCommands() {
 `;
 }
 
-/**
- * Update .gitignore to exclude bootstrap marker
- */
 function updateGitignore(content: string): string {
-    if (content.includes('.bootstrap-complete')) {
-        return content;
+    let updated = content;
+    if (!updated.includes('.bootstrap-complete')) {
+        updated += '\n# Bootstrap marker\n.bootstrap-complete\n';
     }
-    return content + '\n# Bootstrap marker\n.bootstrap-complete\n';
+    // Ignore local env files by default
+    if (!updated.includes('\n.env\n')) {
+        updated += '\n# Local environment variables\n.env\n';
+    }
+    return updated;
+}
+
+/**
+ * Create a minimal Supabase client for generated apps
+ */
+export function generateSupabaseClientFile(): string {
+    return `// Auto-generated Supabase client for your app
+// Uses browser client. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your environment.
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined;
+const supabaseAnonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  // Non-fatal warning; you'll need to set these for database access
+  console.warn('[Supabase] VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is not set. Database calls will fail until configured.');
+}
+
+export const supabase = createClient(
+  supabaseUrl ?? '',
+  supabaseAnonKey ?? ''
+);
+
+// Example helper – remove if not needed
+export async function healthcheck() {
+  try {
+    // uses a cheap call that doesn't require a table
+    const { data, error } = await supabase.from('pg_tables' as any).select('schemaname').limit(1);
+    return { ok: !error, data, error };
+  } catch (err) {
+    return { ok: false, error: err } as const;
+  }
+}
+`;
 }
 
 /**
