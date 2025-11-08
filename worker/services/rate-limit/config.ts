@@ -62,17 +62,17 @@ export interface RateLimitSettings {
 
 export const DEFAULT_RATE_LIMIT_SETTINGS: RateLimitSettings = {
 	apiRateLimit: {
-		enabled: true,
+		enabled: false,
 		store: RateLimitStore.RATE_LIMITER,
 		bindingName: 'API_RATE_LIMITER',
 	},
 	authRateLimit: {
-		enabled: true,
+		enabled: false,
 		store: RateLimitStore.RATE_LIMITER,
 		bindingName: 'AUTH_RATE_LIMITER',
 	},
 	appCreation: {
-		enabled: true,
+		enabled: false,
 		store: RateLimitStore.DURABLE_OBJECT,
 		limit: 10,
         dailyLimit: 10,

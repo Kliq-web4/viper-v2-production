@@ -8,7 +8,6 @@ import { ApiResponse, ControllerResponse } from '../types';
 import { RouteContext } from '../../types/route-context';
 import { ModelConfigService } from '../../../database';
 import { ModelConfig } from '../../../agents/inferutils/config.types';
-import { RateLimitService } from '../../../services/rate-limit/rateLimits';
 import { validateWebSocketOrigin } from '../../../middleware/security/websocket';
 import { createLogger } from '../../../logger';
 import { getPreviewDomain } from 'worker/utils/urls';
@@ -64,16 +63,7 @@ export class CodingAgentController extends BaseController {
             const writer = writable.getWriter();
             // Check if user is authenticated (required for app creation)
             const user = context.user!;
-            try {
-                await RateLimitService.enforceAppCreationRateLimit(env, context.config.security.rateLimit, user, request);
-            } catch (error) {
-                if (error instanceof Error) {
-                    return CodingAgentController.createErrorResponse(error, 429);
-                } else {
-                    this.logger.error('Unknown error in enforceAppCreationRateLimit', error);
-                    return CodingAgentController.createErrorResponse(JSON.stringify(error), 429);
-                }
-            }
+            // App creation rate limits disabled
 
             const agentId = generateId();
             const modelConfigService = new ModelConfigService(env);

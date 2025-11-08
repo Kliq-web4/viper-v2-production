@@ -7,11 +7,9 @@ import { AuthUser } from '../../types/auth-types';
 import { createLogger } from '../../logger';
 import { AppService } from '../../database';
 import { authMiddleware } from './auth';
-import { RateLimitService } from '../../services/rate-limit/rateLimits';
 import { errorResponse } from '../../api/responses';
 import { Context } from 'hono';
 import { AppEnv } from '../../types/appenv';
-import { RateLimitExceededError } from 'shared/types/errors';
 import * as Sentry from '@sentry/cloudflare';
 import { getUserConfigurableSettings } from 'worker/config';
 
@@ -158,15 +156,7 @@ export async function enforceAuthRequirement(c: Context<AppEnv>) : Promise<Respo
         const config = await getUserConfigurableSettings(c.env, user.id);
         c.set('config', config);
 
-        try {
-            await RateLimitService.enforceAuthRateLimit(c.env, config.security.rateLimit, user, c.req.raw);
-        } catch (error) {
-            if (error instanceof RateLimitExceededError) {
-                return errorResponse(error, 429);
-            }
-            logger.error('Error enforcing auth rate limit', error);
-            return errorResponse('Internal server error', 500);
-        }
+        // Auth rate limits disabled
     }
     
     const params = c.req.param();

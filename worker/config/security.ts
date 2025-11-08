@@ -84,10 +84,7 @@ export function getCORSConfig(env: Env): CORSConfig {
             'X-CSRF-Token'
         ],
         exposeHeaders: [
-            'X-Request-ID',
-            'X-RateLimit-Limit',
-            'X-RateLimit-Remaining',
-            'X-RateLimit-Reset'
+            'X-Request-ID'
         ],
         maxAge: 86400, // 24 hours
         credentials: true
