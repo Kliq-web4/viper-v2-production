@@ -49,14 +49,7 @@ export default function Home() {
 		accept: [...SUPPORTED_IMAGE_MIME_TYPES],
 	});
 
-	const placeholderPhrases = useMemo(() => [
-		"todo list app",
-		"F1 fantasy game",
-		"personal finance tracker"
-	], []);
-	const [currentPlaceholderPhraseIndex, setCurrentPlaceholderPhraseIndex] = useState(0);
-	const [currentPlaceholderText, setCurrentPlaceholderText] = useState("");
-	const [isPlaceholderTyping, setIsPlaceholderTyping] = useState(true);
+	const [selectedExample, setSelectedExample] = useState<number | null>(null);
 
 	const {
 		apps,
@@ -109,45 +102,46 @@ export default function Home() {
 		adjustTextareaHeight();
 	}, []);
 
-	// Typewriter effect
-	useEffect(() => {
-		const currentPhrase = placeholderPhrases[currentPlaceholderPhraseIndex];
-
-		if (isPlaceholderTyping) {
-			if (currentPlaceholderText.length < currentPhrase.length) {
-				const timeout = setTimeout(() => {
-					setCurrentPlaceholderText(currentPhrase.slice(0, currentPlaceholderText.length + 1));
-				}, 100); // Typing speed
-				return () => clearTimeout(timeout);
-			} else {
-				// Pause before erasing
-				const timeout = setTimeout(() => {
-					setIsPlaceholderTyping(false);
-				}, 2000); // Pause duration
-				return () => clearTimeout(timeout);
-			}
-		} else {
-			if (currentPlaceholderText.length > 0) {
-				const timeout = setTimeout(() => {
-					setCurrentPlaceholderText(currentPlaceholderText.slice(0, -1));
-				}, 50); // Erasing speed
-				return () => clearTimeout(timeout);
-			} else {
-				// Move to next phrase
-				setCurrentPlaceholderPhraseIndex((prev) => (prev + 1) % placeholderPhrases.length);
-				setIsPlaceholderTyping(true);
-			}
-		}
-	}, [currentPlaceholderText, currentPlaceholderPhraseIndex, isPlaceholderTyping, placeholderPhrases]);
-
 	const discoverLinkRef = useRef<HTMLDivElement>(null);
 
 	const templates = [
-		{ title: 'Reporting Dashboard', description: 'KPIs, charts and filters', icon: LayoutDashboard },
-		{ title: 'Gaming Platform', description: 'Lobby, matchmaking, leaderboards', icon: Gamepad2 },
-		{ title: 'Onboarding Portal', description: 'Sign-up flows and checklists', icon: Users },
-		{ title: 'Room Visualizer', description: 'Interactive layout editor', icon: Box },
-		{ title: 'Networking App', description: 'Profiles, posts and connections', icon: Share2 },
+		{ 
+			title: 'Reporting Dashboard', 
+			description: 'KPIs, charts and filters', 
+			icon: LayoutDashboard,
+			prompt: 'Ask Kliq AI to create a comprehensive reporting dashboard with key performance indicators (KPIs), interactive charts for data visualization, advanced filtering options, date range selectors, and export functionality. Include a clean layout with sidebar navigation, summary cards at the top showing key metrics, and detailed data tables below.'
+		},
+		{ 
+			title: 'Gaming Platform', 
+			description: 'Lobby, matchmaking, leaderboards', 
+			icon: Gamepad2,
+			prompt: 'Ask Kliq AI to build a full-featured gaming platform with a lobby system where players can create and join rooms, real-time matchmaking functionality, comprehensive leaderboards showing top players with rankings and statistics, player profiles with game history, and a chat system for players to communicate. Include game session management and score tracking.'
+		},
+		{ 
+			title: 'Onboarding Portal', 
+			description: 'Sign-up flows and checklists', 
+			icon: Users,
+			prompt: 'Ask Kliq AI to create an onboarding portal with multi-step sign-up forms, user verification flows, interactive checklists to guide new users through setup, progress tracking, and welcome tutorials. Include email verification, profile completion steps, and a dashboard that shows onboarding progress with clear next steps.'
+		},
+		{ 
+			title: 'Room Visualizer', 
+			description: 'Interactive layout editor', 
+			icon: Box,
+			prompt: 'Ask Kliq AI to build an interactive room visualizer where users can drag and drop furniture, adjust room dimensions, apply different floor plans, change wall colors and textures, save multiple room designs, and export layouts as images. Include a toolbar with furniture items, measurement tools, and a 3D preview option.'
+		},
+		{ 
+			title: 'Networking App', 
+			description: 'Profiles, posts and connections', 
+			icon: Share2,
+			prompt: 'Ask Kliq AI to create a professional networking application with user profiles featuring bio, skills, and experience, a feed system for posting updates and sharing content, connection requests and messaging, search functionality to find people by skills or industry, and event creation for networking meetups. Include notifications and activity feeds.'
+		},
+	] as const;
+
+	const placeholderExamples = [
+		'create an internal tool that helps track team productivity with time tracking and project management features',
+		'build a customer feedback dashboard that collects reviews, displays ratings, and provides analytics insights',
+		'develop a task management app with kanban boards, due dates, and team collaboration features',
+		'make a booking system for appointments with calendar integration and email notifications',
 	] as const;
 
 	const features = [
@@ -312,11 +306,12 @@ export default function Home() {
 									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-text-secondary/50 text-text-primary bg-transparent text-base"
 									name="query"
 									value={query}
-									placeholder={`Create a ${currentPlaceholderText}`}
+									placeholder="Ask Kliq AI to..."
 									ref={textareaRef}
 									onChange={(e) => {
 										setQuery(e.target.value);
 										adjustTextareaHeight();
+										setSelectedExample(null);
 									}}
 									onInput={adjustTextareaHeight}
 									onKeyDown={(e) => {
@@ -362,13 +357,40 @@ export default function Home() {
 								</div>
 							</div>
 						</form>
+						
+						{/* Example Prompts */}
+						{!query && (
+							<div className="mt-4 space-y-2">
+								{placeholderExamples.map((example, index) => (
+									<button
+										key={index}
+										type="button"
+										onClick={() => {
+											const fullPrompt = `Ask Kliq AI to ${example}`;
+											setQuery(fullPrompt);
+											setSelectedExample(index);
+											textareaRef.current?.focus();
+											adjustTextareaHeight();
+										}}
+										className={clsx(
+											"w-full text-left px-4 py-2.5 rounded-lg text-sm transition-all duration-200",
+											selectedExample === index
+												? "bg-accent/10 border border-accent/30 text-text-primary"
+												: "bg-bg-4/40 dark:bg-bg-2/40 border border-accent/10 dark:border-accent/20 text-text-secondary hover:bg-bg-4/60 dark:hover:bg-bg-2/60 hover:border-accent/20"
+										)}
+									>
+										Ask Kliq AI to {example}
+									</button>
+								))}
+							</div>
+						)}
 					</div>
 				</section>
 
 				{/* Templates Section */}
 				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
 					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-6">
-						{templates.map(({ title, icon: Icon }) => (
+						{templates.map(({ title, icon: Icon, prompt }) => (
 							<motion.div
 								key={title}
 								initial={{ opacity: 0, y: 10 }}
@@ -380,7 +402,7 @@ export default function Home() {
 							>
 								<Card 
 									className="h-full group relative overflow-hidden border border-accent/10 dark:border-accent/20 bg-bg-4/40 dark:bg-bg-2/40 backdrop-blur supports-backdrop:backdrop-blur-md hover:bg-bg-4/60 dark:hover:bg-bg-2/60 transition-all duration-200 cursor-pointer hover:border-accent/30"
-									onClick={() => handleCreateApp(title, agentMode)}
+									onClick={() => handleCreateApp(prompt, agentMode)}
 								>
 									<CardHeader className="pb-3">
 										<div className="flex flex-col items-center text-center gap-3">
