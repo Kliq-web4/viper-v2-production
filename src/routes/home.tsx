@@ -269,25 +269,24 @@ export default function Home() {
 			
 			<main className="relative z-10 flex-1">
 				{/* Hero Section */}
-				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 md:pt-32 md:pb-24">
+				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12 md:pt-32 md:pb-16">
 					<div className="flex flex-col items-center text-center">
-						<h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-6 bg-clip-text bg-gradient-to-r from-text-primary to-text-primary/80">
-							Shape your ideas into apps that work your way
+						<h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight tracking-tight mb-4 text-text-primary">
+							Build something
 						</h1>
-						<p className="text-lg sm:text-xl md:text-2xl text-text-secondary mb-8 max-w-3xl">
-							This platform lets you build fully-functional apps in minutes with just your words. No coding necessary.
+						<div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight tracking-tight mb-3 bg-gradient-to-r from-pink-400 via-fuchsia-400 to-pink-500 bg-clip-text text-transparent">
+							web4.sbs
+						</div>
+						<p className="text-base sm:text-lg text-text-secondary mb-2">
+							Powered by Kliq AI
 						</p>
-						<Button 
-							size="lg" 
-							className="mb-12"
-							onClick={() => textareaRef.current?.focus()}
-						>
-							Start Now
-						</Button>
+						<p className="text-sm sm:text-base text-text-secondary/80 mb-8 max-w-2xl">
+							Create apps and websites by chatting with AI
+						</p>
 					</div>
 
 					{/* Main Input Area */}
-					<div className="max-w-4xl mx-auto">
+					<div className="max-w-3xl mx-auto mt-8">
 						<form
 							method="POST"
 							onSubmit={(e) => {
@@ -295,9 +294,8 @@ export default function Home() {
 								const query = textareaRef.current!.value;
 								handleCreateApp(query, agentMode);
 							}}
-							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px] bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur supports-backdrop:backdrop-blur-md border border-accent/30 dark:border-accent/40 rounded-[18px] shadow-[0_10px_50px_-20px_rgba(139,92,246,0.35)] p-5 transition-all duration-200"
+							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[120px] bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur-xl supports-backdrop:backdrop-blur-xl border border-accent/20 dark:border-accent/30 rounded-2xl shadow-lg p-4 transition-all duration-200 hover:shadow-xl"
 						>
-							<div className="pointer-events-none absolute -inset-px rounded-[18px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(120% 120% at 50% 0%, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.06) 40%, transparent 70%)' }} />
 							<div 
 								className={clsx(
 									"flex-1 flex flex-col relative",
@@ -311,7 +309,7 @@ export default function Home() {
 									</div>
 								)}
 								<textarea
-									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-text-primary/60 text-text-primary bg-transparent"
+									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-text-secondary/50 text-text-primary bg-transparent text-base"
 									name="query"
 									value={query}
 									placeholder={`Create a ${currentPlaceholderText}`}
@@ -369,47 +367,29 @@ export default function Home() {
 
 				{/* Templates Section */}
 				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-					<p className="text-sm text-text-tertiary mb-8 text-center">Not sure where to start? Try one of these:</p>
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-6">
 						{templates.map(({ title, description, icon: Icon }) => (
 							<motion.div
 								key={title}
-								initial={{ opacity: 0, y: 20 }}
+								initial={{ opacity: 0, y: 10 }}
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true, amount: 0.2 }}
-								transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-								whileHover={{ y: -8, scale: 1.02 }}
+								transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+								whileHover={{ y: -4 }}
 								className="h-full"
 							>
 								<Card 
-									className="h-full group relative overflow-hidden border-2 border-accent/20 dark:border-accent/30 bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:border-accent/50"
+									className="h-full group relative overflow-hidden border border-accent/10 dark:border-accent/20 bg-bg-4/40 dark:bg-bg-2/40 backdrop-blur supports-backdrop:backdrop-blur-md hover:bg-bg-4/60 dark:hover:bg-bg-2/60 transition-all duration-200 cursor-pointer hover:border-accent/30"
 									onClick={() => handleCreateApp(title, agentMode)}
 								>
-									<div className="pointer-events-none absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 50%, transparent 100%)' }} />
-									<CardHeader className="pb-4">
-										<div className="flex items-start gap-4">
-											<div className="size-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/40 text-accent flex items-center justify-center ring-2 ring-accent/20 shadow-md group-hover:scale-110 transition-transform duration-300">
-												<Icon className="size-6" />
+									<CardHeader className="pb-3">
+										<div className="flex flex-col items-center text-center gap-3">
+											<div className="size-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+												<Icon className="size-5" />
 											</div>
-											<div className="flex-1">
-												<CardTitle className="text-xl font-semibold mb-2 group-hover:text-accent transition-colors">{title}</CardTitle>
-												<CardDescription className="text-sm text-text-secondary leading-relaxed">{description}</CardDescription>
-											</div>
+											<CardTitle className="text-sm font-medium">{title}</CardTitle>
 										</div>
 									</CardHeader>
-									<CardContent className="pt-0">
-										<Button 
-											variant="ghost" 
-											className="w-full justify-start group-hover:bg-accent/10 group-hover:text-accent transition-colors"
-											onClick={(e) => {
-												e.stopPropagation();
-												handleCreateApp(title, agentMode);
-											}}
-										>
-											Use template
-											<ArrowRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
-										</Button>
-									</CardContent>
 								</Card>
 							</motion.div>
 						))}
