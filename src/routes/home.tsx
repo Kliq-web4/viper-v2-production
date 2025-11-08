@@ -260,49 +260,55 @@ className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px
 								</div>
 							</div>
 						</form>
-
-						{/* Templates */}
-						<div className="w-full mt-6">
-							<p className="text-sm text-text-tertiary">Not sure where to start? Try one of these:</p>
-							<div className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-{templates.map(({ title, description, icon: Icon }) => (
-									<motion.div key={title} whileHover={{ y: -2, scale: 1.02 }} transition={{ type: 'spring', stiffness: 260, damping: 22 }}>
-										<Card className="group relative overflow-hidden border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md transition-colors">
-											{/* glow border */}
-											<div className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(60% 120% at 50% 0%, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.05) 60%, transparent 100%)' }} />
-											<CardHeader variant="minimal" className="flex-row items-center gap-2">
-												<div className="size-7 rounded-md bg-accent/15 text-accent/90 flex items-center justify-center ring-1 ring-accent/30">
-													<Icon className="size-4" />
-												</div>
-												<CardTitle className="text-sm">{title}</CardTitle>
-											</CardHeader>
-											<CardContent className="pt-0">
-												<CardDescription className="text-xs">{description}</CardDescription>
-												<div className="mt-3">
-													<Button variant="ghost" size="sm" onClick={() => handleCreateApp(title, agentMode)}>
-														Use template <ArrowRight className="size-4" />
-													</Button>
-												</div>
-											</CardContent>
-										</Card>
-									</motion.div>
-								))}
-							</div>
-						</div>
-
-						{/* Trust logos */}
-						<div className="w-full mt-8">
-							<p className="text-xs text-text-tertiary text-center">Trusted by teams building with</p>
-							<div className="mt-3 flex flex-wrap items-center justify-center gap-8 opacity-80">
-								<img src={openaiLogo} alt="OpenAI" className="h-6" />
-								<img src={anthropicLogo} alt="Anthropic" className="h-6" />
-								<img src={googleLogo} alt="Google" className="h-6" />
-								<img src={cloudflareLogo} alt="Cloudflare" className="h-6" />
-								<img src={cerebrasLogo} alt="Cerebras" className="h-6" />
-							</div>
-						</div>
 					</motion.div>
 				</div>
+
+				{/* Templates section (wide) */}
+				<section className="w-full max-w-6xl mx-auto px-4 z-10 mt-10 md:mt-14">
+					<p className="text-sm text-text-tertiary">Not sure where to start? Try one of these:</p>
+					<div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5 xl:gap-6">
+						{templates.map(({ title, description, icon: Icon }) => (
+							<motion.div
+								key={title}
+								initial={{ opacity: 0, y: 8 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true, amount: 0.2 }}
+								transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+								className="h-full"
+							>
+								<Card className="h-full group relative overflow-hidden border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md transition-colors">
+									<div className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(60% 120% at 50% 0%, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.05) 60%, transparent 100%)' }} />
+									<CardHeader variant="minimal" className="flex-row items-center gap-2">
+										<div className="size-7 rounded-md bg-accent/15 text-accent/90 flex items-center justify-center ring-1 ring-accent/30">
+											<Icon className="size-4" />
+										</div>
+										<CardTitle className="text-sm">{title}</CardTitle>
+									</CardHeader>
+									<CardContent className="pt-0">
+										<CardDescription className="text-xs">{description}</CardDescription>
+										<div className="mt-3">
+											<Button variant="ghost" size="sm" onClick={() => handleCreateApp(title, agentMode)}>
+												Use template <ArrowRight className="size-4" />
+											</Button>
+										</div>
+									</CardContent>
+								</Card>
+							</motion.div>
+						))}
+					</div>
+				</section>
+
+				{/* Trust logos (wide) */}
+				<section className="w-full max-w-5xl mx-auto px-4 z-10 mt-8 md:mt-10">
+					<p className="text-xs text-text-tertiary text-center">Trusted by teams building with</p>
+					<div className="mt-3 flex flex-wrap items-center justify-center gap-8 opacity-80">
+						<img src={openaiLogo} alt="OpenAI" className="h-6" />
+						<img src={anthropicLogo} alt="Anthropic" className="h-6" />
+						<img src={googleLogo} alt="Google" className="h-6" />
+						<img src={cloudflareLogo} alt="Cloudflare" className="h-6" />
+						<img src={cerebrasLogo} alt="Cerebras" className="h-6" />
+					</div>
+				</section>
 
 				{/* Features section */}
 				<section className="w-full max-w-6xl mx-auto px-4 z-10 mt-10">
