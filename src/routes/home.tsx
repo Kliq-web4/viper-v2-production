@@ -17,6 +17,7 @@ import { ImageUploadButton } from '@/components/image-upload-button';
 import { ImageAttachmentPreview } from '@/components/image-attachment-preview';
 import { SUPPORTED_IMAGE_MIME_TYPES } from '@/api-types';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
+import { LiquidBackground } from '@/components/ui/liquid-background';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import openaiLogo from '@/assets/provider-logos/openai.svg';
@@ -158,11 +159,12 @@ export default function Home() {
 			<div className="fixed inset-0 z-0 pointer-events-none">
 				<EtheralShadow
 					className="w-full h-full"
-					color="rgba(139, 92, 246, 0.8)"
-					animation={{ scale: 100, speed: 85 }}
-					noise={{ opacity: 0.6, scale: 1.1 }}
+					color="rgba(139, 92, 246, 0.65)"
+					animation={{ scale: 80, speed: 75 }}
+					noise={{ opacity: 0.45, scale: 1 }}
 					sizing="fill"
 				/>
+				<LiquidBackground className="w-full h-full" opacity={0.28} speed={1.2} />
 			</div>
 
 			<LayoutGroup>
@@ -188,8 +190,10 @@ export default function Home() {
 								const query = textareaRef.current!.value;
 								handleCreateApp(query, agentMode);
 							}}
-							className="flex z-10 flex-col w-full min-h-[150px] bg-bg-4 border border-accent/30 dark:border-accent/50 dark:bg-bg-2 rounded-[18px] shadow-textarea p-5 transition-all duration-200"
+className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px] bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur supports-backdrop:backdrop-blur-md border border-accent/30 dark:border-accent/40 rounded-[18px] shadow-[0_10px_50px_-20px_rgba(139,92,246,0.35)] p-5 transition-all duration-200"
 						>
+							{/* subtle animated gradient on hover */}
+							<div className="pointer-events-none absolute -inset-px rounded-[18px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(120% 120% at 50% 0%, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.06) 40%, transparent 70%)' }} />
 							<div 
 								className={clsx(
 									"flex-1 flex flex-col relative",
@@ -261,23 +265,27 @@ export default function Home() {
 						<div className="w-full mt-6">
 							<p className="text-sm text-text-tertiary">Not sure where to start? Try one of these:</p>
 							<div className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-								{templates.map(({ title, description, icon: Icon }) => (
-									<Card key={title} className="border-accent/30 dark:border-accent/40 hover:bg-bg-3/60 transition-colors">
-										<CardHeader variant="minimal" className="flex-row items-center gap-2">
-											<div className="size-7 rounded-md bg-accent/10 text-accent flex items-center justify-center">
-												<Icon className="size-4" />
-											</div>
-											<CardTitle className="text-sm">{title}</CardTitle>
-										</CardHeader>
-										<CardContent className="pt-0">
-											<CardDescription className="text-xs">{description}</CardDescription>
-											<div className="mt-3">
-												<Button variant="ghost" size="sm" onClick={() => handleCreateApp(title, agentMode)}>
-													Use template <ArrowRight className="size-4" />
-												</Button>
-											</div>
-										</CardContent>
-									</Card>
+{templates.map(({ title, description, icon: Icon }) => (
+									<motion.div key={title} whileHover={{ y: -2, scale: 1.02 }} transition={{ type: 'spring', stiffness: 260, damping: 22 }}>
+										<Card className="group relative overflow-hidden border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md transition-colors">
+											{/* glow border */}
+											<div className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(60% 120% at 50% 0%, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.05) 60%, transparent 100%)' }} />
+											<CardHeader variant="minimal" className="flex-row items-center gap-2">
+												<div className="size-7 rounded-md bg-accent/15 text-accent/90 flex items-center justify-center ring-1 ring-accent/30">
+													<Icon className="size-4" />
+												</div>
+												<CardTitle className="text-sm">{title}</CardTitle>
+											</CardHeader>
+											<CardContent className="pt-0">
+												<CardDescription className="text-xs">{description}</CardDescription>
+												<div className="mt-3">
+													<Button variant="ghost" size="sm" onClick={() => handleCreateApp(title, agentMode)}>
+														Use template <ArrowRight className="size-4" />
+													</Button>
+												</div>
+											</CardContent>
+										</Card>
+									</motion.div>
 								))}
 							</div>
 						</div>
@@ -300,16 +308,19 @@ export default function Home() {
 				<section className="w-full max-w-6xl mx-auto px-4 z-10 mt-10">
 					<h2 className="text-2xl font-medium text-text-secondary/90">Consider yourself limitless.</h2>
 					<div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-						{features.map(({ title, description, icon: Icon }) => (
-							<Card key={title} className="border-accent/30 dark:border-accent/40">
-								<CardHeader>
-									<div className="size-8 rounded-md bg-accent/10 text-accent flex items-center justify-center mb-2">
-										<Icon className="size-4" />
-									</div>
-									<CardTitle className="text-base">{title}</CardTitle>
-									<CardDescription>{description}</CardDescription>
-								</CardHeader>
-							</Card>
+{features.map(({ title, description, icon: Icon }) => (
+							<motion.div key={title} whileHover={{ y: -2 }}>
+								<Card className="group relative overflow-hidden border-accent/30 dark:border-accent/40 bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur supports-backdrop:backdrop-blur-md">
+									<div className="pointer-events-none absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(60% 120% at 50% 0%, rgba(139,92,246,0.22) 0%, rgba(139,92,246,0.05) 60%, transparent 100%)' }} />
+									<CardHeader>
+										<div className="size-8 rounded-md bg-accent/15 text-accent/90 flex items-center justify-center mb-2 ring-1 ring-accent/30">
+											<Icon className="size-4" />
+										</div>
+										<CardTitle className="text-base">{title}</CardTitle>
+										<CardDescription>{description}</CardDescription>
+									</CardHeader>
+								</Card>
+							</motion.div>
 						))}
 					</div>
 				</section>
