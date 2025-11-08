@@ -368,7 +368,7 @@ export default function Home() {
 				{/* Templates Section */}
 				<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
 					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-6">
-						{templates.map(({ title, description, icon: Icon }) => (
+						{templates.map(({ title, icon: Icon }) => (
 							<motion.div
 								key={title}
 								initial={{ opacity: 0, y: 10 }}
