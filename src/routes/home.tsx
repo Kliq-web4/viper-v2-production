@@ -50,7 +50,37 @@ export default function Home() {
 		accept: [...SUPPORTED_IMAGE_MIME_TYPES],
 	});
 
-	const [selectedExample, setSelectedExample] = useState<number | null>(null);
+const placeholderSuffixes = useMemo(() => [
+	'build a landing page',
+	'build a game',
+	'create a dashboard',
+	'launch a blog',
+	'make a booking system',
+], []);
+const [placeholderIndex, setPlaceholderIndex] = useState(0);
+const [placeholderText, setPlaceholderText] = useState('');
+const [placeholderTyping, setPlaceholderTyping] = useState(true);
+
+useEffect(() => {
+	const phrase = placeholderSuffixes[placeholderIndex];
+	if (placeholderTyping) {
+		if (placeholderText.length < phrase.length) {
+			const t = setTimeout(() => setPlaceholderText(phrase.slice(0, placeholderText.length + 1)), 80);
+			return () => clearTimeout(t);
+		} else {
+			const t = setTimeout(() => setPlaceholderTyping(false), 1500);
+			return () => clearTimeout(t);
+		}
+	} else {
+		if (placeholderText.length > 0) {
+			const t = setTimeout(() => setPlaceholderText(placeholderText.slice(0, -1)), 40);
+			return () => clearTimeout(t);
+		} else {
+			setPlaceholderIndex((i) => (i + 1) % placeholderSuffixes.length);
+			setPlaceholderTyping(true);
+		}
+	}
+}, [placeholderText, placeholderIndex, placeholderTyping, placeholderSuffixes]);
 
 	const {
 		apps,
@@ -138,12 +168,6 @@ export default function Home() {
 		},
 	] as const;
 
-	const placeholderExamples = [
-		'create an internal tool that helps track team productivity with time tracking and project management features',
-		'build a customer feedback dashboard that collects reviews, displays ratings, and provides analytics insights',
-		'develop a task management app with kanban boards, due dates, and team collaboration features',
-		'make a booking system for appointments with calendar integration and email notifications',
-	] as const;
 
 	const features = [
 		{ 
@@ -307,12 +331,11 @@ export default function Home() {
 									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-text-secondary/50 text-text-primary bg-transparent text-base"
 									name="query"
 									value={query}
-									placeholder="Ask Kliq AI to..."
+placeholder={`Ask Kliq AI to ${placeholderText}`}
 									ref={textareaRef}
-									onChange={(e) => {
+onChange={(e) => {
 										setQuery(e.target.value);
 										adjustTextareaHeight();
-										setSelectedExample(null);
 									}}
 									onInput={adjustTextareaHeight}
 									onKeyDown={(e) => {
@@ -359,32 +382,6 @@ export default function Home() {
 							</div>
 						</form>
 						
-						{/* Example Prompts */}
-						{!query && (
-							<div className="mt-4 space-y-2">
-								{placeholderExamples.map((example, index) => (
-									<button
-										key={index}
-										type="button"
-										onClick={() => {
-											const fullPrompt = `Ask Kliq AI to ${example}`;
-											setQuery(fullPrompt);
-											setSelectedExample(index);
-											textareaRef.current?.focus();
-											adjustTextareaHeight();
-										}}
-										className={clsx(
-											"w-full text-left px-4 py-2.5 rounded-lg text-sm transition-all duration-200",
-											selectedExample === index
-												? "bg-accent/10 border border-accent/30 text-text-primary"
-												: "bg-bg-4/40 dark:bg-bg-2/40 border border-accent/10 dark:border-accent/20 text-text-secondary hover:bg-bg-4/60 dark:hover:bg-bg-2/60 hover:border-accent/20"
-										)}
-									>
-										Ask Kliq AI to {example}
-									</button>
-								))}
-							</div>
-						)}
 					</div>
 				</section>
 
