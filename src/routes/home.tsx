@@ -18,6 +18,8 @@ import { ImageAttachmentPreview } from '@/components/image-attachment-preview';
 import { SUPPORTED_IMAGE_MIME_TYPES } from '@/api-types';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
 import { LiquidBackground } from '@/components/ui/liquid-background';
+import { MarketingHeader } from '@/components/marketing/site-header';
+import { MarketingFooter } from '@/components/marketing/site-footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import openaiLogo from '@/assets/provider-logos/openai.svg';
@@ -167,6 +169,7 @@ export default function Home() {
 				<LiquidBackground className="w-full h-full" opacity={0.28} speed={1.2} />
 			</div>
 
+			<MarketingHeader onStart={() => textareaRef.current?.focus()} />
 			<LayoutGroup>
 				<div className="rounded-md w-full max-w-2xl overflow-hidden">
 					<motion.div
@@ -391,6 +394,7 @@ className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[150px
 
 			{/* Nudge towards Discover */}
 			{user && <CurvedArrow sourceRef={discoverLinkRef} target={{ x: 50, y: window.innerHeight - 60 }} />}
+			<MarketingFooter />
 		</div>
 	);
 }
