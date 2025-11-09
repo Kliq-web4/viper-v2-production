@@ -221,6 +221,48 @@ export class SandboxSdkClient extends BaseSandboxService {
     }
 
     /**
+     * Attempts to resolve a built Worker bundle path for the given instance.
+     * Tries common locations, and if not found, triggers a bundling dry-run via Wrangler
+     * to produce a bundle under dist/.
+     */
+    private async resolveWorkerBundlePath(instanceId: string): Promise<string> {
+        const session = await this.getInstanceSession(instanceId);
+        const candidates = [
+            `/workspace/${instanceId}/dist/index.js`,
+            `/workspace/${instanceId}/dist/worker.js`,
+            `/workspace/${instanceId}/dist/_worker.js`,
+        ];
+
+        // Helper to test if file exists
+        const exists = async (path: string): Promise<boolean> => {
+            const result = await session.exec(`[ -f "${path}" ] && echo exists || echo missing`);
+            return result.exitCode === 0 && result.stdout.trim() === 'exists';
+        };
+
+        for (const p of candidates) {
+            if (await exists(p)) return p;
+        }
+
+        // Try to generate a bundle via Wrangler dry-run into dist/
+        this.logger.info('No worker bundle found, running wrangler dry-run to generate one');
+        const dryRun = await this.executeCommand(instanceId, 'bun x wrangler deploy --dry-run --outdir dist');
+        if (dryRun.exitCode !== 0) {
+            this.logger.warn('Wrangler dry-run failed', dryRun.stdout, dryRun.stderr);
+        } else {
+            // Re-check candidates (worker.js commonly produced)
+            for (const p of candidates) {
+                if (await exists(p)) return p;
+            }
+        }
+
+        // Nothing found
+        throw new Error(
+            `Could not locate a built worker bundle. Looked for: ${candidates.join(', ')}. ` +
+            `Ensure your project builds a worker bundle (e.g. via Vite + @cloudflare/vite-plugin or wrangler --dry-run).`
+        );
+    }
+
+    /**
      * Invalidate session cache (call when instance is destroyed)
      */
     private invalidateSessionCache(instanceId: string): void {
@@ -1808,7 +1850,8 @@ export class SandboxSdkClient extends BaseSandboxService {
                 throw new Error(`Build failed: ${buildResult.stderr}`);
             }
             
-            const wranglerBuildResult = await this.executeCommand(instanceId, 'bunx wrangler build');
+            // Prefer using bun x to invoke wrangler for better portability
+            const wranglerBuildResult = await this.executeCommand(instanceId, 'bun x wrangler build');
             if (wranglerBuildResult.exitCode !== 0) {
                 this.logger.warn('Wrangler build failed', wranglerBuildResult.stdout, wranglerBuildResult.stderr);
                 // Continue anyway - some projects might not need wrangler build
@@ -1830,16 +1873,17 @@ export class SandboxSdkClient extends BaseSandboxService {
             this.logger.info('Worker configuration', { scriptName: config.name });
             this.logger.info('Worker compatibility', { compatibilityDate: config.compatibility_date });
             
-            // Step 3: Read worker script from dist
-            this.logger.info('Reading worker script');
+            // Step 3: Resolve worker bundle path and read script
+            this.logger.info('Resolving worker bundle');
             const session = await this.getInstanceSession(instanceId);
-            const workerFile = await session.readFile(`/workspace/${instanceId}/dist/index.js`);
+            const bundlePath = await this.resolveWorkerBundlePath(instanceId);
+            const workerFile = await session.readFile(bundlePath);
             if (!workerFile.success) {
-                throw new Error(`Worker script not found at /${instanceId}/dist/index.js. Please build the project first.`);
+                throw new Error(`Worker script not found at ${bundlePath}. Please ensure the project builds successfully.`);
             }
             
             const workerContent = workerFile.content;
-            this.logger.info('Worker script loaded', { sizeKB: (workerContent.length / 1024).toFixed(2) });
+            this.logger.info('Worker script loaded', { sizeKB: (workerContent.length / 1024).toFixed(2), bundlePath });
             
             // Step 3a: Check for additional worker modules (ESM imports)
             // Process them the same way as assets but as strings for the Map
