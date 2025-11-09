@@ -564,8 +564,8 @@ export function PhaseTimeline({
 			<motion.div
 				layout="position"
 				animate={{
-					scale: showCollapsedBar ? 0.97 : 1,
-					opacity: showCollapsedBar ? 0.85 : 1,
+					scale: showStickyBar ? 0.97 : 1,
+					opacity: showStickyBar ? 0.85 : 1,
 					transformOrigin: 'top center'
 				}}
 				transition={{
