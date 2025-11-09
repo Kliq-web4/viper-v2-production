@@ -14,6 +14,7 @@ import { Hono } from "hono";
 import { AppEnv } from "../../types/appenv";
 import { setupStatusRoutes } from './statusRoutes';
 import { setupIntegrationsRoutes } from './integrationsRoutes';
+import { setupBillingRoutes } from './billingRoutes';
 
 export function setupRoutes(app: Hono<AppEnv>): void {
     // Health check route
@@ -62,4 +63,7 @@ export function setupRoutes(app: Hono<AppEnv>): void {
 
     // Integrations routes
     setupIntegrationsRoutes(app);
+
+    // Billing routes
+    setupBillingRoutes(app);
 }

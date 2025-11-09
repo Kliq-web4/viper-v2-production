@@ -333,6 +333,18 @@ private async requestRaw<T>(
 	}
 
 	// ===============================
+	// Billing API Methods
+	// ===============================
+
+	async getBillingMe(): Promise<ApiResponse<{ plan: string; credits: number; lastDailyReset: string | null; nextMonthlyReset: string | null; billingStatus: string }>> {
+		return this.request('/api/billing/me');
+	}
+
+	async getBillingPlans(): Promise<ApiResponse<{ plans: Array<{ slug: string; name: string; monthlyCredits: number; dailyFreeCredits: number; rolloverLimit: number; resetCycleDays: number; priceUsd: number; checkoutUrl?: string | null }> }>> {
+		return this.request('/api/billing/plans');
+	}
+
+	// ===============================
 	// Apps API Methods
 	// ===============================
 

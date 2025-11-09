@@ -57,6 +57,16 @@ declare namespace Cloudflare {
 		USE_CLOUDFLARE_IMAGES: boolean;
 		CF_VERSION_METADATA: WorkerVersionMetadata;
 		ASSETS: Fetcher;
+		// Whop integration
+		WHOP_WEBHOOK_SECRET: string;
+		WHOP_PRO_PRODUCT_ID: string;
+		WHOP_BUSINESS_PRODUCT_ID: string;
+		// Alternate env names for flexibility
+		WHOP_PRO_PRICE_ID: string;
+		WHOP_BUSINESS_PRICE_ID: string;
+		// Checkout URLs for frontend buttons
+		WHOP_PRO_CHECKOUT_URL: string;
+		WHOP_BUSINESS_CHECKOUT_URL: string;
 	}
 }
 interface Env extends Cloudflare.Env {}

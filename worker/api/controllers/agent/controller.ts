@@ -65,6 +65,20 @@ export class CodingAgentController extends BaseController {
             const user = context.user!;
             // App creation rate limits disabled
 
+            // Credit check & consumption (1 credit per generation)
+            const { CreditService } = await import('../../../database/services/CreditService');
+            const { COSTS } = await import('../../../config/pricing');
+            const creditService = new CreditService(env);
+            await creditService.ensureCreditsUpToDate(user.id);
+            const cost = COSTS.startGeneration ?? 1;
+            const consume = await creditService.consumeCredits(user.id, cost);
+            if (!consume.ok) {
+                return CodingAgentController.createErrorResponse(
+                    new Error('Insufficient credits. Please upgrade your plan.'),
+                    402
+                );
+            }
+
             const agentId = generateId();
             const modelConfigService = new ModelConfigService(env);
                                 

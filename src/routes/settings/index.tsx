@@ -56,6 +56,7 @@ import {
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { ByokApiKeysModal } from '@/components/byok-api-keys-modal';
+import { BillingWidget } from '@/components/billing/BillingWidget';
 
 // Import provider logos (reusing existing pattern from BYOK modal)
 import OpenAILogo from '@/assets/provider-logos/openai.svg?react';
@@ -612,6 +613,14 @@ export default function SettingsPage() {
 							)}
 						</CardContent>
 					</Card> */}
+
+					{/* Billing Section */}
+					<Card>
+						<CardContent className="px-6 py-6">
+							{/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
+<BillingWidget />
+						</CardContent>
+					</Card>
 
 					{/* Model Configuration Section */}
 					<Card id="model-configs">

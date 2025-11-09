@@ -57,6 +57,16 @@ export class RemoteSandboxServiceClient extends BaseSandboxService{
         this.logger.info('RemoteSandboxServiceClient initialized', { sandboxId: this.sandboxId });
     }
 
+    // Queue to serialize requests
+    private requestQueue: Promise<any> = Promise.resolve();
+
+    // Helper to enqueue requests
+    private async enqueueRequest<T>(fn: () => Promise<T>): Promise<T> {
+        this.requestQueue = this.requestQueue.then(() => fn());
+        return this.requestQueue;
+    }
+
+    // Updated makeRequest with throttling + backoff
     private async makeRequest<T extends z.ZodTypeAny>(
         endpoint: string,
         method: 'GET' | 'POST' | 'DELETE',
@@ -64,54 +74,64 @@ export class RemoteSandboxServiceClient extends BaseSandboxService{
         body?: unknown,
         resetPrevious: boolean = false
     ): Promise<z.infer<T>> {
-        const url = `${RemoteSandboxServiceClient.sandboxServiceUrl}${endpoint}`;
-
-        try {
+        return this.enqueueRequest(async () => {
+            const url = `${RemoteSandboxServiceClient.sandboxServiceUrl}${endpoint}`;
             const headers = new Headers();
             headers.set('Content-Type', 'application/json');
             headers.set('Authorization', `Bearer ${RemoteSandboxServiceClient.token}`);
             headers.set('x-session-id', this.sandboxId);
-            if (resetPrevious) {
-                headers.set('x-container-action', 'reset');
+            if (resetPrevious) headers.set('x-container-action', 'reset');
+
+            let attempt = 0;
+            const maxRetries = 5;
+            let delayMs = 1000; // 1 second initial delay
+
+            while (attempt < maxRetries) {
+                try {
+                    const response = await runnerFetch(url, method, headers, body ? JSON.stringify(body) : undefined);
+
+                    if (response.status === 429) {
+                        this.logger.warn(`Rate limit hit for ${url}, retrying in ${delayMs}ms...`);
+                        await new Promise(r => setTimeout(r, delayMs));
+                        delayMs *= 2; // exponential backoff
+                        attempt++;
+                        continue;
+                    }
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        this.logger.error('Runner service request failed', { 
+                            status: response.status, statusText: response.statusText, errorText, url 
+                        });
+                        await new Promise(r => setTimeout(r, 200)); // small delay before next request
+                        return { success: false, error: errorText } as any;
+                    }
+
+                    const responseData = await response.json();
+                    if (!schema) {
+                        await new Promise(r => setTimeout(r, 200)); // small delay between requests
+                        return responseData as any;
+                    }
+
+                    const validation = schema.safeParse(responseData);
+                    if (!validation.success) {
+                        this.logger.error('Failed to validate response', validation.error.errors, { url, responseData });
+                        await new Promise(r => setTimeout(r, 200)); // small delay between requests
+                        return { success: false, error: "Failed to validate response" } as any;
+                    }
+
+                    await new Promise(r => setTimeout(r, 200)); // small delay between requests
+                    return validation.data as any;
+
+                } catch (error) {
+                    this.logger.error('Error making request to runner service', error, { url });
+                    await new Promise(r => setTimeout(r, 200)); // small delay between requests
+                    return { success: false, error: "Request failed" } as any;
+                }
             }
 
-            const response = await runnerFetch(url, method, headers, body ? JSON.stringify(body) : undefined);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                this.logger.error('Runner service request failed', { 
-                    status: response.status, 
-                    statusText: response.statusText, 
-                    errorText,
-                    url 
-                });
-                return {
-                    success: false,
-                    error: errorText
-                };
-            }
-
-            const responseData = await response.json();
-            if(!schema) return responseData;
-            const validation = schema.safeParse(responseData);
-
-            if (!validation.success) {
-                this.logger.error('Failed to validate response from runner service', validation.error.errors, { url, responseData });
-                return {
-                    success: false,
-                    error: "Failed to validate response"
-                };
-            }
-
-            // this.logger.info('Response validated', { url });
-            return validation.data;
-        } catch (error) {
-            this.logger.error('Error making request to runner service', error, { url });
-            return {
-                success: false,
-                error: "Failed to validate response"
-            };
-        }
+            return { success: false, error: "Rate limit retries exceeded" } as any;
+        });
     }
 
     /**

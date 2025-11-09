@@ -26,6 +26,15 @@ export const users = sqliteTable('users', {
     providerId: text('provider_id').notNull(),
     emailVerified: integer('email_verified', { mode: 'boolean' }).default(false),
     passwordHash: text('password_hash'), // Only for provider: 'email'
+
+    // Billing & Credits
+    planSlug: text('plan_slug').notNull().default('free'), // 'free' | 'pro' | 'business'
+    credits: integer('credits').notNull().default(0), // current balance
+    lastDailyReset: integer('last_daily_reset', { mode: 'timestamp' }), // last daily free credit reset
+    nextMonthlyReset: integer('next_monthly_reset', { mode: 'timestamp' }), // next monthly credit reset for paid plans
+    billingStatus: text('billing_status', { enum: ['none', 'active', 'past_due', 'canceled', 'trialing'] }).default('none'),
+    whopMembershipId: text('whop_membership_id'), // optional: link to Whop membership
+    whopProductId: text('whop_product_id'), // product/price id from Whop to map plan
     
     // Security enhancements
     failedLoginAttempts: integer('failed_login_attempts').default(0),
@@ -56,6 +65,7 @@ export const users = sqliteTable('users', {
     lockedUntilIdx: index('users_locked_until_idx').on(table.lockedUntil),
     isActiveIdx: index('users_is_active_idx').on(table.isActive),
     lastActiveAtIdx: index('users_last_active_at_idx').on(table.lastActiveAt),
+    planIdx: index('users_plan_idx').on(table.planSlug),
 }));
 
 /**
@@ -287,6 +297,26 @@ export const appComments = sqliteTable('app_comments', {
     appIdx: index('app_comments_app_idx').on(table.appId),
     userIdx: index('app_comments_user_idx').on(table.userId),
     parentIdx: index('app_comments_parent_idx').on(table.parentCommentId),
+}));
+
+// ========================================
+// BILLING AND CREDITS
+// ========================================
+
+/**
+ * CreditTransactions table - Track all credit adjustments for auditing
+ */
+export const creditTransactions = sqliteTable('credit_transactions', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    amount: integer('amount').notNull(), // positive for credit, negative for consumption
+    type: text('type', { enum: ['daily_free', 'monthly_reset', 'topup', 'consumption', 'adjustment'] }).notNull(),
+    reason: text('reason'),
+    metadata: text('metadata', { mode: 'json' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('credit_tx_user_idx').on(table.userId),
+    userCreatedIdx: index('credit_tx_user_created_idx').on(table.userId, table.createdAt),
 }));
 
 // ========================================
@@ -583,6 +613,9 @@ export type NewAppComment = typeof appComments.$inferInsert;
 
 export type AppView = typeof appViews.$inferSelect;
 export type NewAppView = typeof appViews.$inferInsert;
+
+export type CreditTransaction = typeof creditTransactions.$inferSelect;
+export type NewCreditTransaction = typeof creditTransactions.$inferInsert;
 
 export type OAuthState = typeof oauthStates.$inferSelect;
 export type NewOAuthState = typeof oauthStates.$inferInsert;

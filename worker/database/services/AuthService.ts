@@ -109,7 +109,7 @@ export class AuthService extends BaseService {
             // Hash password
             const passwordHash = await this.passwordService.hash(data.password);
             
-            // Create user
+// Create user
             const userId = generateId();
             const now = new Date();
             
@@ -122,6 +122,12 @@ export class AuthService extends BaseService {
                 emailVerified: true, // Set as verified immediately
                 provider: 'email',
                 providerId: userId,
+                // billing defaults
+                planSlug: 'free',
+                credits: 0,
+                lastDailyReset: null,
+                nextMonthlyReset: null,
+                billingStatus: 'none',
                 createdAt: now,
                 updatedAt: now
             });
@@ -467,7 +473,7 @@ export class AuthService extends BaseService {
             const userId = generateId();
             const now = new Date();
             
-            await this.database.insert(schema.users).values({
+await this.database.insert(schema.users).values({
                 id: userId,
                 email: oauthUserInfo.email.toLowerCase(),
                 displayName: oauthUserInfo.name || oauthUserInfo.email.split('@')[0],
@@ -475,6 +481,12 @@ export class AuthService extends BaseService {
                 emailVerified: oauthUserInfo.emailVerified || false,
                 provider: provider,
                 providerId: oauthUserInfo.id,
+                // billing defaults
+                planSlug: 'free',
+                credits: 0,
+                lastDailyReset: null,
+                nextMonthlyReset: null,
+                billingStatus: 'none',
                 createdAt: now,
                 updatedAt: now
             });
