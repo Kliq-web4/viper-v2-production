@@ -196,7 +196,7 @@ export function AppSidebar() {
 		);
 	};
 
-	if (!user) return;
+	if (!user) return null;
 
 	return (
 		<>

@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from './app-sidebar';
 import { GlobalHeader } from './global-header';
 import { AppsDataProvider } from '@/contexts/apps-data-context';
+import { useAuth } from '@/contexts/auth-context';
 import clsx from 'clsx';
 
 interface AppLayoutProps {
@@ -12,10 +13,15 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const { pathname } = useLocation();
+  const { user } = useAuth();
+  // Open the sidebar by default when authenticated (including on "/");
+  // Remount provider on auth state change so defaultOpen is reapplied.
+  const sidebarKey = `sidebar-${Boolean(user)}`;
   return (
     <AppsDataProvider>
       <SidebarProvider 
-        defaultOpen={false}
+        key={sidebarKey}
+        defaultOpen={Boolean(user)}
         style={{
           "--sidebar-width": "320px",
           "--sidebar-width-mobile": "280px",
