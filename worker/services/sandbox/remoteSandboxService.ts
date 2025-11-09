@@ -57,13 +57,15 @@ export class RemoteSandboxServiceClient extends BaseSandboxService{
         this.logger.info('RemoteSandboxServiceClient initialized', { sandboxId: this.sandboxId });
     }
 
-    // Queue to serialize requests
-    private requestQueue: Promise<any> = Promise.resolve();
+    // Global queue to serialize requests across ALL instances (prevents bursts across sessions)
+    private static requestQueue: Promise<any> = Promise.resolve();
 
-    // Helper to enqueue requests
+    // Helper to enqueue requests (keeps chain alive even after failures)
     private async enqueueRequest<T>(fn: () => Promise<T>): Promise<T> {
-        this.requestQueue = this.requestQueue.then(() => fn());
-        return this.requestQueue;
+        RemoteSandboxServiceClient.requestQueue = RemoteSandboxServiceClient.requestQueue
+            .catch(() => { /* swallow to keep chain alive */ })
+            .then(() => fn());
+        return RemoteSandboxServiceClient.requestQueue;
     }
 
     // Updated makeRequest with throttling + backoff
@@ -91,9 +93,27 @@ export class RemoteSandboxServiceClient extends BaseSandboxService{
                     const response = await runnerFetch(url, method, headers, body ? JSON.stringify(body) : undefined);
 
                     if (response.status === 429) {
-                        this.logger.warn(`Rate limit hit for ${url}, retrying in ${delayMs}ms...`);
-                        await new Promise(r => setTimeout(r, delayMs));
-                        delayMs *= 2; // exponential backoff
+                        // Respect server-provided Retry-After when available
+                        const retryAfter = response.headers.get('retry-after');
+                        let waitMs = delayMs;
+                        if (retryAfter) {
+                            const seconds = Number(retryAfter);
+                            if (!Number.isNaN(seconds)) {
+                                waitMs = Math.max(seconds * 1000, waitMs);
+                            } else {
+                                const raDate = new Date(retryAfter).getTime();
+                                if (!Number.isNaN(raDate)) {
+                                    const delta = raDate - Date.now();
+                                    if (delta > 0) waitMs = Math.max(delta, waitMs);
+                                }
+                            }
+                        }
+                        // Add a bit of jitter to avoid thundering herd
+                        const jitter = Math.floor(Math.random() * 250);
+                        waitMs += jitter;
+                        this.logger.warn(`Rate limit hit for ${url}, retrying in ${waitMs}ms... (attempt ${attempt + 1}/${maxRetries})`);
+                        await new Promise(r => setTimeout(r, waitMs));
+                        delayMs = Math.min(waitMs * 2, 30000); // exponential backoff (cap at 30s)
                         attempt++;
                         continue;
                     }
