@@ -33,8 +33,25 @@ export function isConversationalMessage(messageId: string): boolean {
         'code_reviewed',
         'generation-complete',
         'core_app_complete',
+        // Deployment lifecycle (Cloudflare + Preview)
+        'cloudflare_deployment_started',
+        'cloudflare_deployment_completed',
+        'cloudflare_deployment_error',
+        'deployment_started',
+        'deployment_completed',
+        'deployment_failed',
+        // Connection lifecycle
+        'websocket_retrying',
+        'websocket_failed',
+        'generation_stopped',
+        'generation_resumed',
     ];
     
+    // Also allow families of messages by prefix for richer, step-by-step updates
+    if (messageId.startsWith('phase_') || messageId.startsWith('cloudflare_deployment_')) {
+        return true;
+    }
+
     return conversationalIds.includes(messageId) || messageId.startsWith('conv-');
 }
 

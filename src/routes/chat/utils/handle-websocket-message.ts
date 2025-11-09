@@ -487,6 +487,8 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
 
             case 'deployment_started': {
                 setIsPreviewDeploying(true);
+                // Notify user in chat
+                sendMessage(createAIMessage('deployment_started', 'Deploying preview environment...'));
                 break;
             }
 
@@ -494,11 +496,16 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
                 setIsPreviewDeploying(false);
                 const finalPreviewURL = getPreviewUrl(message.previewURL, message.tunnelURL);
                 setPreviewUrl(finalPreviewURL);
+                // Announce in chat
+                if (finalPreviewURL) {
+                    sendMessage(createAIMessage('deployment_completed', `Preview is live: ${finalPreviewURL}`));
+                }
                 break;
             }
 
             case 'deployment_failed': {
                 toast.error(message.error);
+                sendMessage(createAIMessage('deployment_failed', `❌ Preview deployment failed: ${message.error}`));
                 break;
             }
 
