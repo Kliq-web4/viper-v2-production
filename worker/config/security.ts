@@ -6,6 +6,7 @@
 import { DEFAULT_RATE_LIMIT_SETTINGS, RateLimitSettings } from "../services/rate-limit/config";
 import { Context } from "hono";
 import { isDev } from "../utils/envs";
+import { getPreviewDomain } from "../utils/urls";
 
 // Type definitions for security configurations
 export interface CORSConfig {
@@ -61,11 +62,35 @@ export function getAllowedOrigins(env: Env): string[] {
 }
 
 export function isOriginAllowed(env: Env, origin: string): boolean {
-    const allowedOrigins = getAllowedOrigins(env);
     if (!origin) return false;
     
-    // Check against allowed origins
-    return allowedOrigins.includes(origin);
+    let url: URL;
+    try {
+        url = new URL(origin);
+    } catch {
+        return false;
+    }
+
+    const hostname = url.hostname;
+    const protocol = url.protocol;
+
+    // Allow localhost/127.0.0.1 on any port during development
+    if (isDev(env) && (hostname === 'localhost' || hostname === '127.0.0.1')) {
+        return protocol === 'http:' || protocol === 'https:';
+    }
+
+    // Allow the primary custom domain
+    if (env.CUSTOM_DOMAIN && hostname === env.CUSTOM_DOMAIN) {
+        return protocol === 'https:';
+    }
+
+    // Allow preview subdomains like https://<id>.<previewDomain>
+    const previewDomain = getPreviewDomain(env);
+    if (hostname.endsWith(`.${previewDomain}`)) {
+        return protocol === 'https:';
+    }
+
+    return false;
 }
 
 /**
