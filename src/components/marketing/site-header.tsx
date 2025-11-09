@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/navigation-menu'
 import { useNavigate } from 'react-router'
 import { useAuthGuard } from '@/hooks/useAuthGuard'
+import { useAuth } from '@/contexts/auth-context'
+import { AuthButton } from '@/components/auth/auth-button'
 
 export type MarketingHeaderProps = {
   onStart?: () => void
@@ -17,6 +19,7 @@ export type MarketingHeaderProps = {
 export function MarketingHeader({ onStart }: MarketingHeaderProps) {
   const navigate = useNavigate();
   const { requireAuth } = useAuthGuard();
+  const { isAuthenticated, user } = useAuth();
 
   const handleStart = () => {
     if (onStart) {
@@ -77,7 +80,11 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
 
             {/* Right actions */}
             <div className="flex items-center gap-2">
-              <Button variant="secondary" size="sm" onClick={handleStart}>Start Building</Button>
+              {isAuthenticated && user ? (
+                <AuthButton />
+              ) : (
+                <Button variant="secondary" size="sm" onClick={handleStart}>Start Building</Button>
+              )}
             </div>
           </div>
         </div>
