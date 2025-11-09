@@ -40,7 +40,7 @@ export class CodingAgentInterface {
         if (response && response.deploymentUrl) {
             return `Deployment successful: ${response.deploymentUrl}`;
         } else {
-            return `Failed to deploy: ${response?.workersUrl}`;
+            return `Failed to deploy: ${response?.deploymentUrl ?? 'Unknown error'}`;
         }
     }
 
