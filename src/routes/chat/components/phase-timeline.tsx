@@ -275,7 +275,6 @@ export function PhaseTimeline({
 	isThinking = false
 }: PhaseTimelineProps) {
 	const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set());
-	const [showCollapsedBar, setShowCollapsedBar] = useState(false);
 	const [isCollapsedBarExpanded, setIsCollapsedBarExpanded] = useState(false);
 	const componentRef = useRef<HTMLDivElement>(null);
 	const lastPhaseRef = useRef<HTMLDivElement>(null);
@@ -289,12 +288,17 @@ export function PhaseTimeline({
 		}
 	}, [phaseTimeline]);
 
+	// Always keep a compact status bar visible at the bottom so progress is never lost
+	const showStickyBar = useMemo(() => {
+		return (projectStages.length > 0 || phaseTimeline.length > 0);
+	}, [projectStages.length, phaseTimeline.length]);
+
 	// Reset collapsed bar expanded state when it disappears
 	useEffect(() => {
-		if (!showCollapsedBar) {
+		if (!showStickyBar) {
 			setIsCollapsedBarExpanded(false);
 		}
-	}, [showCollapsedBar]);
+	}, [showStickyBar]);
 
 	// Auto-scroll to bottom when new phases are added or thinking indicator appears
 	useEffect(() => {
@@ -302,30 +306,6 @@ export function PhaseTimeline({
 			lastPhaseRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
 		}
 	}, [phaseTimeline.length, isThinkingNext]);
-
-	// Show/hide collapsed bar when 60% of timeline card has scrolled out of view
-	useEffect(() => {
-		const parentEl = parentScrollRef?.current;
-		const timelineCard = timelineCardRef.current;
-		if (!timelineCard || !parentEl) return;
-
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				// Show collapsed bar when 30% of timeline has scrolled out of view
-				const shouldCollapse = entry.intersectionRatio < 0.7; // 70% visible = 30% scrolled out
-				const hasContent = projectStages.length > 0 || phaseTimeline.length > 0;
-				setShowCollapsedBar(shouldCollapse && hasContent);
-			},
-			{
-				root: parentEl,
-				rootMargin: '0px 0px 0px 0px', // No margin - watch the actual card
-				threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] // Granular thresholds
-			}
-		);
-
-		observer.observe(timelineCard);
-		return () => observer.disconnect();
-	}, [parentScrollRef, projectStages.length, phaseTimeline.length]);
 
 	// Get current status info for the collapsed bar
 	const collapsedBarInfo = useMemo(() => {
@@ -417,40 +397,19 @@ export function PhaseTimeline({
 
 	return (
 		<>
-			{/* Collapsed Bar with elegant compression animation and surrounding frosted area */}
+			{/* Sticky status bar at the bottom so users always see progress */}
 			<AnimatePresence>
-				{showCollapsedBar && (
+				{showStickyBar && (
 					<motion.div
-						initial={{
-							opacity: 0,
-							y: -24,
-							scaleY: 0.6,
-							transformOrigin: 'top center'
-						}}
-						animate={{
-							opacity: 1,
-							y: 0,
-							scaleY: 1,
-							transformOrigin: 'top center'
-						}}
-						exit={{
-							opacity: 0,
-							y: -16,
-							scaleY: 0.8,
-							transformOrigin: 'top center'
-						}}
-						transition={{
-							duration: 0.4,
-							ease: [0.16, 1, 0.3, 1],
-							opacity: { duration: 0.25, ease: 'easeOut' },
-							y: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
-							scaleY: { duration: 0.35, ease: [0.23, 1, 0.32, 1] }
-						}}
-						className="absolute -top-2 -left-2 -right-2 z-50 px-2 pt-4 pb-2"
+						initial={{ opacity: 0, y: 24 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: 16 }}
+						transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+						className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:w-[min(520px,90vw)] z-50 px-2 pt-2 pb-2"
 					>
 						{/* Subtle frosted glass background area */}
 						<motion.div
-							className="absolute inset-0 backdrop-blur-sm rounded-2xl bg-gradient-to-b from-white/[0.02] via-white/[0.01] to-transparent dark:from-black/[0.02] dark:via-black/[0.01] dark:to-transparent"
+							className="absolute inset-0 backdrop-blur-sm rounded-2xl bg-gradient-to-b from-white/10 via-white/5 to-white/0 dark:from-black/20 dark:via-black/10 dark:to-black/0"
 							initial={{
 								opacity: 0,
 								scaleY: 0.8,
@@ -482,7 +441,7 @@ export function PhaseTimeline({
 							transition={commonTransitions.smooth}
 						/>
 
-						{/* Main frosted panel - Hoverable and Expandable */}
+							{/* Main frosted panel - Hoverable and Expandable */}
 						<motion.div
 							className="relative bg-bg-4/95 dark:bg-bg-2/95 backdrop-blur-md border border-border-primary shadow-lg rounded-xl overflow-hidden mx-4 hover:bg-bg-3/95 dark:hover:bg-bg-1/95 transition-colors cursor-pointer group"
 							onClick={() => setIsCollapsedBarExpanded(!isCollapsedBarExpanded)}
