@@ -20,6 +20,7 @@ import { createWebSocketMessageHandler, type HandleMessageDeps } from '../utils/
 import { isConversationalMessage, addOrUpdateMessage, createUserMessage, handleRateLimitError, createAIMessage, type ChatMessage } from '../utils/message-helpers';
 import { sendWebSocketMessage } from '../utils/websocket-helpers';
 import { initialStages as defaultStages, updateStage as updateStageHelper } from '../utils/project-stage-helpers';
+import { loadSnapshot, saveSnapshot } from '../utils/state-cache';
 import type { ProjectStage } from '../utils/project-stage-helpers';
 
 
@@ -126,6 +127,22 @@ export function useChat({
 	
 	// Track whether we've completed initial state restoration to avoid disrupting active sessions
 	const [isInitialStateRestored, setIsInitialStateRestored] = useState(false);
+
+	// --- Instant UI hydration for previous chats (before WebSocket connects) ---
+	useEffect(() => {
+		if (!urlChatId || urlChatId === 'new') return;
+		const snap = loadSnapshot(urlChatId);
+		if (!snap) return;
+		try {
+			if (snap.projectStages) setProjectStages(snap.projectStages as any);
+			if (snap.phaseTimeline) setPhaseTimeline(snap.phaseTimeline as any);
+			if (typeof snap.previewUrl === 'string') setPreviewUrl(snap.previewUrl);
+			if (typeof snap.isRedeployReady === 'boolean') setIsRedeployReady(snap.isRedeployReady);
+			if (typeof snap.cloudflareDeploymentUrl === 'string') setCloudflareDeploymentUrl(snap.cloudflareDeploymentUrl);
+			// Do not set isPreviewDeploying/isGenerating flags aggressively to avoid stale spinners
+		} catch {}
+		// Do not mark initial state restored; server will reconcile after connect
+	}, [urlChatId]);
 
 	const updateStage = useCallback(
 		(stageId: ProjectStage['id'], data: Partial<Omit<ProjectStage, 'id'>>) => {
@@ -616,6 +633,21 @@ export function useChat({
 			sendMessage(createAIMessage('deployment_error', `❌ Failed to initiate deployment: ${error instanceof Error ? error.message : 'Unknown error'}\n\n🔄 You can try again.`));
 		}
 	}, [websocket, sendMessage, isDeploying, onDebugMessage]);
+
+	// Persist lightweight snapshot whenever key UI bits change (debounced)
+	useEffect(() => {
+		if (!urlChatId) return;
+		const id = setTimeout(() => {
+			saveSnapshot(urlChatId, {
+				projectStages,
+				phaseTimeline,
+				previewUrl,
+				isRedeployReady,
+				cloudflareDeploymentUrl,
+			});
+		}, 250);
+		return () => clearTimeout(id);
+	}, [urlChatId, projectStages, phaseTimeline, previewUrl, isRedeployReady, cloudflareDeploymentUrl]);
 
 	return {
 		messages,
