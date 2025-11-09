@@ -234,7 +234,12 @@ export class RemoteSandboxServiceClient extends BaseSandboxService{
      * @param credentials Optional Cloudflare deployment credentials
      */
     async deployToCloudflareWorkers(instanceId: string): Promise<DeploymentResult> {
-        return this.makeRequest(`/instances/${instanceId}/deploy`, 'POST', DeploymentResultSchema);
+        // Pass credentials to runner service if available (some deployments require explicit credentials)
+        const credentials = {
+            apiToken: (env as any).CLOUDFLARE_API_TOKEN as string | undefined,
+            accountId: (env as any).CLOUDFLARE_ACCOUNT_ID as string | undefined,
+        };
+        return this.makeRequest(`/instances/${instanceId}/deploy`, 'POST', DeploymentResultSchema, credentials);
     }
 
     /**
