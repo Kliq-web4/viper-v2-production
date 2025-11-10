@@ -66,7 +66,7 @@ export function useChat({
 }) {
 	const connectionStatus = useRef<'idle' | 'connecting' | 'connected' | 'failed' | 'retrying'>('idle');
 	const retryCount = useRef(0);
-	const maxRetries = 5;
+	const maxRetries = Number.MAX_SAFE_INTEGER;
 	const retryTimeouts = useRef<NodeJS.Timeout[]>([]);
 	// Track whether component is mounted and should attempt reconnects
 	const shouldReconnectRef = useRef(true);
@@ -83,6 +83,10 @@ export function useChat({
 	const [query, setQuery] = useState<string>();
 
 	const [websocket, setWebsocket] = useState<WebSocket>();
+	// Track last activity for heartbeat/liveness
+	const lastMessageAtRef = useRef<number>(Date.now());
+	// Track last attempted wsUrl for fast online reconnects
+	const lastWsUrlRef = useRef<string | null>(null);
 
 	const [isGeneratingBlueprint, setIsGeneratingBlueprint] = useState(false);
 	const [isBootstrapping, setIsBootstrapping] = useState(true);
@@ -250,8 +254,9 @@ export function useChat({
 			wsUrl: string,
 			{ disableGenerate = false, isRetry = false }: { disableGenerate?: boolean; isRetry?: boolean } = {},
 		) => {
-			logger.debug(`🔌 ${isRetry ? 'Retrying' : 'Attempting'} WebSocket connection (attempt ${retryCount.current + 1}/${maxRetries + 1}):`, wsUrl);
-			
+			logger.debug(`🔌 ${isRetry ? 'Retrying' : 'Attempting'} WebSocket connection (attempt ${retryCount.current + 1}):`, wsUrl);
+			// Remember last URL for reconnect on online
+			lastWsUrlRef.current = wsUrl;
 			if (!wsUrl) {
 				logger.error('❌ WebSocket URL is required');
 				return;
@@ -316,6 +321,7 @@ export function useChat({
 				});
 
 				ws.addEventListener('message', (event) => {
+					lastMessageAtRef.current = Date.now();
 					try {
 						const message: WebSocketMessage = JSON.parse(event.data);
 						handleWebSocketMessage(ws, message);
@@ -364,16 +370,8 @@ export function useChat({
 			connectionStatus.current = 'failed';
 			
 			if (retryCount.current >= maxRetries) {
-				logger.error(`💥 WebSocket connection failed permanently after ${maxRetries + 1} attempts`);
-				sendMessage(createAIMessage('websocket_failed', `🚨 Connection failed permanently after ${maxRetries + 1} attempts.\n\n❌ Reason: ${reason}\n\n🔄 Please refresh the page to try again.`));
-				
-				// Debug logging for permanent failure
-				onDebugMessage?.('error',
-					'WebSocket Connection Failed Permanently',
-					`Failed after ${maxRetries + 1} attempts. Reason: ${reason}`,
-					'WebSocket Resilience'
-				);
-				return;
+				// Cap and continue retrying indefinitely
+				retryCount.current = maxRetries;
 			}
 
 			retryCount.current++;
@@ -385,7 +383,7 @@ export function useChat({
 
 			logger.warn(`🔄 Retrying WebSocket connection in ${actualDelay / 1000}s (attempt ${retryCount.current + 1}/${maxRetries + 1})`);
 			
-			sendMessage(createAIMessage('websocket_retrying', `🔄 Connection failed. Retrying in ${Math.ceil(actualDelay / 1000)} seconds... (attempt ${retryCount.current + 1}/${maxRetries + 1})\n\n❌ Reason: ${reason}`, true));
+			sendMessage(createAIMessage('websocket_retrying', `🔄 Connection failed. Retrying in ${Math.ceil(actualDelay / 1000)} seconds... (attempt ${retryCount.current + 1})\n\n❌ Reason: ${reason}`, true));
 
 			const timeoutId = setTimeout(() => {
 				connectWithRetry(wsUrl, { disableGenerate, isRetry: true });
@@ -396,7 +394,7 @@ export function useChat({
 			// Debug logging for retry attempt
 			onDebugMessage?.('warning',
 				'WebSocket Connection Retry',
-				`Retry ${retryCount.current}/${maxRetries} in ${actualDelay / 1000}s. Reason: ${reason}`,
+				`Retry ${retryCount.current} in ${actualDelay / 1000}s. Reason: ${reason}`,
 				'WebSocket Resilience'
 			);
 		},
@@ -538,6 +536,44 @@ export function useChat({
             retryTimeouts.current = [];
         };
     }, []);
+
+	// Heartbeat to keep connection alive and detect half-open sockets
+	useEffect(() => {
+		if (!websocket) return;
+		const HEARTBEAT_INTERVAL = 25000; // 25s
+		const INACTIVITY_TIMEOUT = 60000; // 60s
+		const id = setInterval(() => {
+			try {
+				if (websocket.readyState === WebSocket.OPEN) {
+					websocket.send(JSON.stringify({ type: 'ping', ts: Date.now() }));
+					if (Date.now() - lastMessageAtRef.current > INACTIVITY_TIMEOUT) {
+						logger.warn('⏳ WebSocket inactive, forcing reconnect');
+						websocket.close();
+					}
+				}
+			} catch {}
+		}, HEARTBEAT_INTERVAL);
+		return () => clearInterval(id);
+	}, [websocket]);
+
+	// Fast reconnect when network comes back online
+	useEffect(() => {
+		const handleOnline = () => {
+			logger.info('🌐 Network online - attempting immediate reconnect');
+			if (connectionStatus.current !== 'connected' && lastWsUrlRef.current && connectWithRetry) {
+				connectWithRetry(lastWsUrlRef.current, { disableGenerate: true, isRetry: true });
+			}
+		};
+		const handleOffline = () => {
+			logger.warn('📴 Network offline - waiting to reconnect');
+		};
+		window.addEventListener('online', handleOnline);
+		window.addEventListener('offline', handleOffline);
+		return () => {
+			window.removeEventListener('online', handleOnline);
+			window.removeEventListener('offline', handleOffline);
+		};
+	}, [connectWithRetry]);
 
     // Close previous websocket on change
     useEffect(() => {
