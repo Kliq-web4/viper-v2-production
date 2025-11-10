@@ -394,6 +394,10 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             state: this.state,
             templateDetails: this.getTemplateDetails()
         });
+        // Send current agent state to enable auto-resume after reconnection
+        sendToConnection(connection, 'cf_agent_state', {
+            state: this.state
+        });
     }
 
     async ensureTemplateDetails() {

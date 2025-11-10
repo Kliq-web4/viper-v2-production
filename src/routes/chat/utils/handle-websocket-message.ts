@@ -243,7 +243,10 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
                     }
                     
                     if (state.generatedFilesMap && Object.keys(state.generatedFilesMap).length > 0) {
-                        updateStage('code', { status: 'completed' });
+                        // Only mark as completed if not actively generating
+                        if (!state.shouldBeGenerating) {
+                            updateStage('code', { status: 'completed' });
+                        }
                         if (urlChatId !== 'new') {
                             logger.debug('🚀 Requesting preview deployment for existing chat with files');
                             sendWebSocketMessage(websocket, 'preview');
@@ -251,6 +254,13 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
                     }
 
                     setIsInitialStateRestored(true);
+                }
+                
+                // Auto-resume generation if backend reports shouldBeGenerating
+                if (state.shouldBeGenerating && !isGenerating) {
+                    logger.debug('🔄 Auto-resuming generation after reconnection (agent_connected)');
+                    updateStage('code', { status: 'active' });
+                    sendWebSocketMessage(websocket, 'generate_all');
                 }
                 break;
             }
@@ -421,6 +431,13 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
                         
                         return deduplicated;
                     });
+                }
+                
+                // Auto-resume generation if backend reports shouldBeGenerating
+                if (state?.shouldBeGenerating && !isGenerating) {
+                    logger.debug('🔄 Auto-resuming generation after reconnection (conversation_state)');
+                    updateStage('code', { status: 'active' });
+                    sendWebSocketMessage(websocket, 'generate_all');
                 }
                 break;
             }
