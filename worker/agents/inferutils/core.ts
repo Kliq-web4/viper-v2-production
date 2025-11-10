@@ -588,8 +588,15 @@ export async function infer<OutputSchema extends z.AnyZodObject>({
         let response: OpenAI.ChatCompletion | OpenAI.ChatCompletionChunk | Stream<OpenAI.ChatCompletionChunk>;
         try {
             // Simple, configurable retry for provider 429 responses
-            const MAX_LLM_RETRIES = parseInt(((globalThis as any)?.process?.env?.MAX_LLM_RETRIES ?? '0') as string, 10);
-            const BASE_DELAY_MS = parseInt(((globalThis as any)?.process?.env?.LLM_RETRY_BASE_DELAY_MS ?? '300') as string, 10);
+            // Default to 3 retries if env var not set or invalid
+            const MAX_LLM_RETRIES_RAW = (globalThis as any)?.process?.env?.MAX_LLM_RETRIES;
+            const MAX_LLM_RETRIES = Number.isFinite(parseInt(MAX_LLM_RETRIES_RAW as string, 10))
+                ? parseInt(MAX_LLM_RETRIES_RAW as string, 10)
+                : 3;
+            const BASE_DELAY_MS_RAW = (globalThis as any)?.process?.env?.LLM_RETRY_BASE_DELAY_MS;
+            const BASE_DELAY_MS = Number.isFinite(parseInt(BASE_DELAY_MS_RAW as string, 10))
+                ? parseInt(BASE_DELAY_MS_RAW as string, 10)
+                : 300;
 
             let attempt = 0;
             while (true) {
@@ -627,7 +634,7 @@ export async function infer<OutputSchema extends z.AnyZodObject>({
                     const msg = typeof e === 'string' ? e : (e as Error)?.message || '';
                     const is429 = msg.includes('429') || msg.toLowerCase().includes('rate limit');
                     if (is429 && attempt < MAX_LLM_RETRIES) {
-                        const delay = BASE_DELAY_MS * Math.pow(2, attempt) + Math.floor(Math.random() * 100);
+                        const delay = BASE_DELAY_MS * Math.pow(2, attempt) + Math.floor(Math.random() * 250);
                         console.warn(`LLM provider returned 429; retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_LLM_RETRIES})`);
                         await new Promise(res => setTimeout(res, delay));
                         attempt++;
