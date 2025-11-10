@@ -477,8 +477,11 @@ export async function infer<OutputSchema extends z.AnyZodObject>({
     format?: SchemaFormat;
     formatOptions?: FormatterOptions;
 }, toolCallContext?: ToolCallContext): Promise<InferResponseObject<OutputSchema> | InferResponseString> {
-    if (messages.length > MAX_LLM_MESSAGES) {
-        throw new RateLimitExceededError(`Message limit exceeded: ${messages.length} messages (max: ${MAX_LLM_MESSAGES}). Please use context compactification.`, RateLimitType.LLM_CALLS);
+    // Allow overriding or disabling the message limit via env (.dev.vars)
+    const MAX_LLM_MESSAGES_OVERRIDE = parseInt(((globalThis as any)?.process?.env?.MAX_LLM_MESSAGES ?? '') as string, 10);
+    const EFFECTIVE_MAX_LLM_MESSAGES = Number.isFinite(MAX_LLM_MESSAGES_OVERRIDE) ? MAX_LLM_MESSAGES_OVERRIDE : MAX_LLM_MESSAGES;
+    if (EFFECTIVE_MAX_LLM_MESSAGES > 0 && messages.length > EFFECTIVE_MAX_LLM_MESSAGES) {
+        throw new RateLimitExceededError(`Message limit exceeded: ${messages.length} messages (max: ${EFFECTIVE_MAX_LLM_MESSAGES}). Please use context compactification.`, RateLimitType.LLM_CALLS);
     }
     
     // Check tool calling depth to prevent infinite recursion
@@ -584,40 +587,59 @@ export async function infer<OutputSchema extends z.AnyZodObject>({
         const toolsOpts = tools ? { tools, tool_choice: 'auto' as const } : {};
         let response: OpenAI.ChatCompletion | OpenAI.ChatCompletionChunk | Stream<OpenAI.ChatCompletionChunk>;
         try {
-            // Call OpenAI API with proper structured output format
-            response = await client.chat.completions.create({
-                ...schemaObj,
-                ...extraBody,
-                ...toolsOpts,
-                model: modelName,
-                messages: messagesToPass as OpenAI.ChatCompletionMessageParam[],
-                max_completion_tokens: maxTokens || 150000,
-                stream: stream ? true : false,
-                reasoning_effort,
-                temperature,
-            }, {
-                signal: abortSignal,
-                headers: {
-                    "cf-aig-metadata": JSON.stringify({
-                        chatId: metadata.agentId,
-                        userId: metadata.userId,
-                        schemaName,
-                        actionKey,
-                    })
+            // Simple, configurable retry for provider 429 responses
+            const MAX_LLM_RETRIES = parseInt(((globalThis as any)?.process?.env?.MAX_LLM_RETRIES ?? '0') as string, 10);
+            const BASE_DELAY_MS = parseInt(((globalThis as any)?.process?.env?.LLM_RETRY_BASE_DELAY_MS ?? '300') as string, 10);
+
+            let attempt = 0;
+            while (true) {
+                try {
+                    // Call OpenAI API with proper structured output format
+                    response = await client.chat.completions.create({
+                        ...schemaObj,
+                        ...extraBody,
+                        ...toolsOpts,
+                        model: modelName,
+                        messages: messagesToPass as OpenAI.ChatCompletionMessageParam[],
+                        max_completion_tokens: maxTokens || 150000,
+                        stream: stream ? true : false,
+                        reasoning_effort,
+                        temperature,
+                    }, {
+                        signal: abortSignal,
+                        headers: {
+                            "cf-aig-metadata": JSON.stringify({
+                                chatId: metadata.agentId,
+                                userId: metadata.userId,
+                                schemaName,
+                                actionKey,
+                            })
+                        }
+                    });
+                    console.log(`Inference response received`);
+                    break; // success
+                } catch (e) {
+                    // Check if aborted
+                    if (e instanceof Error && (e.name === 'AbortError' || e.message?.includes('aborted') || e.message?.includes('abort'))) {
+                        console.log('Inference cancelled by user');
+                        throw new AbortError('**User cancelled inference**', toolCallContext);
+                    }
+                    const msg = typeof e === 'string' ? e : (e as Error)?.message || '';
+                    const is429 = msg.includes('429') || msg.toLowerCase().includes('rate limit');
+                    if (is429 && attempt < MAX_LLM_RETRIES) {
+                        const delay = BASE_DELAY_MS * Math.pow(2, attempt) + Math.floor(Math.random() * 100);
+                        console.warn(`LLM provider returned 429; retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_LLM_RETRIES})`);
+                        await new Promise(res => setTimeout(res, delay));
+                        attempt++;
+                        continue;
+                    }
+                    // Propagate as a generic error instead of RateLimitExceededError to avoid internal rate-limit handling
+                    console.error(`Failed to get inference response from OpenAI: ${msg}`);
+                    throw (e instanceof Error ? e : new Error(String(e)));
                 }
-            });
-            console.log(`Inference response received`);
+            }
         } catch (error) {
-            // Check if error is due to abort
-            if (error instanceof Error && (error.name === 'AbortError' || error.message?.includes('aborted') || error.message?.includes('abort'))) {
-                console.log('Inference cancelled by user');
-                throw new AbortError('**User cancelled inference**', toolCallContext);
-            }
-            
-            console.error(`Failed to get inference response from OpenAI: ${error}`);
-            if ((error instanceof Error && error.message.includes('429')) || (typeof error === 'string' && error.includes('429'))) {
-                throw new RateLimitExceededError('Rate limit exceeded in LLM calls, Please try again later', RateLimitType.LLM_CALLS);
-            }
+            // Already handled abort and retries above; just rethrow
             throw error;
         }
         let toolCalls: ChatCompletionMessageFunctionToolCall[] = [];
