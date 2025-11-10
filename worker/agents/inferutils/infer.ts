@@ -101,6 +101,7 @@ export async function executeInference<T extends z.AnyZodObject>(   {
     const backoffMs = (attempt: number) => Math.min(500 * Math.pow(2, attempt), 10000);
 
     let useCheaperModel = false;
+    let lastError: unknown = null;
 
     for (let attempt = 0; attempt < retryLimit; attempt++) {
         try {
@@ -141,6 +142,7 @@ export async function executeInference<T extends z.AnyZodObject>(   {
             // console.log(result);
             return result;
         } catch (error) {
+            lastError = error;
             if (error instanceof RateLimitExceededError || error instanceof SecurityError) {
                 throw error;
             }
@@ -177,7 +179,9 @@ export async function executeInference<T extends z.AnyZodObject>(   {
             }
         }
     }
-    return null;
+    // If we exhausted all retries, throw a clear error instead of returning null
+    const lastMsg = lastError instanceof Error ? lastError.message : String(lastError);
+    throw new Error(`Inference failed for ${agentActionName} after ${retryLimit} attempt(s): ${lastMsg}`);
 }
 
 /**
