@@ -434,7 +434,8 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
                 }
                 
                 // Auto-resume generation if backend reports shouldBeGenerating
-                if (state?.shouldBeGenerating && !isGenerating) {
+                const maybeShouldGenerate = (state as any)?.shouldBeGenerating;
+                if (maybeShouldGenerate && !isGenerating) {
                     logger.debug('🔄 Auto-resuming generation after reconnection (conversation_state)');
                     updateStage('code', { status: 'active' });
                     sendWebSocketMessage(websocket, 'generate_all');
