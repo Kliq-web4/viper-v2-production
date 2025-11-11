@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-import { getCORSConfig, getSecureHeadersConfig } from './config/security';
+import { getSecureHeadersConfig } from './config/security';
 import { AppEnv } from './types/appenv';
 import { setupRoutes } from './api/routes';
 import { getGlobalConfigurableSettings } from './config';
@@ -26,7 +26,26 @@ export function createApp(env: Env): Hono<AppEnv> {
     });
     
     // CORS configuration
-    app.use('/api/*', cors(getCORSConfig(env)));
+    app.use('*', cors({
+      origin: (origin) => {
+        try {
+          // Parse the origin URL
+          const url = new URL(origin);
+          
+          // Allow the main domain or any subdomain
+          if (url.hostname === 'web4.sbs' || url.hostname.endsWith('.web4.sbs')) {
+            return origin;
+          }
+        } catch (e) {
+          // Invalid origin, ignore
+        }
+        // Block all other origins
+        return null;
+      },
+      allowHeaders: ['Content-Type', 'Authorization', 'Baggage', 'Sentry-Trace'],
+      allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      credentials: true,
+    }));
 
     app.use('/api/*', async (c, next) => {
         // Apply global config middleware
