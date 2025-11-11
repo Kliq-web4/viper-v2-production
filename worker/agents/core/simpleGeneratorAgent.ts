@@ -401,8 +401,12 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         sendToConnection(connection, 'cf_agent_state', {
             state: this.state
         });
+<<<<<<< HEAD
         // Start heartbeat to prevent Cloudflare proxy from closing idle WebSocket connections
         // This is critical for long-running code generation tasks
+=======
+        // Start heartbeat once there is at least one active connection
+>>>>>>> 164cebfd6e9762570d018d0ceeaf99d34bcc2bd0
         this.startHeartbeat();
     }
 
