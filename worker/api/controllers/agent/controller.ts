@@ -75,39 +75,57 @@ export class CodingAgentController extends BaseController {
             const user = context.user!;
             // App creation rate limits disabled
 
-            // Credit check & consumption (1 credit per generation)
-            const { CreditService } = await import('../../../database/services/CreditService');
-            const { COSTS } = await import('../../../config/pricing');
-            const creditService = new CreditService(env);
-            await creditService.ensureCreditsUpToDate(user.id);
-            const cost = COSTS.startGeneration ?? 1;
-            const consume = await creditService.consumeCredits(user.id, cost);
-            if (!consume.ok) {
-                return CodingAgentController.createErrorResponse(
-                    new Error('Insufficient credits. Please upgrade your plan.'),
-                    402
-                );
+            // Credit check & consumption (1 credit per generation) - non-fatal on DB issues
+            try {
+                const { CreditService } = await import('../../../database/services/CreditService');
+                const { COSTS } = await import('../../../config/pricing');
+                const creditService = new CreditService(env);
+                await creditService.ensureCreditsUpToDate(user.id);
+                const cost = COSTS.startGeneration ?? 1;
+                const consume = await creditService.consumeCredits(user.id, cost);
+                if (!consume.ok) {
+                    return CodingAgentController.createErrorResponse(
+                        new Error('Insufficient credits. Please upgrade your plan.'),
+                        402
+                    );
+                }
+            } catch (e) {
+                // Log and continue (likely D1 not ready); do not block code generation
+                CodingAgentController.logger.warn('Credit system unavailable, skipping credit enforcement', e);
             }
 
             const agentId = generateId();
             const modelConfigService = new ModelConfigService(env);
-                                
-            // Fetch all user model configs, api keys and agent instance at once
-            const [userConfigsRecord, agentInstance] = await Promise.all([
-                modelConfigService.getUserModelConfigs(user.id),
-                getAgentStub(env, agentId)
-            ]);
-                                
+
+            // Fetch user model configs safely (fallback to defaults if DB not available)
+            let userConfigsRecord: Record<string, any> = {};
+            let agentInstance: any;
+            try {
+                const results = await Promise.all([
+                    modelConfigService.getUserModelConfigs(user.id).catch((e) => {
+                        CodingAgentController.logger.warn('ModelConfigService unavailable, using defaults', e);
+                        return {} as Record<string, any>;
+                    }),
+                    getAgentStub(env, agentId),
+                ]);
+                userConfigsRecord = results[0] || {};
+                agentInstance = results[1] as any;
+            } catch (e) {
+                // If agent fetch worked but configs failed unexpectedly, keep going with empty overrides
+                CodingAgentController.logger.warn('Proceeding without user model config overrides', e);
+                agentInstance = await getAgentStub(env, agentId);
+            }
+
             // Convert Record to Map and extract only ModelConfig properties
             const userModelConfigs = new Map();
             for (const [actionKey, mergedConfig] of Object.entries(userConfigsRecord)) {
-                if (mergedConfig.isUserOverride) {
+                if ((mergedConfig as any).isUserOverride) {
                     const modelConfig: ModelConfig = {
-                        name: mergedConfig.name,
-                        max_tokens: mergedConfig.max_tokens,
-                        temperature: mergedConfig.temperature,
-                        reasoning_effort: mergedConfig.reasoning_effort,
-                        fallbackModel: mergedConfig.fallbackModel
+                        name: (mergedConfig as any).name,
+                        max_tokens: (mergedConfig as any).max_tokens,
+                        temperature: (mergedConfig as any).temperature,
+                        reasoning_effort: (mergedConfig as any).reasoning_effort,
+                        fallbackModel: (mergedConfig as any).fallbackModel
                     };
                     userModelConfigs.set(actionKey, modelConfig);
                 }
