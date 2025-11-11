@@ -129,7 +129,14 @@ const worker = {
 		const url = new URL(request.url);
 		const { hostname, pathname } = url;
 
-		// 2. Security: Immediately reject any requests made via an IP address.
+		// 2. Redirect www.web4.sbs to web4.sbs (remove www subdomain)
+		if (hostname === 'www.web4.sbs') {
+			const redirectUrl = new URL(request.url);
+			redirectUrl.hostname = 'web4.sbs';
+			return Response.redirect(redirectUrl.toString(), 301);
+		}
+
+		// 3. Security: Immediately reject any requests made via an IP address.
 		const ipRegex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
 		if (ipRegex.test(hostname)) {
 			return new Response('Access denied. Please use the assigned domain name.', { status: 403 });
