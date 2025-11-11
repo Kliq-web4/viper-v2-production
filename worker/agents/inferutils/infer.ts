@@ -135,7 +135,7 @@ export async function executeInference(
     schema?: z.AnyZodObject;
   }
 ): Promise<{ object: unknown } | { string: string }> {
-  const modelName = (args.modelName ?? args.modelConfig?.name ?? AGENT_CONFIG[args.agentActionName]?.name ?? 'openai/gpt-5-mini') as string;
+  const modelName = (args.modelName ?? args.modelConfig?.name ?? AGENT_CONFIG[args.agentActionName]?.name ?? 'openai/o4-mini') as string;
 
   const result = await infer({
     operationId: args.agentActionName,
