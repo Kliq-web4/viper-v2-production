@@ -393,17 +393,37 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     onConnect(connection: Connection, ctx: ConnectionContext) {
         this.logger().info(`Agent connected for agent ${this.getAgentId()}`, { connection, ctx });
-        sendToConnection(connection, 'agent_connected', {
-            state: this.state,
-            templateDetails: this.getTemplateDetails()
-        });
-        // Send current agent state to enable auto-resume after reconnection
-        sendToConnection(connection, 'cf_agent_state', {
-            state: this.state
-        });
-        // Start heartbeat to prevent Cloudflare proxy from closing idle WebSocket connections
-        // This is critical for long-running code generation tasks
+        // Start heartbeat early to keep the socket alive while we finish initialization
         this.startHeartbeat();
+
+        // Defer template-dependent payloads until initialization completes to avoid race conditions
+        (async () => {
+            try {
+                // Wait until template details are available or template name is set by initialize()
+                const start = Date.now();
+                const timeoutMs = 15000; // 15s max wait
+                while (!this.templateDetailsCache && (!this.state.templateName || this.state.templateName.length === 0)) {
+                    await new Promise((r) => setTimeout(r, 50));
+                    if (Date.now() - start > timeoutMs) break;
+                }
+
+                // Ensure template details are loaded before notifying the client
+                const templateDetails = await this.ensureTemplateDetails();
+
+                sendToConnection(connection, 'agent_connected', {
+                    state: this.state,
+                    templateDetails,
+                });
+
+                // Send current agent state to enable auto-resume after reconnection
+                sendToConnection(connection, 'cf_agent_state', {
+                    state: this.state
+                });
+            } catch (error) {
+                this.logger().error('Failed during onConnect initialization', error);
+                // Keep the connection open; will proceed once initialization completes
+            }
+        })();
     }
 
     async ensureTemplateDetails() {
