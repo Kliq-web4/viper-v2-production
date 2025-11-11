@@ -130,13 +130,9 @@
 	],
     "routes": [
         {
-            "pattern": "web4.sbs/*",
+            "pattern": "web4.sbs",
             "zone_id": "f481a370822f702e7b36a915151800b0"
         },
-        {
-            "pattern": "*.web4.sbs/*",
-            "zone_id": "f481a370822f702e7b36a915151800b0"
-        }
     ],
     "vars": {
         "TEMPLATES_REPOSITORY": "https://github.com/cloudflare/vibesdk-templates",
