@@ -261,8 +261,10 @@ async function runProviderInference<T extends z.AnyZodObject | undefined>(
     baseURL: 'https://api.openai.com/v1',
   });
 
+  // OpenAI Chat Completions expects a provider-less model id (e.g., "o4-mini")
+  const openaiModel = modelName.includes('/') ? modelName.split('/')[1] : modelName;
   const payload: any = {
-    model: modelName,
+    model: openaiModel,
     messages: messages as any,
     max_tokens: maxTokens,
     temperature,

@@ -594,11 +594,13 @@ export async function infer<OutputSchema extends z.AnyZodObject>({
             while (true) {
                 try {
                     // Call OpenAI API with proper structured output format
+                    // OpenAI Chat Completions expects a provider-less model id (e.g., "o4-mini")
+                    const openaiModel = modelName.includes('/') ? modelName.split('/')[1] : modelName;
                     response = await client.chat.completions.create({
                         ...schemaObj,
                         ...extraBody,
                         ...toolsOpts,
-                        model: modelName,
+                        model: openaiModel,
                         messages: messagesToPass as OpenAI.ChatCompletionMessageParam[],
                         max_completion_tokens: maxTokens || 150000,
                         stream: stream ? true : false,
