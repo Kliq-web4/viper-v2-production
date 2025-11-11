@@ -282,7 +282,20 @@ export class CodingAgentController extends BaseController {
 
                 // Construct WebSocket URL
                 const url = new URL(request.url);
-                const websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws`;
+                let websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws`;
+
+                // Issue a short-lived, single-use token for WS auth and append as query param
+                try {
+                    const { WebSocketTokenService } = await import('../../../services/auth/WebSocketTokenService');
+                    const wsTokenService = new WebSocketTokenService(env);
+                    const userId = context.user!.id;
+                    const token = await wsTokenService.issue(userId, agentId, 90); // 90s TTL
+                    const u = new URL(websocketUrl);
+                    u.searchParams.set('token', token);
+                    websocketUrl = u.toString();
+                } catch (tokenErr) {
+                    CodingAgentController.logger.warn('Failed to issue WS auth token, proceeding without it', tokenErr);
+                }
 
                 const responseData: AgentConnectionData = {
                     websocketUrl,

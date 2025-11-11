@@ -144,19 +144,50 @@ export async function enforceAuthRequirement(c: Context<AppEnv>) : Promise<Respo
     
     // Only perform auth if we need it or don't have user yet
     if (!user && (requirement.level === 'authenticated' || requirement.level === 'owner-only')) {
-        const userSession = await authMiddleware(c.req.raw, c.env);
-        if (!userSession) {
-            return errorResponse('Authentication required', 401);
+        // Special handling for WebSocket upgrades with one-time token
+        const upgradeHeader = c.req.header('upgrade');
+        if (upgradeHeader?.toLowerCase() === 'websocket') {
+            try {
+                const url = new URL(c.req.url);
+                const token = url.searchParams.get('token');
+                const params = c.req.param();
+                const agentId = params.agentId || params.id;
+                if (token && agentId) {
+                    const { WebSocketTokenService } = await import('../../services/auth/WebSocketTokenService');
+                    const wsTokenService = new WebSocketTokenService(c.env);
+                    const result = await wsTokenService.validateAndConsume(token, agentId);
+                    if (result.valid && result.userId) {
+                        // Minimal user context – sufficient for ownership checks
+                        user = { id: result.userId, email: 'ws-token@local', isAnonymous: false } as AuthUser;
+                        c.set('user', user);
+                        c.set('sessionId', `ws-${agentId}`);
+                        Sentry.setUser({ id: user.id, email: user.email });
+
+                        const config = await getUserConfigurableSettings(c.env, user.id);
+                        c.set('config', config);
+                    }
+                }
+            } catch (e) {
+                logger.warn('WS token validation failed', e);
+            }
         }
-        user = userSession.user;
-        c.set('user', user);
-		c.set('sessionId', userSession.sessionId);
-		Sentry.setUser({ id: user.id, email: user.email });
 
-        const config = await getUserConfigurableSettings(c.env, user.id);
-        c.set('config', config);
+        // Fallback to regular auth (Authorization header/cookies) if still no user
+        if (!user) {
+            const userSession = await authMiddleware(c.req.raw, c.env);
+            if (!userSession) {
+                return errorResponse('Authentication required', 401);
+            }
+            user = userSession.user;
+            c.set('user', user);
+            c.set('sessionId', userSession.sessionId);
+            Sentry.setUser({ id: user.id, email: user.email });
 
-        // Auth rate limits disabled
+            const config = await getUserConfigurableSettings(c.env, user.id);
+            c.set('config', config);
+
+            // Auth rate limits disabled
+        }
     }
     
     const params = c.req.param();
