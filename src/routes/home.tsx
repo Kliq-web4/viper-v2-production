@@ -305,7 +305,7 @@ useEffect(() => {
 					</div>
 
 					{/* Main Input Area */}
-					<div className="max-w-3xl mx-auto mt-8">
+					<div className="max-w-3xl mx-auto mt-8 md:mt-12">
 						<form
 							method="POST"
 							onSubmit={(e) => {
@@ -313,7 +313,7 @@ useEffect(() => {
 								const query = textareaRef.current!.value;
 								handleCreateApp(query, agentMode);
 							}}
-							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[120px] bg-bg-4/60 dark:bg-bg-2/60 backdrop-blur-xl supports-backdrop:backdrop-blur-xl border border-accent/20 dark:border-accent/30 rounded-2xl shadow-lg p-4 transition-all duration-200 hover:shadow-xl"
+							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[120px] bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl border-2 border-accent/20 dark:border-accent/30 rounded-2xl shadow-xl shadow-accent/10 p-5 md:p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-accent/15 hover:border-accent/30 dark:hover:border-accent/40 focus-within:border-accent/40 dark:focus-within:border-accent/50"
 						>
 							<div 
 								className={clsx(
@@ -374,7 +374,7 @@ onChange={(e) => {
 									<button
 										type="submit"
 										disabled={!query.trim()}
-										className="bg-accent text-white p-1 rounded-md *:size-5 transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+										className="bg-gradient-to-b from-accent to-accent/90 text-white p-2 rounded-lg *:size-5 transition-all duration-200 hover:shadow-lg hover:shadow-accent/30 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border border-accent/20"
 									>
 										<ArrowRight />
 									</button>
@@ -383,15 +383,15 @@ onChange={(e) => {
 						</form>
 
 						{/* External CTA */}
-						<div className="mt-4 flex justify-center">
+						<div className="mt-6 flex justify-center">
 							<a
 								href="http://www.kliqonline.com"
 								target="_blank"
 								rel="noopener noreferrer"
-								className="group relative inline-flex items-center gap-2 rounded-full border border-accent/30 bg-bg-4/40 dark:bg-bg-2/40 px-4 py-2 text-sm text-text-primary hover:bg-accent/10 transition-colors backdrop-blur supports-backdrop:backdrop-blur-sm"
+								className="group relative inline-flex items-center gap-2.5 rounded-full border-2 border-accent/30 bg-bg-4/60 dark:bg-bg-2/60 px-5 py-2.5 text-sm font-semibold text-text-primary hover:bg-accent/10 hover:border-accent/50 transition-all duration-200 backdrop-blur-md supports-backdrop:backdrop-blur-md shadow-lg hover:shadow-xl hover:scale-105"
 							>
-								<span className="font-medium">Explore Our Kliq AI x Web4 Playground</span>
-								<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+								<span className="font-semibold">Explore Our Kliq AI x Web4 Playground</span>
+								<ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
 								<span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-white/10" />
 							</a>
 						</div>
@@ -400,8 +400,8 @@ onChange={(e) => {
 				</section>
 
 				{/* Templates Section */}
-				<section id="templates" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-6">
+				<section id="templates" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-5 lg:gap-6">
 						{templates.map(({ title, icon: Icon, prompt }) => (
 							<motion.div
 								key={title}
@@ -413,23 +413,23 @@ onChange={(e) => {
 								className="h-full"
 							>
 								<Card 
-									className="h-full group relative overflow-hidden border border-accent/10 dark:border-accent/20 bg-bg-4/40 dark:bg-bg-2/40 backdrop-blur supports-backdrop:backdrop-blur-md hover:bg-bg-4/60 dark:hover:bg-bg-2/60 transition-all duration-200 cursor-pointer hover:border-accent/30"
+									className="h-full group relative overflow-hidden border-2 border-accent/15 dark:border-accent/25 bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur-lg supports-backdrop:backdrop-blur-lg hover:bg-bg-4/90 dark:hover:bg-bg-2/90 transition-all duration-300 cursor-pointer hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1"
 									onClick={() => handleCreateApp(prompt, agentMode)}
 									role="button"
 									tabIndex={0}
 									onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCreateApp(prompt, agentMode)}
 									aria-label={`${title} template`}
 								>
-									<div className="absolute top-2 left-2 z-10">
-										<Badge variant="secondary">Template</Badge>
+									<div className="absolute top-2.5 left-2.5 z-10">
+										<Badge variant="outline" className="text-[10px] px-2 py-0.5">Template</Badge>
 									</div>
-									<CardHeader className="pb-3">
+									<CardHeader className="pb-4 pt-12">
 										<div className="flex flex-col items-center text-center gap-3">
-											<div className="size-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-												<Icon className="size-5" />
+											<div className="size-12 md:size-14 rounded-xl bg-gradient-to-br from-accent/20 to-accent/30 text-accent flex items-center justify-center group-hover:from-accent/30 group-hover:to-accent/40 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent/10 ring-2 ring-accent/10 group-hover:ring-accent/20">
+												<Icon className="size-6 md:size-7" />
 											</div>
-											<CardTitle className="text-sm font-medium">{title}</CardTitle>
-											<div className="text-[11px] text-text-tertiary">Click to start from this template</div>
+											<CardTitle className="text-sm md:text-base font-semibold group-hover:text-accent transition-colors">{title}</CardTitle>
+											<div className="text-[10px] md:text-[11px] text-text-tertiary">Click to start</div>
 										</div>
 									</CardHeader>
 								</Card>
@@ -467,7 +467,7 @@ onChange={(e) => {
 						<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-text-primary">Consider yourself limitless.</h2>
 						<p className="text-lg md:text-xl text-text-secondary">If you can describe it, you can build it.</p>
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 						{features.map(({ title, description, icon: Icon }) => (
 							<motion.div 
 								key={title} 
@@ -477,14 +477,14 @@ onChange={(e) => {
 								transition={{ duration: 0.5 }}
 								whileHover={{ y: -8, scale: 1.02 }}
 							>
-								<Card className="group relative overflow-hidden border-2 border-accent/20 dark:border-accent/30 bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-300 h-full">
-									<div className="pointer-events-none absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(139,92,246,0.2) 0%, rgba(139,92,246,0.08) 50%, transparent 100%)' }} />
-									<CardHeader className="pb-6">
-										<div className="size-14 rounded-2xl bg-gradient-to-br from-accent/25 to-accent/45 text-accent flex items-center justify-center mb-6 ring-2 ring-accent/20 shadow-lg group-hover:scale-110 group-hover:ring-accent/40 transition-all duration-300">
-											<Icon className="size-7" />
+								<Card className="group relative overflow-hidden border-2 border-accent/15 dark:border-accent/25 bg-gradient-to-b from-bg-4/90 to-bg-4/70 dark:from-bg-2/90 dark:to-bg-2/70 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-xl hover:shadow-2xl hover:shadow-accent/10 transition-all duration-300 h-full">
+									<div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 50%, transparent 100%)' }} />
+									<CardHeader className="pb-6 relative z-10">
+										<div className="size-16 rounded-2xl bg-gradient-to-br from-accent/25 to-accent/40 text-accent flex items-center justify-center mb-6 ring-2 ring-accent/20 shadow-xl shadow-accent/20 group-hover:scale-110 group-hover:ring-accent/40 group-hover:shadow-accent/30 transition-all duration-300">
+											<Icon className="size-8" />
 										</div>
-										<CardTitle className="text-2xl font-bold mb-4 group-hover:text-accent transition-colors">{title}</CardTitle>
-										<CardDescription className="text-base text-text-secondary leading-relaxed">{description}</CardDescription>
+										<CardTitle className="text-xl md:text-2xl font-bold mb-4 group-hover:text-accent transition-colors">{title}</CardTitle>
+										<CardDescription className="text-sm md:text-base text-text-secondary leading-relaxed">{description}</CardDescription>
 									</CardHeader>
 								</Card>
 							</motion.div>
@@ -536,40 +536,40 @@ onChange={(e) => {
 						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">Pricing plans for every need</h2>
 						<p className="text-lg text-text-secondary">Scale as you go with plans designed to match your growth.</p>
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-						<Card className="border-2 border-accent/20 dark:border-accent/30 bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+						<Card className="border-2 border-accent/15 dark:border-accent/25 bg-bg-4/90 dark:bg-bg-2/90 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-xl hover:shadow-2xl hover:border-accent/25 dark:hover:border-accent/35 transition-all duration-300">
 							<CardHeader className="pb-6">
-								<CardTitle className="text-2xl md:text-3xl mb-2 font-bold">Start for free.</CardTitle>
-								<CardDescription className="text-base">Get access to:</CardDescription>
+								<CardTitle className="text-2xl md:text-3xl mb-3 font-bold">Start for free.</CardTitle>
+								<CardDescription className="text-base text-text-secondary">Get access to:</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<ul className="space-y-4 mb-8">
-									<li className="flex items-center gap-3 text-base text-text-secondary">
-										<div className="size-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-											<Check className="size-3.5 text-accent" />
+									<li className="flex items-center gap-3 text-sm md:text-base text-text-secondary">
+										<div className="size-6 rounded-full bg-gradient-to-br from-accent/20 to-accent/30 flex items-center justify-center flex-shrink-0 ring-2 ring-accent/10">
+											<Check className="size-4 text-accent font-bold" />
 										</div>
 										All core features
 									</li>
-									<li className="flex items-center gap-3 text-base text-text-secondary">
-										<div className="size-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-											<Check className="size-3.5 text-accent" />
+									<li className="flex items-center gap-3 text-sm md:text-base text-text-secondary">
+										<div className="size-6 rounded-full bg-gradient-to-br from-accent/20 to-accent/30 flex items-center justify-center flex-shrink-0 ring-2 ring-accent/10">
+											<Check className="size-4 text-accent font-bold" />
 										</div>
 										Built-in integrations
 									</li>
-									<li className="flex items-center gap-3 text-base text-text-secondary">
-										<div className="size-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-											<Check className="size-3.5 text-accent" />
+									<li className="flex items-center gap-3 text-sm md:text-base text-text-secondary">
+										<div className="size-6 rounded-full bg-gradient-to-br from-accent/20 to-accent/30 flex items-center justify-center flex-shrink-0 ring-2 ring-accent/10">
+											<Check className="size-4 text-accent font-bold" />
 										</div>
 										Authentication system
 									</li>
-									<li className="flex items-center gap-3 text-base text-text-secondary">
-										<div className="size-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-											<Check className="size-3.5 text-accent" />
+									<li className="flex items-center gap-3 text-sm md:text-base text-text-secondary">
+										<div className="size-6 rounded-full bg-gradient-to-br from-accent/20 to-accent/30 flex items-center justify-center flex-shrink-0 ring-2 ring-accent/10">
+											<Check className="size-4 text-accent font-bold" />
 										</div>
 										Database functionality
 									</li>
 								</ul>
-								<Button className="w-full text-base h-11" onClick={() => {
+								<Button size="lg" className="w-full" onClick={() => {
 									const intendedUrl = `/chat/new`;
 									if (requireAuth({ requireFullAuth: true, actionContext: 'to create applications', intendedUrl })) {
 										navigate(intendedUrl);
@@ -579,17 +579,18 @@ onChange={(e) => {
 								</Button>
 							</CardContent>
 						</Card>
-						<Card className="border-2 border-accent/30 dark:border-accent/40 bg-gradient-to-br from-accent/5 to-accent/10 dark:from-accent/10 dark:to-accent/15 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300">
-							<CardHeader className="pb-6">
-								<CardTitle className="text-2xl md:text-3xl mb-2 font-bold">Paid plans from</CardTitle>
-								<div className="flex items-baseline gap-2 mb-3">
-									<span className="text-5xl font-bold text-text-primary">$20</span>
-									<span className="text-lg text-text-secondary">/ mo</span>
+						<Card className="border-2 border-accent/25 dark:border-accent/35 bg-gradient-to-br from-accent/8 to-accent/12 dark:from-accent/12 dark:to-accent/18 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-xl hover:shadow-2xl hover:border-accent/35 dark:hover:border-accent/45 transition-all duration-300 relative overflow-hidden">
+							<div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent pointer-events-none" />
+							<CardHeader className="pb-6 relative z-10">
+								<CardTitle className="text-2xl md:text-3xl mb-3 font-bold">Paid plans from</CardTitle>
+								<div className="flex items-baseline gap-2 mb-4">
+									<span className="text-5xl md:text-6xl font-bold text-text-primary">$20</span>
+									<span className="text-lg md:text-xl text-text-secondary">/ mo</span>
 								</div>
-								<CardDescription className="text-base">Upgrade as you go for more credits, more features, and more support.</CardDescription>
+								<CardDescription className="text-base text-text-secondary">Upgrade as you go for more credits, more features, and more support.</CardDescription>
 							</CardHeader>
-							<CardContent>
-								<Button variant="outline" className="w-full text-base h-11 border-2">
+							<CardContent className="relative z-10">
+								<Button variant="outline" size="lg" className="w-full">
 									See all plans
 								</Button>
 							</CardContent>

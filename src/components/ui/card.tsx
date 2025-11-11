@@ -7,7 +7,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "bg-bg-4 dark:bg-bg-2 text-text-primary flex flex-col rounded-md border",
+        "bg-bg-4/90 dark:bg-bg-2/90 text-text-primary flex flex-col rounded-xl border border-accent/10 dark:border-accent/20 shadow-lg backdrop-blur-md supports-backdrop:backdrop-blur-md transition-all duration-200 hover:shadow-xl hover:border-accent/20 dark:hover:border-accent/30",
         className
       )}
       {...props}
@@ -20,9 +20,9 @@ function CardHeader({ className, variant, ...props }: React.ComponentProps<"div"
     <div
       data-slot="card-header"
       className={cn(
-        "flex items-start gap-1.5 py-4 px-4",
+        "flex items-start gap-2 py-5 px-5",
         className,
-        variant !== "minimal" ? "py-4" : "py-1",
+        variant !== "minimal" ? "py-5" : "py-2",
       )}
       {...props}
     />
@@ -57,7 +57,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+  <div ref={ref} className={cn("p-5 pt-0", className)} {...props} />
 ))
 CardContent.displayName = "CardContent"
 
