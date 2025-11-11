@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { apiClient } from '@/lib/api-client';
 import openaiLogo from '@/assets/provider-logos/openai.svg';
 import anthropicLogo from '@/assets/provider-logos/anthropic.svg';
 import googleLogo from '@/assets/provider-logos/google.svg';
@@ -233,7 +234,21 @@ useEffect(() => {
 			author: "Erel Cohen", 
 			handle: "" 
 		},
-	] as const;
+] as const;
+
+	// Pricing plans loaded from API
+	const [plans, setPlans] = useState<Array<{ slug: string; name: string; monthlyCredits: number; dailyFreeCredits: number; rolloverLimit: number; resetCycleDays: number; priceUsd: number; checkoutUrl?: string | null }>>([]);
+const [, setPlansLoading] = useState(true);
+	useEffect(() => {
+		let mounted = true;
+		apiClient.getBillingPlans()
+			.then((res) => {
+				if (mounted && res.success && res.data) setPlans((res.data as any).plans);
+			})
+			.catch(() => {})
+			.finally(() => mounted && setPlansLoading(false));
+		return () => { mounted = false };
+	}, []);
 
 	const faqs = [
 		{
@@ -536,63 +551,73 @@ onChange={(e) => {
 						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">Pricing plans for every need</h2>
 						<p className="text-lg text-text-secondary">Scale as you go with plans designed to match your growth.</p>
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
+						{/* Free */}
 						<Card className="border-2 border-accent/15 dark:border-accent/25 bg-bg-4/90 dark:bg-bg-2/90 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-xl hover:shadow-2xl hover:border-accent/25 dark:hover:border-accent/35 transition-all duration-300">
-							<CardHeader className="pb-6">
-								<CardTitle className="text-2xl md:text-3xl mb-3 font-bold">Start for free.</CardTitle>
-								<CardDescription className="text-base text-text-secondary">Get access to:</CardDescription>
+							<CardHeader className="pb-4">
+								<CardTitle className="text-xl md:text-2xl mb-1 font-bold">Free</CardTitle>
+								<CardDescription className="text-sm text-text-secondary">$0 / mo</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<ul className="space-y-4 mb-8">
-									<li className="flex items-center gap-3 text-sm md:text-base text-text-secondary">
-										<div className="size-6 rounded-full bg-gradient-to-br from-accent/20 to-accent/30 flex items-center justify-center flex-shrink-0 ring-2 ring-accent/10">
-											<Check className="size-4 text-accent font-bold" />
-										</div>
-										All core features
-									</li>
-									<li className="flex items-center gap-3 text-sm md:text-base text-text-secondary">
-										<div className="size-6 rounded-full bg-gradient-to-br from-accent/20 to-accent/30 flex items-center justify-center flex-shrink-0 ring-2 ring-accent/10">
-											<Check className="size-4 text-accent font-bold" />
-										</div>
-										Built-in integrations
-									</li>
-									<li className="flex items-center gap-3 text-sm md:text-base text-text-secondary">
-										<div className="size-6 rounded-full bg-gradient-to-br from-accent/20 to-accent/30 flex items-center justify-center flex-shrink-0 ring-2 ring-accent/10">
-											<Check className="size-4 text-accent font-bold" />
-										</div>
-										Authentication system
-									</li>
-									<li className="flex items-center gap-3 text-sm md:text-base text-text-secondary">
-										<div className="size-6 rounded-full bg-gradient-to-br from-accent/20 to-accent/30 flex items-center justify-center flex-shrink-0 ring-2 ring-accent/10">
-											<Check className="size-4 text-accent font-bold" />
-										</div>
-										Database functionality
-									</li>
+								<ul className="space-y-3 mb-6 text-sm">
+									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> 10 daily free credits</li>
+									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Core features</li>
+									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Built-in integrations</li>
 								</ul>
 								<Button size="lg" className="w-full" onClick={() => {
 									const intendedUrl = `/chat/new`;
 									if (requireAuth({ requireFullAuth: true, actionContext: 'to create applications', intendedUrl })) {
 										navigate(intendedUrl);
 									}
-								}}>
-									Start building
-								</Button>
+								}}>Start building</Button>
 							</CardContent>
 						</Card>
+
+						{/* Pro */}
 						<Card className="border-2 border-accent/25 dark:border-accent/35 bg-gradient-to-br from-accent/8 to-accent/12 dark:from-accent/12 dark:to-accent/18 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-xl hover:shadow-2xl hover:border-accent/35 dark:hover:border-accent/45 transition-all duration-300 relative overflow-hidden">
 							<div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent pointer-events-none" />
-							<CardHeader className="pb-6 relative z-10">
-								<CardTitle className="text-2xl md:text-3xl mb-3 font-bold">Paid plans from</CardTitle>
-								<div className="flex items-baseline gap-2 mb-4">
-									<span className="text-5xl md:text-6xl font-bold text-text-primary">$20</span>
-									<span className="text-lg md:text-xl text-text-secondary">/ mo</span>
+							<CardHeader className="pb-4 relative z-10">
+								<CardTitle className="text-xl md:text-2xl mb-1 font-bold">Pro</CardTitle>
+								<div className="flex items-baseline gap-2">
+									<span className="text-4xl md:text-5xl font-bold text-text-primary">${plans.find(p=>p.slug==='pro')?.priceUsd ?? 25}</span>
+									<span className="text-sm md:text-base text-text-secondary">/ mo</span>
 								</div>
-								<CardDescription className="text-base text-text-secondary">Upgrade as you go for more credits, more features, and more support.</CardDescription>
 							</CardHeader>
 							<CardContent className="relative z-10">
-								<Button variant="outline" size="lg" className="w-full">
-									See all plans
-								</Button>
+								<ul className="space-y-3 mb-6 text-sm">
+									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> 100 monthly credits</li>
+									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Rollover up to 100 credits</li>
+									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Monthly reset</li>
+								</ul>
+								<a href={(plans.find(p=>p.slug==='pro')?.checkoutUrl) || '#'} target={plans.find(p=>p.slug==='pro')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
+									<Button variant="outline" size="lg" className="w-full" disabled={!plans.find(p=>p.slug==='pro')?.checkoutUrl}>
+										Upgrade to Pro
+									</Button>
+								</a>
+							</CardContent>
+						</Card>
+
+						{/* Business */}
+						<Card className="border-2 border-accent/25 dark:border-accent/35 bg-gradient-to-br from-accent/8 to-accent/12 dark:from-accent/12 dark:to-accent/18 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-xl hover:shadow-2xl hover:border-accent/35 dark:hover:border-accent/45 transition-all duration-300 relative overflow-hidden">
+							<div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent pointer-events-none" />
+							<CardHeader className="pb-4 relative z-10">
+								<CardTitle className="text-xl md:text-2xl mb-1 font-bold">Business</CardTitle>
+								<div className="flex items-baseline gap-2">
+									<span className="text-4xl md:text-5xl font-bold text-text-primary">${plans.find(p=>p.slug==='business')?.priceUsd ?? 79}</span>
+									<span className="text-sm md:text-base text-text-secondary">/ mo</span>
+								</div>
+							</CardHeader>
+							<CardContent className="relative z-10">
+								<ul className="space-y-3 mb-6 text-sm">
+									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> 500 monthly credits</li>
+									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Rollover up to 500 credits</li>
+									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Monthly reset</li>
+								</ul>
+								<a href={(plans.find(p=>p.slug==='business')?.checkoutUrl) || '#'} target={plans.find(p=>p.slug==='business')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
+									<Button variant="outline" size="lg" className="w-full" disabled={!plans.find(p=>p.slug==='business')?.checkoutUrl}>
+										Upgrade to Business
+									</Button>
+								</a>
 							</CardContent>
 						</Card>
 					</div>
