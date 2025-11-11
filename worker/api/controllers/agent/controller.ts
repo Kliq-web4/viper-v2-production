@@ -38,6 +38,16 @@ export class CodingAgentController extends BaseController {
 
             const url = new URL(request.url);
             const hostname = url.hostname === 'localhost' ? `localhost:${url.port}`: getPreviewDomain(env);
+
+            // Preflight: ensure required AI credentials exist (OpenAI-only configuration)
+            const openaiKey = (env as any).OPENAI_API_KEY as string | undefined;
+            if (!openaiKey || typeof openaiKey !== 'string' || openaiKey.trim().length < 10) {
+                return CodingAgentController.createErrorResponse(
+                    'OPENAI_API_KEY is missing. Set it in .dev.vars for local dev or as a Wrangler secret for deployments.',
+                    400
+                );
+            }
+
             // Parse the query from the request body
             let body: CodeGenArgs;
             try {
