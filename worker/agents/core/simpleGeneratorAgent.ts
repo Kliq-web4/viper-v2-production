@@ -114,6 +114,9 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
     
     public _logger: StructuredLogger | undefined;
 
+    // Heartbeat timer to keep WebSocket connections alive behind Cloudflare proxy
+    private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+
     private initLogger(agentId: string, sessionId: string, userId: string) {
         this._logger = createObjectLogger(this, 'CodeGeneratorAgent');
         this._logger.setObjectId(agentId);
@@ -398,6 +401,8 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         sendToConnection(connection, 'cf_agent_state', {
             state: this.state
         });
+        // Start heartbeat once there is at least one active connection
+        this.startHeartbeat();
     }
 
     async ensureTemplateDetails() {
@@ -1978,6 +1983,13 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     async onClose(connection: Connection): Promise<void> {
         handleWebSocketClose(connection);
+        // Stop heartbeat when all connections are closed
+        // Defer check slightly to allow SDK to update connection list
+        setTimeout(() => {
+            if (this.getWebSockets().length === 0) {
+                this.stopHeartbeat();
+            }
+        }, 0);
     }
 
     private async onProjectUpdate(message: string): Promise<void> {
@@ -2007,6 +2019,25 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         broadcastToConnections(this, msg, data || {} as WebSocketMessageData<T>);
     }
 
+    private startHeartbeat() {
+        if (this.heartbeatTimer) return;
+        this.logger().info('Starting WebSocket heartbeat');
+        this.heartbeatTimer = setInterval(() => {
+            try {
+                // Lightweight keepalive message to keep CF proxy from closing idle WS
+                this.broadcast('keepalive', { ts: Date.now() } as any);
+            } catch (e) {
+                this.logger().warn('Heartbeat broadcast failed', e);
+            }
+        }, 25000); // 25s
+    }
+
+    private stopHeartbeat() {
+        if (!this.heartbeatTimer) return;
+        try { clearInterval(this.heartbeatTimer as any); } catch {}
+        this.heartbeatTimer = null;
+        this.logger().info('Stopped WebSocket heartbeat');
+    }
     private getBootstrapCommands() {
         const bootstrapCommands = this.state.commandsHistory || [];
         // Validate, deduplicate, and clean

@@ -133,7 +133,12 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
         } = deps;
 
         // Log messages except for frequent ones
-        if (message.type !== 'file_chunk_generated' && message.type !== 'cf_agent_state' && message.type.length <= 50) {
+        if (
+            message.type !== 'file_chunk_generated' &&
+            message.type !== 'cf_agent_state' &&
+            message.type !== 'keepalive' &&
+            message.type.length <= 50
+        ) {
             logger.info('received message', message.type, message);
             onDebugMessage?.('websocket', 
                 `${message.type}`,
@@ -145,6 +150,10 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
         }
         
         switch (message.type) {
+            case 'keepalive': {
+                // No-op heartbeat message from server
+                break;
+            }
             case 'conversation_cleared': {
                 // Reset chat messages to a subtle tool-event entry indicating success
                 setMessages(() => appendToolEvent([], 'conversation_cleared', {
