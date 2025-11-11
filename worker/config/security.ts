@@ -208,9 +208,9 @@ export function getSecureHeadersConfig(env: Env): SecureHeadersConfig {
                 // WebSocket connections
                 "ws://localhost:*",
                 "wss://localhost:*",
-                `wss://${env.CUSTOM_DOMAIN || '*'}`,
+                ...(env.CUSTOM_DOMAIN ? [`wss://${env.CUSTOM_DOMAIN}`] : ['wss:']),
                 // Allow preview subdomains on custom domain
-                "https://*.web4.sbs",
+                "wss://*.web4.sbs",
                 // API endpoints
                 "https://api.github.com",
                 "https://api.cloudflare.com"

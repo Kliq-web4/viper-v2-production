@@ -88,6 +88,34 @@ export function useChat({
 	// Track last attempted wsUrl for fast online reconnects
 	const lastWsUrlRef = useRef<string | null>(null);
 
+	// Normalize server-provided WebSocket URLs to current origin and scheme.
+	// This avoids issues when TLS is terminated by a reverse proxy and the backend
+	// computes ws:// instead of wss:// (or wrong host). Also appends JWT token as
+	// a query param when available to support auth during WS upgrade.
+	function buildWebSocketUrl(input: string): string {
+		try {
+			const incoming = new URL(input, window.location.origin);
+			const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+			const url = new URL(incoming.pathname + incoming.search, `${protocol}//${window.location.host}`);
+			const token = localStorage.getItem('authToken');
+			if (token && !url.searchParams.has('token') && !url.searchParams.has('access_token')) {
+				url.searchParams.set('token', token);
+			}
+			return url.toString();
+		} catch {
+			try {
+				const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+				const basePath = input.startsWith('/') ? input : `/${input}`;
+				const url = new URL(basePath, `${protocol}//${window.location.host}`);
+				const token = localStorage.getItem('authToken');
+				if (token) url.searchParams.set('token', token);
+				return url.toString();
+			} catch {
+				return input;
+			}
+		}
+	}
+
 	const [isGeneratingBlueprint, setIsGeneratingBlueprint] = useState(false);
 	const [isBootstrapping, setIsBootstrapping] = useState(true);
 
@@ -484,7 +512,7 @@ export function useChat({
 
 					// Connect to WebSocket
 					logger.debug('connecting to ws with created id');
-					connectWithRetry(result.websocketUrl);
+					connectWithRetry(buildWebSocketUrl(result.websocketUrl));
 					setChatId(result.agentId); // This comes from the server response
 					
 					// Emit app-created event for sidebar updates
@@ -512,7 +540,7 @@ export function useChat({
 
 
 					logger.debug('connecting from init for existing chatId');
-					connectWithRetry(response.data.websocketUrl, {
+					connectWithRetry(buildWebSocketUrl(response.data.websocketUrl), {
 						disableGenerate: true, // We'll handle generation resume in the WebSocket open handler
 					});
 				}
