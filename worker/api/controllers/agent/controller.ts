@@ -117,8 +117,20 @@ export class CodingAgentController extends BaseController {
 
             const { templateDetails, selection } = await getTemplateForQuery(env, inferenceContext, query, body.images, this.logger);
 
-            const websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws`;
+            let websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws`;
             const httpStatusUrl = `${url.origin}/api/agent/${agentId}`;
+
+            // Issue a short-lived, single-use WS token and append to URL for browser WS auth
+            try {
+                const { WebSocketTokenService } = await import('../../../services/auth/WebSocketTokenService');
+                const wsTokenService = new WebSocketTokenService(env);
+                const token = await wsTokenService.issue(context.user!.id, agentId, 90); // 90s TTL
+                const u = new URL(websocketUrl);
+                u.searchParams.set('token', token);
+                websocketUrl = u.toString();
+            } catch (tokenErr) {
+                CodingAgentController.logger.warn('Failed to issue WS auth token for new session', tokenErr);
+            }
 
             let uploadedImages: ProcessedImageAttachment[] = [];
             if (body.images) {
