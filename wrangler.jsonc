@@ -141,7 +141,13 @@
         "MAX_SANDBOX_INSTANCES": "10",
         "SANDBOX_INSTANCE_TYPE": "standard-4",
         "USE_CLOUDFLARE_IMAGES": "true",
-        "USE_TUNNEL_FOR_PREVIEW": "false"
+        "USE_TUNNEL_FOR_PREVIEW": "false",
+        "WHOP_PRO_PRODUCT_ID": "prod_wzsNzWEWuKCq0",
+        "WHOP_BUSINESS_PRODUCT_ID": "prod_SfM0OLueKGVQD",
+        "WHOP_PRO_PRICE_ID": "prod_wzsNzWEWuKCq0",
+        "WHOP_BUSINESS_PRICE_ID": "prod_SfM0OLueKGVQD",
+        "WHOP_PRO_CHECKOUT_URL": "https://whop.com/checkout/plan_27f545eaOEsjP?d2c=true",
+        "WHOP_BUSINESS_CHECKOUT_URL": "https://whop.com/checkout/plan_4qVW8tkfBoI08?d2c=true"
     },
 	"workers_dev": false,
 	"preview_urls": false
