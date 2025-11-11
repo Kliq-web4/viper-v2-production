@@ -9,10 +9,17 @@ const logger = createLogger('CodeGeneratorWebSocket');
 
 export function handleWebSocketMessage(agent: SimpleCodeGeneratorAgent, connection: Connection, message: string): void {
     try {
-        logger.info(`Received WebSocket message from ${connection.id}: ${message}`);
         const parsedMessage = JSON.parse(message);
+        if (parsedMessage?.type === 'ping') {
+            // Ignore client heartbeat pings to avoid spurious errors/noise
+            return;
+        }
+        logger.info(`Received WebSocket message from ${connection.id}: ${message}`);
 
         switch (parsedMessage.type) {
+            case 'ping':
+                // Ignore client heartbeat pings to avoid spurious errors/noise
+                return;
             case WebSocketMessageRequests.GENERATE_ALL:
                 // Set shouldBeGenerating flag to indicate persistent intent
                 agent.setState({ 

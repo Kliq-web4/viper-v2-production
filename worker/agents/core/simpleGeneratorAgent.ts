@@ -114,6 +114,9 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
     
     public _logger: StructuredLogger | undefined;
 
+    // Heartbeat timer to keep WebSocket connections alive behind Cloudflare proxy
+    private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+
     private initLogger(agentId: string, sessionId: string, userId: string) {
         this._logger = createObjectLogger(this, 'CodeGeneratorAgent');
         this._logger.setObjectId(agentId);
@@ -398,6 +401,9 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         sendToConnection(connection, 'cf_agent_state', {
             state: this.state
         });
+        // Start heartbeat to prevent Cloudflare proxy from closing idle WebSocket connections
+        // This is critical for long-running code generation tasks
+        this.startHeartbeat();
     }
 
     async ensureTemplateDetails() {
@@ -1978,6 +1984,13 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     async onClose(connection: Connection): Promise<void> {
         handleWebSocketClose(connection);
+        // Stop heartbeat when all connections are closed
+        // Defer check slightly to allow SDK to update connection list
+        setTimeout(() => {
+            if (this.getWebSockets().length === 0) {
+                this.stopHeartbeat();
+            }
+        }, 0);
     }
 
     private async onProjectUpdate(message: string): Promise<void> {
@@ -2007,6 +2020,42 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         broadcastToConnections(this, msg, data || {} as WebSocketMessageData<T>);
     }
 
+    /**
+     * Start WebSocket heartbeat to prevent Cloudflare proxy from closing idle connections.
+     * 
+     * Cloudflare proxies WebSocket connections by default (orange cloud) and closes idle
+     * connections after ~100s. This heartbeat sends keepalive messages every 25s to keep
+     * the connection active during long-running code generation tasks.
+     * 
+     * Equivalent to Socket.IO's pingInterval: 25000, pingTimeout: 5000
+     */
+    private startHeartbeat() {
+        if (this.heartbeatTimer) return;
+        this.logger().info('Starting WebSocket heartbeat (25s interval) to prevent CF proxy timeout');
+        this.heartbeatTimer = setInterval(() => {
+            try {
+                const connections = this.getWebSockets();
+                if (connections.length === 0) {
+                    // No active connections, stop heartbeat
+                    this.stopHeartbeat();
+                    return;
+                }
+                // Lightweight keepalive message to keep CF proxy from closing idle WS
+                // Sends every 25s to stay well under CF's ~100s idle timeout
+                this.broadcast('keepalive', { ts: Date.now() } as any);
+                this.logger().debug(`Heartbeat sent to ${connections.length} connection(s)`);
+            } catch (e) {
+                this.logger().warn('Heartbeat broadcast failed', e);
+            }
+        }, 25000); // 25s - well under CF's ~100s idle timeout
+    }
+
+    private stopHeartbeat() {
+        if (!this.heartbeatTimer) return;
+        try { clearInterval(this.heartbeatTimer as any); } catch {}
+        this.heartbeatTimer = null;
+        this.logger().info('Stopped WebSocket heartbeat');
+    }
     private getBootstrapCommands() {
         const bootstrapCommands = this.state.commandsHistory || [];
         // Validate, deduplicate, and clean
