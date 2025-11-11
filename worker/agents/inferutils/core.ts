@@ -226,80 +226,72 @@ function isValidApiKey(apiKey: string): boolean {
 
 async function getApiKey(provider: string, env: Env, _userId: string): Promise<string> {
     console.log("Getting API key for provider: ", provider);
-    // try {
-    //     const secretsService = new SecretsService(env);
-    //     const userProviderKeys = await secretsService.getUserBYOKKeysMap(userId);
-    //     // First check if user has a custom API key for this provider
-    //     if (userProviderKeys && provider in userProviderKeys) {
-    //         const userKey = userProviderKeys.get(provider);
-    //         if (userKey && isValidApiKey(userKey)) {
-    //             console.log("Found user API key for provider: ", provider, userKey);
-    //             return userKey;
-    //         }
-    //     }
-    // } catch (error) {
-    //     console.error("Error getting API key for provider: ", provider, error);
-    // }
-    // Fallback to environment variables
+    // Resolve environment variable name from provider (e.g., openai -> OPENAI_API_KEY)
     const providerKeyString = provider.toUpperCase().replaceAll('-', '_');
     const envKey = `${providerKeyString}_API_KEY` as keyof Env;
-    let apiKey: string = env[envKey] as string;
-    
-    // Check if apiKey is empty or undefined and is valid
+    const apiKey: string = env[envKey] as string;
+
     if (!isValidApiKey(apiKey)) {
-        apiKey = env.CLOUDFLARE_AI_GATEWAY_TOKEN;
+        throw new Error(`Missing or invalid API key for provider '${provider}'. Expected environment variable: ${envKey}`);
     }
     return apiKey;
 }
 
 export async function getConfigurationForModel(
-    model: AIModels | string, 
-    env: Env, 
+    model: AIModels | string,
+    env: Env,
     userId: string,
 ): Promise<{
     baseURL: string,
     apiKey: string,
     defaultHeaders?: Record<string, string>,
 }> {
-    let providerForcedOverride: AIGatewayProviders | undefined;
-    // Check if provider forceful-override is set
-    const match = model.match(/\[(.*?)\]/);
+    // Optional provider override via [provider] prefix
+    let providerOverride: string | undefined;
+    const match = String(model).match(/\[(.*?)\]/);
     if (match) {
-        const provider = match[1];
-        if (provider === 'openrouter') {
-            return {
-                baseURL: 'https://openrouter.ai/api/v1',
-                apiKey: env.OPENROUTER_API_KEY,
-            };
-        } else if (provider === 'gemini') {
-            return {
-                baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
-                apiKey: env.GOOGLE_AI_STUDIO_API_KEY,
-            };
-        } else if (provider === 'claude') {
-            return {
-                baseURL: 'https://api.anthropic.com/v1/',
-                apiKey: env.ANTHROPIC_API_KEY,
-            };
-        }
-        providerForcedOverride = provider as AIGatewayProviders;
+        providerOverride = match[1];
     }
 
-    const baseURL = await buildGatewayUrl(env, providerForcedOverride);
+    // Clean model (strip override) and extract provider (e.g., "openai/gpt-5-mini")
+    const cleanModel = String(model).replace(/\[.*?\]/, '').trim();
+    const provider = (providerOverride || cleanModel.split('/')[0]).toLowerCase();
 
-    // Extract the provider name from model name. Model name is of type `provider/model_name`
-    const provider = providerForcedOverride || model.split('/')[0];
-    // Try to find API key of type <PROVIDER>_API_KEY else default to CLOUDFLARE_AI_GATEWAY_TOKEN
-    // `env` is an interface of type `Env`
-    const apiKey = await getApiKey(provider, env, userId);
-    // AI Gateway Wholesaling checks
-    const defaultHeaders = env.CLOUDFLARE_AI_GATEWAY_TOKEN && apiKey !== env.CLOUDFLARE_AI_GATEWAY_TOKEN ? {
-        'cf-aig-authorization': `Bearer ${env.CLOUDFLARE_AI_GATEWAY_TOKEN}`,
-    } : undefined;
+    // Route directly to official provider endpoints (no Cloudflare AI Gateway)
+    // OpenAI official endpoint
+    if (provider === 'openai') {
+        return {
+            baseURL: 'https://api.openai.com/v1',
+            apiKey: await getApiKey('openai', env, userId),
+        };
+    }
+
+    // Google AI Studio (Gemini) - OpenAI compatibility endpoint
+    if (provider === 'google-ai-studio' || provider === 'gemini') {
+        // Support both GOOGLE_AI_STUDIO_API_KEY and GEMINI_API_KEY for flexibility
+        const apiKey = (env.GOOGLE_AI_STUDIO_API_KEY || (env as any).GEMINI_API_KEY) as string;
+        if (!isValidApiKey(apiKey)) {
+            // Throw a clear error referencing the expected default var
+            await getApiKey('google-ai-studio', env, userId); // will throw
+        }
+        return {
+            baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+            apiKey: apiKey!,
+        };
+    }
+
+    // OpenRouter (still optional direct route)
+    if (provider === 'openrouter') {
+        return {
+            baseURL: 'https://openrouter.ai/api/v1',
+            apiKey: await getApiKey('openrouter', env, userId),
+        };
+    }
+
+    // Default: use OpenAI
     return {
-        baseURL,
-        apiKey,
-        defaultHeaders
+        baseURL: 'https://api.openai.com/v1',
+        apiKey: await getApiKey('openai', env, userId),
     };
 }
 

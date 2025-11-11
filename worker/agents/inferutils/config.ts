@@ -74,6 +74,7 @@ export const AGENT_CONFIG: AgentConfig = {
         fallbackModel: AIModels.GEMINI_2_5_FLASH,
         temperature: 0.6,
     },
+    // Bootstrapping: keep Gemini for initial planning and setup
     blueprint: {
         name: AIModels.GEMINI_2_5_PRO,
         reasoning_effort: 'medium',
@@ -88,26 +89,27 @@ export const AGENT_CONFIG: AgentConfig = {
         temperature: 0.2,
         fallbackModel: AIModels.GEMINI_2_5_PRO,
     },
+    // Phases: use OpenAI
     phaseGeneration: {
-        name: AIModels.GEMINI_2_5_PRO,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.OPENAI_5,
     },
     firstPhaseImplementation: {
-        name: AIModels.GEMINI_2_5_PRO,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 64000,
         temperature: 0.2,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.OPENAI_5,
     },
     phaseImplementation: {
-        name: AIModels.GEMINI_2_5_PRO,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 64000,
         temperature: 0.2,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.OPENAI_5,
     },
     realtimeCodeFixer: {
         name: AIModels.DISABLED,
@@ -139,14 +141,14 @@ export const AGENT_CONFIG: AgentConfig = {
         fallbackModel: AIModels.GEMINI_2_5_FLASH,
     },
     codeReview: {
-        name: AIModels.GEMINI_2_5_PRO,
+        name: AIModels.OPENAI_5,
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.GEMINI_2_5_PRO,
     },
     fileRegeneration: {
-        name: AIModels.GEMINI_2_5_PRO,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 0,
