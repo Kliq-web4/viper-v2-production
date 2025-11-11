@@ -69,25 +69,25 @@ OR
 
 export const AGENT_CONFIG: AgentConfig = {
     templateSelection: {
-        name: AIModels.GEMINI_2_5_FLASH_LITE,
+        name: AIModels.OPENAI_5_MINI,
         max_tokens: 2000,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.OPENAI_5,
         temperature: 0.6,
     },
-    // Bootstrapping: keep Gemini for initial planning and setup
+    // Bootstrapping: now using OpenAI for initial planning and setup
     blueprint: {
-        name: AIModels.GEMINI_2_5_PRO,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'medium',
         max_tokens: 64000,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.OPENAI_5,
         temperature: 0.7,
     },
     projectSetup: {
-        name: AIModels.GEMINI_2_5_PRO,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 10000,
         temperature: 0.2,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.OPENAI_5,
     },
     // Phases: use OpenAI
     phaseGeneration: {
@@ -116,7 +116,7 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.OPENAI_5,
     },
     // Not used right now
     fastCodeFixer: {
@@ -124,43 +124,43 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: undefined,
         max_tokens: 64000,
         temperature: 0.0,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.OPENAI_5,
     },
     conversationalResponse: {
-        name: AIModels.GEMINI_2_5_FLASH,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 4000,
         temperature: 0,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.OPENAI_5,
     },
     deepDebugger: {
-        name: AIModels.GEMINI_2_5_PRO,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 0.5,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.OPENAI_5,
     },
     codeReview: {
         name: AIModels.OPENAI_5,
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.1,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.OPENAI_5,
     },
     fileRegeneration: {
         name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 0,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.OPENAI_5,
     },
     // Not used right now
     screenshotAnalysis: {
-        name: AIModels.GEMINI_2_5_PRO,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.OPENAI_5,
     },
 };
 

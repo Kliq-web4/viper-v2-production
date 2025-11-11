@@ -10,10 +10,12 @@ RUN apt-get update && \
             "arm64") ARCH="arm64" ;; \
             *) echo "Unsupported architecture: ${TARGETARCH}"; exit 1 ;; \
         esac && \
-        curl -L -k --output cloudflared "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${ARCH}" && \
-        chmod +x cloudflared && \
-        mv cloudflared /usr/local/bin/ && \
-        rm -rf /var/lib/apt/lists/* && \    
+        # Try to install cloudflared, but don't fail the build if download is unavailable (not required in prod) \
+        (curl -fsSL -k --output cloudflared "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${ARCH}" \
+            && chmod +x cloudflared \
+            && mv cloudflared /usr/local/bin/ \
+            || echo "Skipping cloudflared install (download failed)" ) && \
+        rm -rf /var/lib/apt/lists/* && \
         git config --global user.email "vibesdk-bot@cloudflare.com" && \
         git config --global user.name "Cloudflare Vibesdk bot"
 

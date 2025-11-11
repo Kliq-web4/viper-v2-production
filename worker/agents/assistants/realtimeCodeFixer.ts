@@ -491,7 +491,7 @@ ${block.error}
             const llmResponse = await infer({
                 env: this.env,
                 metadata: this.inferenceContext,
-                modelName: AIModels.GEMINI_2_5_FLASH,
+                modelName: AIModels.OPENAI_5_MINI,
                 reasoning_effort: 'low',
                 temperature: 0.0,
                 maxTokens: 10000,
