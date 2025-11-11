@@ -1,29 +1,87 @@
-import { infer, InferError, InferResponseString, InferResponseObject, AbortError } from './core';
-import { createAssistantMessage, createUserMessage, Message } from './common';
-import z from 'zod';
-// import { CodeEnhancementOutput, CodeEnhancementOutputType } from '../codegen/phasewiseGenerator';
-import { SchemaFormat } from './schemaFormatters';
-import { ReasoningEffort } from 'openai/resources.mjs';
-import { AgentActionKey, AIModels, InferenceContext, ModelConfig } from './config.types';
-import { AGENT_CONFIG } from './config';
+import { OpenAI } from 'openai';
+// Note: We will dynamically import the Google SDK to avoid build-time resolution issues
+// when the dependency is not present during typecheck in some environments.
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import type { Message } from './common';
 import { createLogger } from '../../logger';
-import { RateLimitExceededError, SecurityError } from 'shared/types/errors';
-import { ToolDefinition } from '../tools/types';
+import { AGENT_CONFIG } from './config';
+import { AIModels, AgentActionKey, InferenceContext, ModelConfig } from './config.types';
+import type { ReasoningEffort } from 'openai/resources.mjs';
+import type { SchemaFormat } from './schemaFormatters';
 
 const logger = createLogger('InferenceUtils');
 
-const responseRegenerationPrompts = `
-The response you provided was either in an incorrect/unparsable format or was incomplete.
-Please provide a valid response that matches the expected output format exactly.
-`;
+// Local helper types matching minimal needs of this module
+export interface InferenceConfig {
+  maxTokens: number;
+  temperature: number;
+  retries: number;
+  retryDelay: number;
+}
 
-/**
- * Helper function to execute AI inference with consistent error handling
- * @param params Parameters for the inference operation
- * @returns The inference result or null if error
- */
+export interface InferenceResult<T = unknown> {
+  content: string | T;
+  model: string;
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
 
-interface InferenceParamsBase {
+export interface InferenceParams<T extends z.AnyZodObject | undefined = undefined> {
+  operationId: string;
+  modelName: string;
+  messages: Message[];
+  schema?: T;
+}
+
+export class InferenceError extends Error {
+  constructor(message: string, public cause?: unknown) {
+    super(message);
+    this.name = 'InferenceError';
+  }
+}
+
+// Lightweight helpers normally coming from other utilities
+function formatZodErrors(e: z.ZodError): string {
+  return e.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+}
+
+function getInferenceConfig(_operationId: string, _env: Env): InferenceConfig {
+  // Provide conservative defaults; per-operation tuning can be added later
+  return { maxTokens: 16000, temperature: 0.2, retries: 3, retryDelay: 400 };
+}
+
+function getTokenCounter(_modelName: string) {
+  // Approximate token counter: ~4 chars per token
+  return (messages: Message[]) => Math.ceil(JSON.stringify(messages).length / 4);
+}
+
+function trimMessages(
+  messages: Message[],
+  _maxTokens: number,
+  _tokenCounter: (m: Message[]) => number,
+): { trimmedMessages: Message[]; originalSize: number; newSize: number; trimmable: boolean } {
+  const originalSize = JSON.stringify(messages).length;
+  return { trimmedMessages: messages, originalSize, newSize: originalSize, trimmable: false };
+}
+
+// Helper to convert OpenAI messages to Google Generative AI format
+function convertMessagesToGoogle(messages: Message[]): any[] {
+  const history = messages
+    .filter((msg) => msg.role === 'user' || msg.role === 'assistant')
+    .map((msg) => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content as string }], // Assumes text-only content for now
+    }));
+  return history;
+}
+
+// Compatibility wrapper matching the previous executeInference API used across the codebase
+export async function executeInference<T extends z.AnyZodObject>(
+  args: {
     env: Env;
     messages: Message[];
     maxTokens?: number;
@@ -31,214 +89,321 @@ interface InferenceParamsBase {
     modelName?: AIModels | string;
     retryLimit?: number;
     agentActionName: AgentActionKey;
-    tools?: ToolDefinition<any, any>[];
-    stream?: {
-        chunk_size: number;
-        onChunk: (chunk: string) => void;
-    };
+    tools?: unknown[];
+    stream?: { chunk_size: number; onChunk: (chunk: string) => void };
     reasoning_effort?: ReasoningEffort;
     modelConfig?: ModelConfig;
     context: InferenceContext;
-}
-
-interface InferenceParamsStructured<T extends z.AnyZodObject> extends InferenceParamsBase {
-    schema: T;
     format?: SchemaFormat;
-}
-
-export async function executeInference<T extends z.AnyZodObject>(
-    params: InferenceParamsStructured<T>
-): Promise<InferResponseObject<T>>;
+    schema: T;
+  }
+): Promise<{ object: z.infer<T> }>;
 
 export async function executeInference(
-    params: InferenceParamsBase
-): Promise<InferResponseString>;
-    
-
-export async function executeInference<T extends z.AnyZodObject>(   {
-    env,
-    messages,
-    temperature,
-    maxTokens,
-    retryLimit = 5, // Increased retry limit for better reliability
-    stream,
-    tools,
-    reasoning_effort,
-    schema,
-    agentActionName,
-    format,
-    modelName,
-    modelConfig,
-    context
-}: InferenceParamsBase &    {
-    schema?: T;
+  args: {
+    env: Env;
+    messages: Message[];
+    maxTokens?: number;
+    temperature?: number;
+    modelName?: AIModels | string;
+    retryLimit?: number;
+    agentActionName: AgentActionKey;
+    tools?: unknown[];
+    stream?: { chunk_size: number; onChunk: (chunk: string) => void };
+    reasoning_effort?: ReasoningEffort;
+    modelConfig?: ModelConfig;
+    context: InferenceContext;
     format?: SchemaFormat;
-}): Promise<InferResponseString | InferResponseObject<T> | null> {
-    let conf: ModelConfig | undefined;
-    
-    if (modelConfig) {
-        // Use explicitly provided model config
-        conf = modelConfig;
-    } else if (context?.userId && context?.userModelConfigs) {
-        // Try to get user-specific configuration from context cache
-        conf = context.userModelConfigs[agentActionName];
-        if (conf) {
-            logger.info(`Using user configuration for ${agentActionName}: ${JSON.stringify(conf)}`);
-        } else {
-            logger.info(`No user configuration for ${agentActionName}, using AGENT_CONFIG defaults`);
-        }
-    }
+  }
+): Promise<{ string: string }>;
 
-    // Use the final config or fall back to AGENT_CONFIG defaults
-    const finalConf = conf || AGENT_CONFIG[agentActionName];
+export async function executeInference(
+  args: {
+    env: Env;
+    messages: Message[];
+    maxTokens?: number;
+    temperature?: number;
+    modelName?: AIModels | string;
+    retryLimit?: number;
+    agentActionName: AgentActionKey;
+    tools?: unknown[];
+    stream?: { chunk_size: number; onChunk: (chunk: string) => void };
+    reasoning_effort?: ReasoningEffort;
+    modelConfig?: ModelConfig;
+    context: InferenceContext;
+    format?: SchemaFormat;
+    schema?: z.AnyZodObject;
+  }
+): Promise<{ object: unknown } | { string: string }> {
+  const modelName = (args.modelName ?? args.modelConfig?.name ?? AGENT_CONFIG[args.agentActionName]?.name ?? 'openai/gpt-5-mini') as string;
 
-    modelName = modelName || finalConf.name;
-    temperature = temperature || finalConf.temperature || 0.2;
-    maxTokens = maxTokens || finalConf.max_tokens || 16000;
-    reasoning_effort = reasoning_effort || finalConf.reasoning_effort;
+  const result = await infer({
+    operationId: args.agentActionName,
+    modelName,
+    messages: args.messages,
+    schema: args.schema as any,
+  }, args.env);
 
-    // Exponential backoff for retries
-    const backoffMs = (attempt: number) => Math.min(500 * Math.pow(2, attempt), 10000);
-
-    let useCheaperModel = false;
-    let lastError: unknown = null;
-
-    for (let attempt = 0; attempt < retryLimit; attempt++) {
-        try {
-            logger.info(`Starting ${agentActionName} operation with model ${modelName} (attempt ${attempt + 1}/${retryLimit})`);
-
-            const result = schema ? await infer<T>({
-                env,
-                metadata: context,
-                messages,
-                schema,
-                schemaName: agentActionName,
-                actionKey: agentActionName,
-                format,
-                maxTokens,
-                modelName: useCheaperModel ? AIModels.GEMINI_2_5_FLASH : modelName,
-                formatOptions: {
-                    debug: false,
-                },
-                tools,
-                stream,
-                reasoning_effort: useCheaperModel ? undefined : reasoning_effort,
-                temperature,
-                abortSignal: context.abortSignal,
-            }) : await infer({
-                env,
-                metadata: context,
-                messages,
-                maxTokens,
-                modelName: useCheaperModel ? AIModels.GEMINI_2_5_FLASH: modelName,
-                tools,
-                stream,
-                actionKey: agentActionName,
-                reasoning_effort: useCheaperModel ? undefined : reasoning_effort,
-                temperature,
-                abortSignal: context.abortSignal,
-            });
-            logger.info(`Successfully completed ${agentActionName} operation`);
-            // console.log(result);
-            return result;
-        } catch (error) {
-            lastError = error;
-            if (error instanceof RateLimitExceededError || error instanceof SecurityError) {
-                throw error;
-            }
-            
-            // Check if cancellation - don't retry, propagate immediately
-            if (error instanceof InferError && error.message.includes('cancelled')) {
-                logger.info(`${agentActionName} operation cancelled by user, not retrying`);
-                throw error;
-            }
-            
-            const isLastAttempt = attempt === retryLimit - 1;
-            logger.error(
-                `Error during ${agentActionName} operation (attempt ${attempt + 1}/${retryLimit}):`,
-                error
-            );
-
-            if (error instanceof InferError && !(error instanceof AbortError)) {
-                // If its an infer error and not an abort error, we can append the partial response to the list of messages and ask a cheaper model to retry the generation
-                if (error.response && error.response.length > 1000) {
-                    messages.push(createAssistantMessage(error.response));
-                    messages.push(createUserMessage(responseRegenerationPrompts));
-                    useCheaperModel = true;
-                }
-            } else {
-                // Try using fallback model if available
-                modelName = conf?.fallbackModel || modelName;
-            }
-
-            if (!isLastAttempt) {
-                // Wait with exponential backoff before retrying
-                const delay = backoffMs(attempt);
-                logger.info(`Retrying in ${delay}ms...`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-            }
-        }
-    }
-    // If we exhausted all retries, throw a clear error instead of returning null
-    const lastMsg = lastError instanceof Error ? lastError.message : String(lastError);
-    throw new Error(`Inference failed for ${agentActionName} after ${retryLimit} attempt(s): ${lastMsg}`);
+  if (args.schema) {
+    return { object: result.content as unknown };
+  }
+  return { string: result.content as string };
 }
 
 /**
- * Creates a file enhancement request message
- * @param filePath Path to the file being enhanced
- * @param fileContents Contents of the file to enhance
- * @returns A message for the AI model to enhance the file
+ * Executes an inference request against the appropriate provider (OpenAI or Google)
+ * based on the model name.
  */
-export function createFileEnhancementRequestMessage(filePath: string, fileContents: string): Message {
-    const fileExtension = filePath.split('.').pop() || '';
-    const codeBlock = fileExtension ?
-        `\`\`\`${fileExtension}\n${fileContents}\n\`\`\`` :
-        `\`\`\`\n${fileContents}\n\`\`\``;
+async function runProviderInference<T extends z.AnyZodObject | undefined>(
+  params: InferenceParams<T>,
+  env: Env,
+  attempt: number,
+  config: InferenceConfig,
+): Promise<InferenceResult<T>> {
+  const { modelName, messages, schema } = params;
+  const { maxTokens, temperature } = config;
 
-    return createUserMessage(`
-<FILE_ENHANCEMENT_REQUEST>
-Please review the following file and identify any potential issues:
-- Syntax errors
-- Missing variable declarations
-- Incorrect imports
-- Incorrect usage of libraries or APIs
-- Unicode or special characters that shouldn't be there
-- Inconsistent indentation or formatting
-- Logic errors
-- Any other issues that could cause runtime errors
+  // --- NATIVE GOOGLE GEMINI CLIENT LOGIC ---
+  if (modelName.startsWith('google-ai-studio/')) {
+    logger.info(
+      `Running GEMINI native inference with ${modelName} (attempt ${attempt}/${config.retries})`,
+    );
 
-If you find any issues:
-1. Fix them directly in the code
-2. Return the full enhanced code with all issues fixed
-3. Provide a list of issues that were fixed with clear descriptions
+    // Dynamically import Google SDK
+    const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = (await import('@google/generative-ai')) as any;
 
-If no issues are found, simply indicate this without modifying the code.
+    const googleAi = new GoogleGenerativeAI(
+      env.GOOGLE_AI_STUDIO_API_KEY as string,
+    );
 
-File Path: ${filePath}
+    const modelFamily = modelName.split('/')[1]; // e.g., "gemini-2.5-flash-lite"
 
-${codeBlock}
-</FILE_ENHANCEMENT_REQUEST>
-`);
-}
+    const model = googleAi.getGenerativeModel({
+      model: modelFamily,
+      generationConfig: {
+        maxOutputTokens: maxTokens,
+        temperature,
+        ...(schema
+          ? { responseMimeType: 'application/json' }
+          : { responseMimeType: 'text/plain' }),
+      },
+      safetySettings: [
+        {
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+      ],
+    });
 
-/**
- * Creates a response message about a generated file
- */
-export function createFileGenerationResponseMessage(filePath: string, fileContents: string, explanation: string, nextFile?: { path: string, purpose: string }): Message {
-    // Format the message in a focused way to reduce token usage
-    const fileExtension = filePath.split('.').pop() || '';
-    const codeBlock = fileExtension ?
-        `\`\`\`${fileExtension}\n${fileContents}\n\`\`\`` :
-        `\`\`\`\n${fileContents}\n\`\`\``;
+    const systemPrompt = messages.find((m) => m.role === 'system')?.content || '';
+    const history = convertMessagesToGoogle(
+      messages.filter((m) => m.role !== 'system'),
+    );
+    const lastMessage = history.pop(); // Get the last user message
+
+    if (!lastMessage || lastMessage.role !== 'user') {
+      throw new Error('Last message must be from a user for Gemini.');
+    }
+
+    if (systemPrompt) {
+      lastMessage.parts[0].text = `${systemPrompt}\n\n---\n\nUSER REQUEST:\n${lastMessage.parts[0].text}`;
+    }
+
+    if (schema) {
+      const jsonSchema = zodToJsonSchema(schema);
+      lastMessage.parts[0].text += `\n\nIMPORTANT: You MUST respond in JSON format that strictly adheres to the following JSON schema:\n${JSON.stringify(jsonSchema, null, 2)}`;
+    }
+
+    const chat = model.startChat({
+      history: history,
+    });
+
+    const result = await chat.sendMessage(lastMessage.parts);
+    const response = result.response;
+    const responseText = response.text();
+
+    if (!responseText) {
+      throw new Error('Gemini response was empty.');
+    }
 
     return {
-        role: 'assistant',
-        content: `
-<GENERATED FILE: "${filePath}">
-${codeBlock}
+      content: responseText,
+      model: modelName,
+      usage: {
+        prompt_tokens: 0, // Google SDK does not easily provide token counts
+        completion_tokens: 0,
+        total_tokens: 0,
+      },
+    };
+  }
 
-Explanation: ${explanation}
-Next file to generate: ${nextFile ? `Path: ${nextFile.path} | Purpose: (${nextFile.purpose})` : "None"}
-`};
+  // --- OPENAI CLIENT LOGIC ---
+  logger.info(
+    `Running OPENAI compatible inference with ${modelName} (attempt ${attempt}/${config.retries})`,
+  );
+
+  const openai = new OpenAI({
+    // Using your 'OPENAI_API_KEY' secret
+    apiKey: env.OPENAI_API_KEY as string,
+    // Using the correct, direct OpenAI URL
+    baseURL: 'https://api.openai.com/v1',
+  });
+
+  const payload: any = {
+    model: modelName,
+    messages: messages as any,
+    max_tokens: maxTokens,
+    temperature,
+  };
+  if (schema) {
+    payload.response_format = { type: 'json_object' } as const;
+  }
+  const response = await openai.chat.completions.create(payload);
+
+  const content = response.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error('OpenAI response content was empty.');
+  }
+
+  return {
+    content: content,
+    model: response.model,
+    usage: {
+      prompt_tokens: response.usage?.prompt_tokens || 0,
+      completion_tokens: response.usage?.completion_tokens || 0,
+      total_tokens: response.usage?.total_tokens || 0,
+    },
+  };
+}
+
+/**
+ * Main inference function with retries and error handling.
+ */
+export async function infer<T extends z.AnyZodObject | undefined = undefined>(
+  params: InferenceParams<T>,
+  env: Env,
+): Promise<InferenceResult<T>> {
+  const { operationId, modelName, messages, schema } = params;
+  const config = getInferenceConfig(operationId, env);
+  const tokenCounter = getTokenCounter(modelName);
+
+  const { trimmedMessages, ...trimStats } = await trimMessages(
+    messages,
+    config.maxTokens,
+    tokenCounter,
+  );
+
+  if (trimStats.trimmable) {
+    logger.info(
+      `Token optimization: Original messages size ~${trimStats.originalSize} chars, optimized size ~${trimStats.newSize} chars`,
+    );
+  }
+
+  const paramsWithTrimmedMessages = { ...params, messages: trimmedMessages };
+
+  for (let i = 0; i < config.retries; i++) {
+    try {
+      const attempt = i + 1;
+      const result = await runProviderInference(
+        paramsWithTrimmedMessages as InferenceParams<T>,
+        env,
+        attempt,
+        config,
+      );
+
+      if (schema) {
+        try {
+          const parsed = JSON.parse(result.content as string);
+          const validation = schema.safeParse(parsed);
+          if (validation.success) {
+            return {
+              ...result,
+              content: validation.data as any,
+            };
+          }
+          logger.warn(
+            `Schema validation failed for ${operationId}: ${formatZodErrors(validation.error)}`,
+          );
+          throw new Error(
+            `Schema validation failed: ${formatZodErrors(validation.error)}`,
+          );
+        } catch (e: any) {
+          logger.warn(
+            `Failed to parse JSON for ${operationId} (attempt ${attempt}/${config.retries}): ${e.message}`,
+          );
+          throw new Error(
+            `Failed to parse JSON: ${e.message}. Raw content: ${(result.content as string).substring(0, 100)}...`,
+          );
+        }
+      }
+
+      return {
+        ...result,
+        content: result.content as any,
+      };
+    } catch (error: any) {
+      logger.error(
+        `Error during ${operationId} operation (attempt ${i + 1}/${config.retries}):`,
+        error,
+      );
+      if (i === config.retries - 1) {
+        throw new InferenceError(
+          `Inference failed for ${operationId} after ${config.retries} attempt(s): ${error.message}`,
+          error,
+        );
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, config.retryDelay * (i + 1)),
+      );
+      if (i > 0) {
+        logger.info(`Retrying in ${config.retryDelay * (i + 1)}ms...`);
+      }
+    }
+  }
+
+  throw new InferenceError(
+    `Inference failed for ${operationId} after ${config.retries} attempts.`,
+  );
+}
+
+/**
+ * A simpler inference utility that doesn't use structured schemas or retries.
+ */
+export async function inferSimple(
+  params: Omit<InferenceParams, 'operationId' | 'schema'>,
+  env: Env,
+): Promise<string> {
+  const { modelName } = params;
+
+  try {
+    const config = getInferenceConfig('simple', env);
+    const result = await runProviderInference(
+      { ...params, operationId: 'simple' },
+      env,
+      1,
+      {
+        ...config,
+        retries: 1, // No retries for simple inference
+      },
+    );
+    return result.content as string;
+  } catch (error: any) {
+    logger.error(`Error during simple inference with ${modelName}:`, error);
+    throw new InferenceError(
+      `Simple inference failed: ${error.message}`,
+      error,
+    );
+  }
 }

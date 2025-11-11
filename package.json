@@ -84,6 +84,8 @@
 		"diff": "^8.0.2",
 		"dotenv": "^17.2.3",
 		"drizzle-orm": "^0.44.7",
+		"@google/generative-ai": "^0.21.0",
+		"zod-to-json-schema": "^3.23.0",
 		"embla-carousel-react": "^8.6.0",
 		"esbuild": "^0.25.12",
 		"eslint-import-resolver-typescript": "^4.4.4",
