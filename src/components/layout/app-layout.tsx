@@ -14,14 +14,15 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const { pathname } = useLocation();
   const { user } = useAuth();
-  // Open the sidebar by default when authenticated (including on "/");
+  // Collapse the sidebar by default on the landing page, open elsewhere when authenticated.
   // Remount provider on auth state change so defaultOpen is reapplied.
   const sidebarKey = `sidebar-${Boolean(user)}`;
+  const defaultOpen = pathname !== '/' && Boolean(user);
   return (
     <AppsDataProvider>
       <SidebarProvider 
         key={sidebarKey}
-        defaultOpen={Boolean(user)}
+        defaultOpen={defaultOpen}
         style={{
           "--sidebar-width": "320px",
           "--sidebar-width-mobile": "280px",

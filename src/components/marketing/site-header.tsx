@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router'
 import { useAuthGuard } from '@/hooks/useAuthGuard'
 import { useAuth } from '@/contexts/auth-context'
 import { AuthButton } from '@/components/auth/auth-button'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 
 export type MarketingHeaderProps = {
   onStart?: () => void
@@ -37,8 +38,9 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
       <div className="pointer-events-auto backdrop-blur supports-backdrop:backdrop-blur-md bg-bg-3/40 dark:bg-bg-2/40 border-b border-accent/20">
         <div className="mx-auto max-w-7xl px-4">
           <div className="h-14 flex items-center justify-between gap-4">
-            {/* Brand */}
+            {/* Brand + Sidebar toggle */}
             <div className="flex items-center gap-2 select-none">
+              <SidebarTrigger className="hidden md:inline-flex text-text-secondary hover:text-text-primary" />
               <div className="text-lg font-semibold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-violet-500 bg-clip-text text-transparent">web4.sbs</div>
             </div>
 
