@@ -130,8 +130,12 @@
 	],
     "routes": [
         {
-            "pattern": "web4.sbs",
-            "custom_domain": true
+            "pattern": "web4.sbs/*",
+            "zone_id": "f481a370822f702e7b36a915151800b0"
+        },
+        {
+            "pattern": "*.web4.sbs/*",
+            "zone_id": "f481a370822f702e7b36a915151800b0"
         }
     ],
     "vars": {
