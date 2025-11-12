@@ -3,7 +3,7 @@ import { createAssistantMessage, createSystemMessage, createUserMessage } from "
 import { FileOutputType, PhaseConceptType } from "../schemas";
 import { CodeSerializerType } from "../utils/codeSerializers";
 import { createObjectLogger } from "../../logger";
-import { executeInference } from "../inferutils/infer";
+import { executeInference } from "../inferutils/core";
 import { PROMPT_UTILS } from "../prompts";
 import Assistant from "./assistant";
 import { applySearchReplaceDiff } from "../output-formats/diff-formats";
@@ -491,7 +491,7 @@ ${block.error}
             const llmResponse = await infer({
                 env: this.env,
                 metadata: this.inferenceContext,
-                modelName: AIModels.OPENAI_O4_MINI,
+modelName: AIModels.CF_LLAMA_3_1_8B,
                 reasoning_effort: 'low',
                 temperature: 0.0,
                 maxTokens: 10000,

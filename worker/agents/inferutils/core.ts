@@ -15,7 +15,8 @@ import {
 } from 'openai/resources.mjs';
 import { Message, MessageContent, MessageRole } from './common';
 import { ToolCallResult, ToolDefinition } from '../tools/types';
-import { AgentActionKey, AIModels, InferenceMetadata } from './config.types';
+import { AGENT_CONFIG } from './config';
+import { AgentActionKey, AIModels, InferenceMetadata, InferenceContext } from './config.types';
 // import { SecretsService } from '../../database';
 import { RateLimitService } from '../../services/rate-limit/rateLimits';
 import { getUserConfigurableSettings } from '../../config';
@@ -224,75 +225,33 @@ function isValidApiKey(apiKey: string): boolean {
     return true;
 }
 
-async function getApiKey(provider: string, env: Env, _userId: string): Promise<string> {
-    console.log("Getting API key for provider: ", provider);
-    // Resolve environment variable name from provider (e.g., openai -> OPENAI_API_KEY)
-    const providerKeyString = provider.toUpperCase().replaceAll('-', '_');
-    const envKey = `${providerKeyString}_API_KEY` as keyof Env;
-    const apiKey: string = env[envKey] as string;
-
-    if (!isValidApiKey(apiKey)) {
-        throw new Error(`Missing or invalid API key for provider '${provider}'. Expected environment variable: ${envKey}`);
-    }
-    return apiKey;
-}
 
 export async function getConfigurationForModel(
-    model: AIModels | string,
+    _model: AIModels | string,
     env: Env,
-    userId: string,
+    _userId: string,
 ): Promise<{
     baseURL: string,
     apiKey: string,
     defaultHeaders?: Record<string, string>,
 }> {
-    // Optional provider override via [provider] prefix
-    let providerOverride: string | undefined;
-    const match = String(model).match(/\[(.*?)\]/);
-    if (match) {
-        providerOverride = match[1];
-    }
+    // Always route via Cloudflare AI Gateway to Cloudflare Workers AI provider
+    // Accept any model name (including '@cf/...') and forward it unchanged to the OpenAI-compatible endpoint
+    const baseURL = await buildGatewayUrl(env);
 
-    // Clean model (strip override) and extract provider (e.g., "openai/gpt-5-mini")
-    const cleanModel = String(model).replace(/\[.*?\]/, '').trim();
-    const provider = (providerOverride || cleanModel.split('/')[0]).toLowerCase();
+    // Optional token for Gateway auth (created by setup script); if absent, omit Authorization header
+    const gatewayToken = (env.CLOUDFLARE_AI_GATEWAY_TOKEN as string) || '';
 
-    // Route directly to official provider endpoints (no Cloudflare AI Gateway)
-    // OpenAI official endpoint
-    if (provider === 'openai') {
-        return {
-            baseURL: 'https://api.openai.com/v1',
-            apiKey: await getApiKey('openai', env, userId),
-        };
-    }
-
-    // Google AI Studio (Gemini) - OpenAI compatibility endpoint
-    if (provider === 'google-ai-studio' || provider === 'gemini') {
-        // Support both GOOGLE_AI_STUDIO_API_KEY and GEMINI_API_KEY for flexibility
-        const apiKey = (env.GOOGLE_AI_STUDIO_API_KEY || (env as any).GEMINI_API_KEY) as string;
-        if (!isValidApiKey(apiKey)) {
-            // Throw a clear error referencing the expected default var
-            await getApiKey('google-ai-studio', env, userId); // will throw
-        }
-        return {
-            baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
-            apiKey: apiKey!,
-        };
-    }
-
-    // OpenRouter (still optional direct route)
-    if (provider === 'openrouter') {
-        return {
-            baseURL: 'https://openrouter.ai/api/v1',
-            apiKey: await getApiKey('openrouter', env, userId),
-        };
-    }
-
-    // Default: use OpenAI
-    return {
-        baseURL: 'https://api.openai.com/v1',
-        apiKey: await getApiKey('openai', env, userId),
+    const result: { baseURL: string; apiKey: string; defaultHeaders?: Record<string, string> } = {
+        baseURL,
+        apiKey: gatewayToken,
     };
+
+    if (isValidApiKey(gatewayToken)) {
+        result.defaultHeaders = { Authorization: `Bearer ${gatewayToken}` };
+    }
+
+    return result;
 }
 
 type InferArgsBase = {
@@ -377,6 +336,99 @@ export class AbortError extends InferError {
         super(response, response, toolCallContext);
         this.name = 'AbortError';
     }
+}
+
+// Backwards-compat wrapper: support previous executeInference signature used across codebase
+export function executeInference<T extends z.AnyZodObject>(args: {
+    env: Env;
+    messages: Message[];
+    maxTokens?: number;
+    temperature?: number;
+    modelName?: AIModels | string;
+    retryLimit?: number; // ignored; core handles retries internally
+    agentActionName: AgentActionKey | 'testModelConfig';
+    tools?: ToolDefinition<any, any>[];
+    stream?: { chunk_size: number; onChunk: (chunk: string) => void };
+    reasoning_effort?: ReasoningEffort;
+    modelConfig?: { name: AIModels | string; max_tokens?: number; temperature?: number; reasoning_effort?: ReasoningEffort };
+    context: InferenceContext;
+    format?: SchemaFormat;
+    schema: T;
+}): Promise<{ object: z.infer<T> }>;
+export function executeInference(args: {
+    env: Env;
+    messages: Message[];
+    maxTokens?: number;
+    temperature?: number;
+    modelName?: AIModels | string;
+    retryLimit?: number; // ignored
+    agentActionName: AgentActionKey | 'testModelConfig';
+    tools?: ToolDefinition<any, any>[];
+    stream?: { chunk_size: number; onChunk: (chunk: string) => void };
+    reasoning_effort?: ReasoningEffort;
+    modelConfig?: { name: AIModels | string; max_tokens?: number; temperature?: number; reasoning_effort?: ReasoningEffort };
+    context: InferenceContext;
+    format?: SchemaFormat;
+}): Promise<{ string: string }>;
+export async function executeInference(args: {
+    env: Env;
+    messages: Message[];
+    maxTokens?: number;
+    temperature?: number;
+    modelName?: AIModels | string;
+    retryLimit?: number;
+    agentActionName: AgentActionKey | 'testModelConfig';
+    tools?: ToolDefinition<any, any>[];
+    stream?: { chunk_size: number; onChunk: (chunk: string) => void };
+    reasoning_effort?: ReasoningEffort;
+    modelConfig?: { name: AIModels | string; max_tokens?: number; temperature?: number; reasoning_effort?: ReasoningEffort };
+    context: InferenceContext;
+    format?: SchemaFormat;
+    schema?: z.AnyZodObject;
+}): Promise<{ object: unknown } | { string: string }> {
+    const {
+        env,
+        messages,
+        maxTokens,
+        temperature,
+        modelName,
+        agentActionName,
+        tools,
+        stream,
+        reasoning_effort,
+        modelConfig,
+        context,
+        format,
+        schema,
+    } = args as any;
+
+    // Choose model in priority order: explicit -> modelConfig -> AGENT_CONFIG -> fallback CF llama 8b
+    let effectiveModel: string = (modelName as string)
+        || (modelConfig?.name as string)
+        || (AGENT_CONFIG as any)[agentActionName]?.name
+        || (AIModels.CF_LLAMA_3_1_8B as string);
+
+    const result = await infer({
+        env,
+        metadata: { agentId: context.agentId, userId: context.userId },
+        messages,
+        schema: schema as any,
+        schemaName: schema ? (agentActionName as string) : undefined,
+        actionKey: (agentActionName as any),
+        format,
+        maxTokens,
+        modelName: effectiveModel,
+        stream,
+        tools: tools as any,
+        reasoning_effort,
+        temperature,
+        abortSignal: context.abortSignal,
+    } as any);
+
+    if (schema) {
+        return { object: (result as any).object } as any;
+    }
+    return { string: (result as any).string } as any;
 }
 
 const claude_thinking_budget_tokens = {
@@ -593,9 +645,8 @@ export async function infer<OutputSchema extends z.AnyZodObject>({
             let attempt = 0;
             while (true) {
                 try {
-                    // Call OpenAI API with proper structured output format
-                    // OpenAI Chat Completions expects a provider-less model id (e.g., "o4-mini")
-                    const openaiModel = modelName.includes('/') ? modelName.split('/')[1] : modelName;
+                    // Call OpenAI-compatible API via Cloudflare AI Gateway (Workers AI provider)
+                    const openaiModel = modelName; // Do not strip provider prefix; Gateway accepts '@cf/...'
                     response = await client.chat.completions.create({
                         ...schemaObj,
                         ...extraBody,

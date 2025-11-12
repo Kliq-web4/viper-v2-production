@@ -1,6 +1,6 @@
 import { ConversationalResponseType } from "../schemas";
 import { createAssistantMessage, createUserMessage, createMultiModalUserMessage, MessageRole, mapImagesInMultiModalMessage } from "../inferutils/common";
-import { executeInference } from "../inferutils/infer";
+import { executeInference } from '../../agents/inferutils/core';
 import type { ChatCompletionMessageFunctionToolCall } from 'openai/resources';
 import { WebSocketMessageResponses } from "../constants";
 import { WebSocketMessageData } from "../../api/websocketTypes";

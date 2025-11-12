@@ -1,7 +1,7 @@
 import { createSystemMessage, createUserMessage, createMultiModalUserMessage } from '../inferutils/common';
 import { TemplateListResponse} from '../../services/sandbox/sandboxTypes';
 import { createLogger } from '../../logger';
-import { executeInference } from '../inferutils/infer';
+import { executeInference } from '../inferutils/core';
 import { InferenceContext } from '../inferutils/config.types';
 import { RateLimitExceededError, SecurityError } from 'shared/types/errors';
 import { TemplateSelection, TemplateSelectionSchema } from '../../agents/schemas';

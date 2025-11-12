@@ -1,7 +1,7 @@
 import { PhaseConceptType, FileOutputType, PhaseConceptSchema } from '../schemas';
 import { IssueReport } from '../domain/values/IssueReport';
 import { createUserMessage, createMultiModalUserMessage } from '../inferutils/common';
-import { executeInference } from '../inferutils/infer';
+import { executeInference } from '../inferutils/core';
 import { issuesPromptFormatter, PROMPT_UTILS, STRATEGIES } from '../prompts';
 import { CodeGenerationStreamingState } from '../output-formats/streaming-formats/base';
 import { FileProcessing } from '../domain/pure/FileProcessing';

@@ -170,16 +170,17 @@ export class ModelTestService extends BaseService {
     /**
      * Get a simple test model for a given provider
      */
-    private getTestModelForProvider(provider: string): string | null {
+private getTestModelForProvider(provider: string): string | null {
         const testModels: Record<string, string> = {
-            'openai': AIModels.OPENAI_5_MINI,
-            'anthropic': AIModels.CLAUDE_4_SONNET,
-            'google-ai-studio': AIModels.GEMINI_2_5_FLASH,
-            'gemini': AIModels.GEMINI_2_5_FLASH,
-            // 'openrouter': AIModels.OPENROUTER_QWEN_3_CODER, // Removed - not available
-            'cerebras': AIModels.CEREBRAS_GPT_OSS
+            // Route all provider tests through Workers AI via Gateway
+            'cloudflare': AIModels.CF_LLAMA_3_1_8B,
+            'openai': AIModels.CF_LLAMA_3_1_8B,
+            'anthropic': AIModels.CF_LLAMA_3_1_8B,
+            'google-ai-studio': AIModels.CF_LLAMA_3_1_8B,
+            'gemini': AIModels.CF_LLAMA_3_1_8B,
+            'cerebras': AIModels.CF_LLAMA_3_1_8B,
         };
 
-        return testModels[provider] || null;
+        return testModels[provider] || AIModels.CF_LLAMA_3_1_8B;
     }
 }

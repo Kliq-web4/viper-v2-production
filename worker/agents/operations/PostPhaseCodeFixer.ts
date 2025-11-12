@@ -1,5 +1,5 @@
 import { createSystemMessage, createUserMessage } from '../inferutils/common';
-import { executeInference } from '../inferutils/infer';
+import { executeInference } from '../inferutils/core';
 import { PROMPT_UTILS } from '../prompts';
 import { AgentOperation, OperationOptions } from './common';
 import { FileOutputType, PhaseConceptType } from '../schemas';

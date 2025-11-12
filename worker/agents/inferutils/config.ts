@@ -70,55 +70,55 @@ OR
 export const AGENT_CONFIG: AgentConfig = {
     // Planning / selection should be cheap and fast
     templateSelection: {
-        name: AIModels.OPENAI_5_MINI,
+        name: AIModels.CF_LLAMA_3_1_8B,
         max_tokens: 2000,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
         temperature: 0.6,
     },
-    // Bootstrapping and blueprint use GPT-5-mini
+    // Bootstrapping and blueprint
     blueprint: {
-        name: AIModels.OPENAI_5_MINI,
+        name: AIModels.CF_LLAMA_3_1_8B,
         reasoning_effort: 'medium',
         max_tokens: 64000,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
         temperature: 0.7,
     },
     projectSetup: {
-        name: AIModels.OPENAI_5_MINI,
+        name: AIModels.CF_LLAMA_3_1_8B,
         reasoning_effort: 'low',
         max_tokens: 10000,
         temperature: 0.2,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
-    // Phase planning uses mini
+    // Phase planning uses smaller model
     phaseGeneration: {
-        name: AIModels.OPENAI_5_MINI,
+        name: AIModels.CF_LLAMA_3_1_8B,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
-    // Main code generation uses GPT-5
+    // Main code generation uses a stronger coder model
     firstPhaseImplementation: {
-        name: AIModels.OPENAI_5,
+        name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'low',
         max_tokens: 64000,
         temperature: 0.2,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
     phaseImplementation: {
-        name: AIModels.OPENAI_5,
+        name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'low',
         max_tokens: 64000,
         temperature: 0.2,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
     realtimeCodeFixer: {
         name: AIModels.DISABLED,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 1,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
     // Not used right now
     fastCodeFixer: {
@@ -126,43 +126,43 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: undefined,
         max_tokens: 64000,
         temperature: 0.0,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
     conversationalResponse: {
-        name: AIModels.OPENAI_5_MINI,
+        name: AIModels.CF_LLAMA_3_1_8B,
         reasoning_effort: 'low',
         max_tokens: 4000,
         temperature: 0,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
     deepDebugger: {
-        name: AIModels.OPENAI_5,
+        name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 0.5,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
     codeReview: {
-        name: AIModels.OPENAI_5,
+        name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.1,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
     fileRegeneration: {
-        name: AIModels.OPENAI_5_MINI,
+        name: AIModels.CF_LLAMA_3_1_8B,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 0,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
     // Not used right now
     screenshotAnalysis: {
-        name: AIModels.OPENAI_5_MINI,
+        name: AIModels.CF_LLAMA_3_1_8B,
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: AIModels.OPENAI_5_MINI,
+        fallbackModel: AIModels.CF_LLAMA_3_1_8B,
     },
 };
 

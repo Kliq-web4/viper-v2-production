@@ -1,7 +1,7 @@
 import { PhaseConceptGenerationSchema, PhaseConceptGenerationSchemaType } from '../schemas';
 import { IssueReport } from '../domain/values/IssueReport';
 import { createUserMessage, createMultiModalUserMessage } from '../inferutils/common';
-import { executeInference } from '../inferutils/infer';
+import { executeInference } from '../inferutils/core';
 import { issuesPromptFormatter, PROMPT_UTILS, STRATEGIES } from '../prompts';
 import { Message } from '../inferutils/common';
 import { AgentOperation, getSystemPromptWithProjectContext, OperationOptions } from '../operations/common';

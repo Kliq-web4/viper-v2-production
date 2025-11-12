@@ -6,7 +6,7 @@ import {
     createUserMessage,
     Message,
 } from '../inferutils/common';
-import { executeInference } from '../inferutils/infer';
+import { executeInference } from '../inferutils/core';
 import { InferenceContext, ModelConfig } from '../inferutils/config.types';
 import { createObjectLogger } from '../../logger';
 import type { ToolDefinition } from '../tools/types';

@@ -3,7 +3,7 @@ import { SetupCommandsType, type Blueprint } from "../schemas";
 import { createObjectLogger, StructuredLogger } from '../../logger';
 import { generalSystemPromptBuilder, PROMPT_UTILS } from '../prompts';
 import { createAssistantMessage, createSystemMessage, createUserMessage } from "../inferutils/common";
-import { executeInference, } from "../inferutils/infer";
+import { executeInference } from "../inferutils/core";
 import Assistant from "./assistant";
 import { AIModels, InferenceContext } from "../inferutils/config.types";
 import { extractCommands } from "../utils/common";
@@ -125,7 +125,7 @@ ${error}`);
                 messages,
                 agentActionName: "projectSetup",
                 context: this.inferenceContext,
-                modelName: error? AIModels.GEMINI_2_5_FLASH : undefined,
+modelName: error ? AIModels.CF_LLAMA_3_1_8B : undefined,
             });
             this.logger.info(`Generated setup commands: ${results.string}`);
 
