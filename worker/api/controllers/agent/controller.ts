@@ -15,6 +15,7 @@ import { getPreviewDomain } from 'worker/utils/urls';
 import { ImageType, uploadImage } from 'worker/utils/images';
 import { ProcessedImageAttachment } from 'worker/types/image-attachment';
 import { getTemplateImportantFiles } from 'worker/services/sandbox/utils';
+import { WebSocketTokenService } from '../../../services/auth/WebSocketTokenService';
 
 const defaultCodeGenArgs: CodeGenArgs = {
     query: '',
@@ -113,7 +114,10 @@ export class CodingAgentController extends BaseController {
 
             const { templateDetails, selection } = await getTemplateForQuery(env, inferenceContext, query, body.images, this.logger);
 
-            const websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws`;
+            // Issue a short-lived, single-use WS token to authenticate the WS upgrade
+            const wsTokenService = new WebSocketTokenService(env);
+            const wsToken = await wsTokenService.issue(user.id, agentId, 60);
+            const websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws?token=${encodeURIComponent(wsToken)}`;
             const httpStatusUrl = `${url.origin}/api/agent/${agentId}`;
 
             let uploadedImages: ProcessedImageAttachment[] = [];
@@ -278,7 +282,11 @@ export class CodingAgentController extends BaseController {
 
                 // Construct WebSocket URL
                 const url = new URL(request.url);
-                const websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws`;
+                // Issue a short-lived, single-use WS token to authenticate the WS upgrade
+                const wsTokenService = new WebSocketTokenService(env);
+                const user = context.user!;
+                const wsToken = await wsTokenService.issue(user.id, agentId, 60);
+                const websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws?token=${encodeURIComponent(wsToken)}`;
 
                 const responseData: AgentConnectionData = {
                     websocketUrl,
