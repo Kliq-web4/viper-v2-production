@@ -1,4 +1,4 @@
-import { OpenAI } from 'openai';
+import OpenAI from 'openai';
 // Note: We will dynamically import the Google SDK to avoid build-time resolution issues
 // when the dependency is not present during typecheck in some environments.
 import { z } from 'zod';
@@ -249,45 +249,114 @@ async function runProviderInference<T extends z.AnyZodObject | undefined>(
     };
   }
 
-  // --- OPENAI CLIENT LOGIC ---
+  // --- OPENAI CLIENT LOGIC (Responses API) ---
   logger.info(
-    `Running OPENAI compatible inference with ${modelName} (attempt ${attempt}/${config.retries})`,
+    `Running OPENAI Responses API with ${modelName} (attempt ${attempt}/${config.retries})`,
   );
 
   const openai = new OpenAI({
-    // Using your 'OPENAI_API_KEY' secret
     apiKey: env.OPENAI_API_KEY as string,
-    // Using the correct, direct OpenAI URL
     baseURL: 'https://api.openai.com/v1',
   });
 
-  // OpenAI Chat Completions expects a provider-less model id (e.g., "o4-mini")
+  // Responses API expects a provider-less model id (e.g., "o4-mini", "gpt-5")
   const openaiModel = modelName.includes('/') ? modelName.split('/')[1] : modelName;
-  const payload: any = {
+
+  // Extract system messages as high-priority instructions
+  const systemInstructions = (messages || [])
+    .filter((m) => m.role === 'system' && typeof m.content === 'string')
+    .map((m) => m.content as string)
+    .join('\n\n');
+
+  // Map remaining messages to Responses API input format
+  const input = (messages || [])
+    .filter((m) => m.role !== 'system')
+    .map((m) => {
+      const role = m.role === 'assistant' ? 'assistant' : 'user';
+      let content: string = '';
+      if (typeof m.content === 'string') {
+        content = m.content as string;
+      } else if (Array.isArray(m.content)) {
+        // Flatten multimodal content to text for now
+        content = m.content
+          .map((c: any) => (c?.type === 'text' ? c.text : '[image]'))
+          .join('\n');
+      }
+      return { role, content } as any;
+    });
+
+  const request: any = {
     model: openaiModel,
-    messages: messages as any,
-    max_tokens: maxTokens,
-    temperature,
+    input,
   };
+
+  // Temperature and token limits (Responses API uses max_output_tokens)
+  if (typeof temperature === 'number') request.temperature = temperature;
+  if (typeof maxTokens === 'number') request.max_output_tokens = maxTokens;
+
+  // If a JSON schema is provided, request structured output
   if (schema) {
-    payload.response_format = { type: 'json_object' } as const;
+    const jsonSchema = zodToJsonSchema(schema as any);
+    request.response_format = {
+      type: 'json_schema',
+      json_schema: {
+        name: params.operationId || 'structured_output',
+        schema: jsonSchema,
+        strict: true,
+      },
+    } as const;
   }
-  const response = await openai.chat.completions.create(payload);
 
-  const content = response.choices[0]?.message?.content;
-  if (!content) {
-    throw new Error('OpenAI response content was empty.');
+  if (systemInstructions.length > 0) {
+    request.instructions = systemInstructions;
   }
 
-  return {
-    content: content,
-    model: response.model,
-    usage: {
-      prompt_tokens: response.usage?.prompt_tokens || 0,
-      completion_tokens: response.usage?.completion_tokens || 0,
-      total_tokens: response.usage?.total_tokens || 0,
-    },
-  };
+  try {
+    const response = await openai.responses.create(request);
+    const text = (response as any).output_text as string | undefined;
+    if (!text || text.length === 0) {
+      throw new Error('OpenAI Responses API returned empty output_text.');
+    }
+    // Usage metrics are different in Responses; default to 0 if missing
+    return {
+      content: text,
+      model: openaiModel,
+      usage: {
+        prompt_tokens: 0,
+        completion_tokens: 0,
+        total_tokens: 0,
+      },
+    };
+  } catch (err) {
+    // Fallback to Chat Completions if Responses API is unavailable
+    logger.warn('Responses API call failed; falling back to Chat Completions', err as any);
+    const chatPayload: any = {
+      model: openaiModel,
+      messages: messages as any,
+      temperature,
+    };
+    if (typeof maxTokens === 'number') {
+      // Chat Completions uses max_tokens
+      chatPayload.max_tokens = maxTokens;
+    }
+    if (schema) {
+      chatPayload.response_format = { type: 'json_object' } as const;
+    }
+    const chat = await openai.chat.completions.create(chatPayload);
+    const content = chat.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('OpenAI fallback (Chat Completions) returned empty content.');
+    }
+    return {
+      content,
+      model: chat.model,
+      usage: {
+        prompt_tokens: chat.usage?.prompt_tokens || 0,
+        completion_tokens: chat.usage?.completion_tokens || 0,
+        total_tokens: chat.usage?.total_tokens || 0,
+      },
+    };
+  }
 }
 
 /**
