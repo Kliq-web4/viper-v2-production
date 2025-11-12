@@ -567,8 +567,25 @@ export class DeploymentManager extends BaseAgentService implements IDeploymentMa
      */
     private async createNewInstance(): Promise<BootstrapResponse | null> {
         const state = this.getState();
-        const templateName = state.templateName;
-        const projectName = state.projectName;
+        let templateName = state.templateName;
+        let projectName = state.projectName || `app-${generateId()}`;
+
+        // Fallback: if template not set, pick first available template from catalog
+        if (!templateName || templateName.trim() === '') {
+            try {
+                const catalog = await BaseSandboxService.listTemplates();
+                if (catalog.success && catalog.templates.length > 0) {
+                    templateName = catalog.templates[0].name;
+                    this.setState({ ...this.getState(), templateName });
+                    this.getLog().info('Template name not set — using first available template from catalog', { templateName });
+                } else {
+                    throw new Error('No templates available in catalog');
+                }
+            } catch (e) {
+                this.getLog().error('Failed to select fallback template', e);
+                throw new Error('No template available to create sandbox instance');
+            }
+        }
 
         // Add AI proxy vars if AI template
         let localEnvVars: Record<string, string> = {};

@@ -200,8 +200,9 @@ export async function buildGatewayUrl(env: Env, providerOverride?: AIGatewayProv
             const url = new URL(env.CLOUDFLARE_AI_GATEWAY_URL);
             // Validate it's actually an HTTP/HTTPS URL
             if (url.protocol === 'http:' || url.protocol === 'https:') {
-                // Add 'providerOverride' as a segment to the URL
-                const cleanPathname = url.pathname.replace(/\/$/, ''); // Remove trailing slash
+                // Normalize path: strip any trailing provider/compat segment, ensure no trailing slash
+                let cleanPathname = url.pathname.replace(/\/$/, '');
+                cleanPathname = cleanPathname.replace(/\/(cloudflare|compat|openai|anthropic|google|openrouter)$/i, '');
                 url.pathname = providerOverride ? `${cleanPathname}/${providerOverride}` : `${cleanPathname}/compat`;
                 return url.toString();
             }
