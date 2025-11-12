@@ -5,7 +5,7 @@ import { generalSystemPromptBuilder, PROMPT_UTILS } from '../prompts';
 import { createAssistantMessage, createSystemMessage, createUserMessage } from "../inferutils/common";
 import { executeInference, } from "../inferutils/infer";
 import Assistant from "./assistant";
-import { AIModels, InferenceContext } from "../inferutils/config.types";
+import { InferenceContext } from "../inferutils/config.types";
 import { extractCommands } from "../utils/common";
 
 interface GenerateSetupCommandsArgs {
@@ -125,7 +125,7 @@ ${error}`);
                 messages,
                 agentActionName: "projectSetup",
                 context: this.inferenceContext,
-                modelName: error? AIModels.GEMINI_2_5_FLASH : undefined,
+                modelName: error ? 'google-ai-studio/gemini-2.5-flash' : undefined,
             });
             this.logger.info(`Generated setup commands: ${results.string}`);
 

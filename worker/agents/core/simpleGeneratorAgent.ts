@@ -1403,6 +1403,42 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         }
     }
 
+    /**
+     * Adds Supabase integration to the running app.
+     * For platform-managed Supabase (env.SUPABASE_URL/ANON_KEY), the sandbox
+     * will already receive these via DeploymentManager during instance creation.
+     * This method ensures an instance exists and returns a status message.
+     */
+    async addSupabaseIntegration(): Promise<{ success: boolean; message: string }> {
+        try {
+            const hasPlatformSupabase =
+                typeof this.env.SUPABASE_URL === 'string' && !!this.env.SUPABASE_URL &&
+                typeof this.env.SUPABASE_ANON_KEY === 'string' && !!this.env.SUPABASE_ANON_KEY;
+
+            // Ensure there's a sandbox instance to apply env/config if needed
+            if (!this.state.sandboxInstanceId) {
+                await this.deployToSandbox();
+            }
+
+            if (hasPlatformSupabase) {
+                this.logger().info('Supabase integration: platform credentials detected; no additional setup required');
+                return { success: true, message: 'Supabase integration acknowledged (platform-level credentials detected).' };
+            }
+
+            this.logger().info('Supabase integration triggered without platform credentials; expecting app-level env to be provided');
+            return {
+                success: true,
+                message: 'Supabase integration initiated. Provide VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in app settings if not already configured.'
+            };
+        } catch (e) {
+            this.logger().error('addSupabaseIntegration failed', e);
+            return {
+                success: false,
+                message: `Failed to add Supabase integration: ${e instanceof Error ? e.message : String(e)}`,
+            };
+        }
+    }
+
     getTotalFiles(): number {
         return this.fileManager.getGeneratedFilePaths().length + ((this.state.currentPhase || this.state.blueprint.initialPhase)?.files?.length || 0);
     }
