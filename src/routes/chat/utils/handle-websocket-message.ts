@@ -523,6 +523,19 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
                 setIsPreviewDeploying(false);
                 const finalPreviewURL = getPreviewUrl(message.previewURL, message.tunnelURL);
                 setPreviewUrl(finalPreviewURL);
+
+                // Mark the most recent phase as completed if not already (guards against rare missing phase_implemented)
+                setPhaseTimeline(prev => {
+                    if (prev.length === 0) return prev;
+                    const updated = [...prev];
+                    const last = updated[updated.length - 1];
+                    if (last.status !== 'completed') {
+                        last.status = 'completed';
+                        last.files = last.files.map(f => ({ ...f, status: 'completed' as const }));
+                    }
+                    return updated;
+                });
+
                 // Announce in chat
                 if (finalPreviewURL) {
                     sendMessage(createAIMessage('deployment_completed', `Preview is live: ${finalPreviewURL}`));
