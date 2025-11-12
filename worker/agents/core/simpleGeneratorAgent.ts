@@ -863,9 +863,29 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         });
         await this.ensureTemplateDetails();
 
+        // Ensure blueprint exists; if missing, synthesize a minimal initial phase from template important files
+        try {
+            if (!this.state.blueprint || !(this.state.blueprint as any).initialPhase) {
+                const td = await this.ensureTemplateDetails();
+                const fallbackFiles = (td.importantFiles || []).map((p) => ({ path: p, purpose: 'bootstrap' }));
+                const fallbackPhase: PhaseConceptType = {
+                    name: 'Initial Setup',
+                    description: 'Bootstrap project from template and prepare environment',
+                    files: fallbackFiles,
+                } as any;
+                this.setState({
+                    ...this.state,
+                    blueprint: { ...(this.state.blueprint as any), initialPhase: fallbackPhase } as any,
+                });
+                this.logger().warn('Blueprint missing; created fallback initial phase from template important files');
+            }
+        } catch (e) {
+            this.logger().error('Failed to ensure blueprint; continuing with fallback guard', e);
+        }
+
         let currentDevState = CurrentDevState.PHASE_IMPLEMENTING;
-        const generatedPhases = this.state.generatedPhases;
-        const incompletedPhases = generatedPhases.filter(phase => !phase.completed);
+        const generatedPhases = this.state.generatedPhases || [];
+        const incompletedPhases = generatedPhases.filter(phase => !!phase && !phase.completed);
         let phaseConcept : PhaseConceptType | undefined;
         if (incompletedPhases.length > 0) {
             phaseConcept = incompletedPhases[incompletedPhases.length - 1];
@@ -878,11 +898,18 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                 phase: generatedPhases[generatedPhases.length - 1]
             });
         } else {
-            phaseConcept = this.state.blueprint.initialPhase;
+            phaseConcept = (this.state.blueprint as any)?.initialPhase;
+            if (!phaseConcept || !Array.isArray((phaseConcept as any).files)) {
+                const td = await this.ensureTemplateDetails();
+                const files = (td.importantFiles || []).map((p) => ({ path: p, purpose: 'bootstrap' }));
+                phaseConcept = { name: 'Initial Setup', description: 'Bootstrap project from template', files } as any;
+            }
             this.logger().info('Starting code generation from initial phase', {
                 phase: phaseConcept
             });
-            this.createNewIncompletePhase(phaseConcept);
+            if (phaseConcept) {
+                this.createNewIncompletePhase(phaseConcept);
+            }
         }
 
         let staticAnalysisCache: StaticAnalysisResponse | undefined;
