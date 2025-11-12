@@ -412,3 +412,8 @@ display: none; /* Chrome, Safari, Opera */
 @media (prefers-reduced-motion: reduce) {
   .logo-marquee__inner { animation: none; }
 }
+
+/* Disable heavy marquee animation on small screens */
+@media (max-width: 767px) {
+  .logo-marquee__inner { animation: none; }
+}

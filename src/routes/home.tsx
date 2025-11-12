@@ -17,9 +17,9 @@ import { ImageUploadButton } from '@/components/image-upload-button';
 import { ImageAttachmentPreview } from '@/components/image-attachment-preview';
 import { SUPPORTED_IMAGE_MIME_TYPES } from '@/api-types';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
-import { LiquidBackground } from '@/components/ui/liquid-background';
 import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +38,7 @@ export default function Home() {
 	const [agentMode, setAgentMode] = useState<AgentMode>('deterministic');
 	const [query, setQuery] = useState('');
 	const { user } = useAuth();
+	const isMobile = useIsMobile();
 
 	const { images, addImages, removeImage, clearImages, isProcessing } = useImageUpload({
 		onError: (error) => {
@@ -289,14 +290,13 @@ const [, setPlansLoading] = useState(true);
 		<div className="relative flex flex-col min-h-screen">
 			{/* Background */}
 			<div className="fixed inset-0 z-0 pointer-events-none">
-				<EtheralShadow
-					className="w-full h-full"
-					color="rgba(139, 92, 246, 0.65)"
-					animation={{ scale: 80, speed: 75 }}
-					noise={{ opacity: 0.45, scale: 1 }}
-					sizing="fill"
-				/>
-				<LiquidBackground className="w-full h-full" opacity={0.28} speed={1.2} />
+					<EtheralShadow
+						className="w-full h-full"
+						color="rgba(139, 92, 246, 0.65)"
+						animation={{ scale: isMobile ? 0 : 80, speed: isMobile ? 0 : 75 }}
+						noise={{ opacity: 0.45, scale: 1 }}
+						sizing="fill"
+					/>
 			</div>
 
 				<MarketingHeader />
@@ -416,7 +416,7 @@ onChange={(e) => {
 
 				{/* Templates Section */}
 				<section id="templates" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-5 lg:gap-6">
+					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5 lg:gap-6">
 						{templates.map(({ title, icon: Icon, prompt }) => (
 							<motion.div
 								key={title}
@@ -698,7 +698,7 @@ onChange={(e) => {
 			</main>
 
 			{/* Nudge towards Discover */}
-			{user && <CurvedArrow sourceRef={discoverLinkRef} target={{ x: 50, y: window.innerHeight - 60 }} />}
+			{user && !isMobile && <CurvedArrow sourceRef={discoverLinkRef} target={{ x: 50, y: window.innerHeight - 60 }} />}
 			<MarketingFooter />
 		</div>
 	);
