@@ -17,6 +17,9 @@ import { Message, MessageContent, MessageRole } from './common';
 import { ToolCallResult, ToolDefinition } from '../tools/types';
 import { AGENT_CONFIG } from './config';
 import { AgentActionKey, AIModels, InferenceMetadata, InferenceContext } from './config.types';
+
+// Supported AI Gateway provider segments
+type AIGatewayProviders = 'cloudflare' | 'compat' | 'openai' | 'anthropic' | 'google' | 'openrouter';
 // import { SecretsService } from '../../database';
 import { RateLimitService } from '../../services/rate-limit/rateLimits';
 import { getUserConfigurableSettings } from '../../config';
@@ -236,8 +239,8 @@ export async function getConfigurationForModel(
     defaultHeaders?: Record<string, string>,
 }> {
     // Always route via Cloudflare AI Gateway to Cloudflare Workers AI provider
-    // Accept any model name (including '@cf/...') and forward it unchanged to the OpenAI-compatible endpoint
-    const baseURL = await buildGatewayUrl(env);
+    // Use the 'cloudflare' provider path to accept '@cf/...' Workers AI model IDs
+    const baseURL = await buildGatewayUrl(env, 'cloudflare');
 
     // Optional token for Gateway auth (created by setup script); if absent, omit Authorization header
     const gatewayToken = (env.CLOUDFLARE_AI_GATEWAY_TOKEN as string) || '';

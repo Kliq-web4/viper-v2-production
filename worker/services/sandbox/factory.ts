@@ -1,13 +1,9 @@
 import { SandboxSdkClient } from "./sandboxSdkClient";
-import { RemoteSandboxServiceClient } from "./remoteSandboxService";
 import { BaseSandboxService } from "./BaseSandboxService";
-import { env } from 'cloudflare:workers'
 
 export function getSandboxService(sessionId: string, agentId: string): BaseSandboxService {
-    if (env.SANDBOX_SERVICE_TYPE == 'runner') {
-        console.log("[getSandboxService] Using runner service for sandboxing");
-        return new RemoteSandboxServiceClient(sessionId);
-    }
+    // Force the stable local sandbox SDK to avoid remote runner template issues
+    // If you explicitly need the remote runner, change this logic or set it behind a safer feature flag.
     console.log("[getSandboxService] Using sandboxsdk service for sandboxing");
     return new SandboxSdkClient(sessionId, agentId);
 }
