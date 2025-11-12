@@ -6,7 +6,7 @@ import { getAgentStub, getTemplateForQuery } from '../../../agents';
 import { AgentConnectionData, AgentPreviewResponse, CodeGenArgs } from './types';
 import { ApiResponse, ControllerResponse } from '../types';
 import { RouteContext } from '../../types/route-context';
-import { ModelConfigService } from '../../../database';
+import { ModelConfigService, AppService } from '../../../database';
 import { ModelConfig } from '../../../agents/inferutils/config.types';
 import { validateWebSocketOrigin } from '../../../middleware/security/websocket';
 import { createLogger } from '../../../logger';
