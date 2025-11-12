@@ -75,15 +75,22 @@ export async function getTemplateForQuery(
     
     logger.info('Selected template', { selectedTemplate: analyzeQueryResponse });
             
-    if (!analyzeQueryResponse.selectedTemplateName) {
-        logger.error('No suitable template found for code generation');
-        throw new Error('No suitable template found for code generation');
+    // Fallback: if AI did not select a template, choose the first available
+    let selectedTemplateName = analyzeQueryResponse.selectedTemplateName;
+    if (!selectedTemplateName) {
+        const fallback = templatesResponse.templates[0];
+        if (!fallback) {
+            logger.error('No templates available to select');
+            throw new Error('No templates available to select');
+        }
+        logger.warn('AI did not select a template. Falling back to first available template', { fallback: fallback.name });
+        selectedTemplateName = fallback.name;
     }
             
-    const selectedTemplate = templatesResponse.templates.find(template => template.name === analyzeQueryResponse.selectedTemplateName);
+    const selectedTemplate = templatesResponse.templates.find(template => template.name === selectedTemplateName);
     if (!selectedTemplate) {
-        logger.error('Selected template not found');
-        throw new Error('Selected template not found');
+        logger.error('Selected template not found', { selectedTemplateName });
+        throw new Error(`Selected template not found: ${selectedTemplateName}`);
     }
     const templateDetailsResponse = await BaseSandboxService.getTemplateDetails(selectedTemplate.name);
     if (!templateDetailsResponse.success || !templateDetailsResponse.templateDetails) {
