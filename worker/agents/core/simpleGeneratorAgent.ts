@@ -419,6 +419,17 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                 sendToConnection(connection, 'cf_agent_state', {
                     state: this.state
                 });
+
+                // Auto-start generation if a blueprint exists but generation hasn't been kicked off yet
+                // This covers cases where the client doesn't send 'generate_all' (e.g., routing or race conditions)
+                const hasBlueprint = !!this.state.blueprint && Object.keys(this.state.blueprint).length > 0;
+                const noPhasesYet = !this.state.generatedPhases || this.state.generatedPhases.length === 0;
+                if (hasBlueprint && noPhasesYet && this.state.shouldBeGenerating !== true) {
+                    this.logger().info('Auto-enabling shouldBeGenerating on connect to kick off code generation');
+                    this.setState({ ...this.state, shouldBeGenerating: true });
+                    // Notify client so it can send 'generate_all' per its reconnection logic
+                    sendToConnection(connection, 'cf_agent_state', { state: this.state });
+                }
             } catch (error) {
                 this.logger().error('Failed during onConnect initialization', error);
                 // Keep the connection open; will proceed once initialization completes
