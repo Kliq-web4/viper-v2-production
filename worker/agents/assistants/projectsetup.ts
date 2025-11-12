@@ -3,7 +3,7 @@ import { SetupCommandsType, type Blueprint } from "../schemas";
 import { createObjectLogger, StructuredLogger } from '../../logger';
 import { generalSystemPromptBuilder, PROMPT_UTILS } from '../prompts';
 import { createAssistantMessage, createSystemMessage, createUserMessage } from "../inferutils/common";
-import { executeInference } from "../inferutils/core";
+import { executeInference, } from "../inferutils/infer";
 import Assistant from "./assistant";
 import { AIModels, InferenceContext } from "../inferutils/config.types";
 import { extractCommands } from "../utils/common";
@@ -125,17 +125,12 @@ ${error}`);
                 messages,
                 agentActionName: "projectSetup",
                 context: this.inferenceContext,
-modelName: error ? AIModels.CF_LLAMA_3_1_8B : undefined,
+                modelName: error? AIModels.GEMINI_2_5_FLASH : undefined,
             });
             this.logger.info(`Generated setup commands: ${results.string}`);
 
             this.save([createAssistantMessage(results.string)]);
-            // Ensure Supabase client is installed in all generated apps
-            const commands = extractCommands(results.string);
-            if (!commands.some(cmd => cmd.includes('@supabase/supabase-js'))) {
-                commands.unshift('bun add @supabase/supabase-js@^2');
-            }
-            return { commands };
+            return { commands: extractCommands(results.string) };
         } catch (error) {
             this.logger.error("Error generating setup commands:", error);
             throw error;

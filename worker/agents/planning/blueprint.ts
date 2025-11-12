@@ -1,6 +1,6 @@
 import { TemplateDetails, TemplateFileSchema } from '../../services/sandbox/sandboxTypes'; // Import the type
 import { STRATEGIES, PROMPT_UTILS, generalSystemPromptBuilder } from '../prompts';
-import { executeInference } from '../inferutils/core';
+import { executeInference } from '../inferutils/infer';
 import { Blueprint, BlueprintSchema, TemplateSelection } from '../schemas';
 import { createLogger } from '../../logger';
 import { createSystemMessage, createUserMessage, createMultiModalUserMessage } from '../inferutils/common';
@@ -187,8 +187,8 @@ export async function generateBlueprint({ env, inferenceContext, query, language
         // Build the SYSTEM prompt for blueprint generation
         // ---------------------------------------------------------------------------
 
-const filesText = TemplateRegistry.markdown.serialize(
-            { files: getTemplateImportantFiles(templateDetails).filter((f: any) => !f.filePath.includes('package.json')) },
+        const filesText = TemplateRegistry.markdown.serialize(
+            { files: getTemplateImportantFiles(templateDetails).filter(f => !f.filePath.includes('package.json')) },
             z.object({ files: z.array(TemplateFileSchema) })
         );
 

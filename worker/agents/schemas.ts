@@ -144,5 +144,3 @@ export const ConversationalResponseSchema = z.object({
 });
 
 export type ConversationalResponseType = z.infer<typeof ConversationalResponseSchema>;
-
-

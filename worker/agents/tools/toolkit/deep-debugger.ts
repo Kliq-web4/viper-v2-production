@@ -12,9 +12,6 @@ export function createDeepDebuggerTool(
 	{ issue: string; focus_paths?: string[] },
 	{ transcript: string } | { error: string }
 > {
-	// === CONFIGURABLE DEBUG LIMIT ===
-	// Defaults to 1 if not provided. Can be set via .dev.vars -> MAX_DEBUG_CALLS
-	const MAX_DEBUG_CALLS = parseInt(((globalThis as any)?.process?.env?.MAX_DEBUG_CALLS ?? '1') as string, 10);
 	// Track calls per conversation turn (resets when buildTools is called again)
 	let callCount = 0;
 	
@@ -23,7 +20,7 @@ export function createDeepDebuggerTool(
 		function: {
 			name: 'deep_debug',
 			description:
-				`Autonomous debugging assistant that investigates errors, reads files, and applies fixes. CANNOT run during code generation - will return GENERATION_IN_PROGRESS if generation is active. Limited to up to ${MAX_DEBUG_CALLS} call(s) per conversation turn (configurable via MAX_DEBUG_CALLS).`,
+				'Autonomous debugging assistant that investigates errors, reads files, and applies fixes. CANNOT run during code generation - will return GENERATION_IN_PROGRESS error if generation is active. LIMITED TO ONE CALL PER CONVERSATION TURN.',
 			parameters: {
 				type: 'object',
 				properties: {
@@ -34,11 +31,11 @@ export function createDeepDebuggerTool(
 			},
 		},
 		implementation: async ({ issue, focus_paths }: { issue: string; focus_paths?: string[] }) => {
-			// Enforce per-turn limit
-			if (callCount >= MAX_DEBUG_CALLS) {
-				logger.warn('Cannot start debugging: Call limit exceeded for this turn', { callCount, MAX_DEBUG_CALLS });
+			// Check if already called in this turn
+			if (callCount > 0) {
+				logger.warn('Cannot start debugging: Already called once this turn');
 				return {
-					error: `CALL_LIMIT_EXCEEDED: Max ${MAX_DEBUG_CALLS} deep_debug call(s) per conversation turn. Set MAX_DEBUG_CALLS in .dev.vars to increase.`,
+					error: 'CALL_LIMIT_EXCEEDED: You are only allowed to make a single deep_debug call per conversation turn. Ask user for permission before trying again.'
 				};
 			}
 			

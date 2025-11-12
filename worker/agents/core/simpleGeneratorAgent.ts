@@ -37,7 +37,7 @@ import { fixProjectIssues } from '../../services/code-fixer';
 import { GitVersionControl } from '../git';
 import { FastCodeFixerOperation } from '../operations/PostPhaseCodeFixer';
 import { looksLikeCommand, validateAndCleanBootstrapCommands } from '../utils/common';
-import { customizePackageJson, customizeTemplateFiles, generateBootstrapScript, generateProjectName, generateSupabaseClientFile } from '../utils/templateCustomizer';
+import { customizePackageJson, customizeTemplateFiles, generateBootstrapScript, generateProjectName } from '../utils/templateCustomizer';
 import { generateBlueprint } from '../planning/blueprint';
 import { AppService } from '../../database';
 import { RateLimitExceededError } from 'shared/types/errors';
@@ -113,9 +113,6 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
     };
     
     public _logger: StructuredLogger | undefined;
-
-    // Heartbeat timer to keep WebSocket connections alive behind Cloudflare proxy
-    private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 
     private initLogger(agentId: string, sessionId: string, userId: string) {
         this._logger = createObjectLogger(this, 'CodeGeneratorAgent');
@@ -393,74 +390,18 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     onConnect(connection: Connection, ctx: ConnectionContext) {
         this.logger().info(`Agent connected for agent ${this.getAgentId()}`, { connection, ctx });
-        // Start heartbeat early to keep the socket alive while we finish initialization
-        this.startHeartbeat();
-
-        // Defer template-dependent payloads until initialization completes to avoid race conditions
-        (async () => {
-            try {
-                // Wait until template details are available or template name is set by initialize()
-                const start = Date.now();
-                const timeoutMs = 15000; // 15s max wait
-                while (!this.templateDetailsCache && (!this.state.templateName || this.state.templateName.length === 0)) {
-                    await new Promise((r) => setTimeout(r, 50));
-                    if (Date.now() - start > timeoutMs) break;
-                }
-
-                // Ensure template details are loaded before notifying the client
-                const templateDetails = await this.ensureTemplateDetails();
-
-                sendToConnection(connection, 'agent_connected', {
-                    state: this.state,
-                    templateDetails,
-                });
-
-                // Send current agent state to enable auto-resume after reconnection
-                sendToConnection(connection, 'cf_agent_state', {
-                    state: this.state
-                });
-
-                // Auto-start generation if a blueprint exists but generation hasn't been kicked off yet
-                // This covers cases where the client doesn't send 'generate_all' (e.g., routing or race conditions)
-                const hasBlueprint = !!this.state.blueprint && Object.keys(this.state.blueprint).length > 0;
-                const noPhasesYet = !this.state.generatedPhases || this.state.generatedPhases.length === 0;
-                if (hasBlueprint && noPhasesYet && this.state.shouldBeGenerating !== true) {
-                    this.logger().info('Auto-enabling shouldBeGenerating on connect to kick off code generation');
-                    this.setState({ ...this.state, shouldBeGenerating: true });
-                    // Notify client so it can send 'generate_all' per its reconnection logic
-                    sendToConnection(connection, 'cf_agent_state', { state: this.state });
-                }
-            } catch (error) {
-                this.logger().error('Failed during onConnect initialization', error);
-                // Keep the connection open; will proceed once initialization completes
-            }
-        })();
+        sendToConnection(connection, 'agent_connected', {
+            state: this.state,
+            templateDetails: this.getTemplateDetails()
+        });
     }
 
     async ensureTemplateDetails() {
         if (!this.templateDetailsCache) {
-            let templateName = this.state.templateName;
-            if (!templateName || templateName.trim().length === 0) {
-                this.logger().warn('Template name not set yet; selecting a fallback template');
-                try {
-                    const list = await BaseSandboxService.listTemplates();
-                    if (list.success && list.templates.length > 0) {
-                        const preferredOrder = ['vite-cf-DO-v2-runner', 'vite-cf-DO-runner', 'vite-cfagents-runner'];
-                        templateName = preferredOrder.find(p => list.templates.some(t => t.name === p)) || list.templates[0].name;
-                        // Persist to state so subsequent calls are stable
-                        this.setState({ ...this.state, templateName });
-                    } else {
-                        throw new Error(list.error || 'No templates available');
-                    }
-                } catch (e) {
-                    throw new Error(`Failed to get template details: ${e instanceof Error ? e.message : String(e)}`);
-                }
-            }
-
-            this.logger().info(`Loading template details for: ${templateName}`);
-            const results = await BaseSandboxService.getTemplateDetails(templateName);
+            this.logger().info(`Loading template details for: ${this.state.templateName}`);
+            const results = await BaseSandboxService.getTemplateDetails(this.state.templateName);
             if (!results.success || !results.templateDetails) {
-                throw new Error(`Failed to get template details for: ${templateName}`);
+                throw new Error(`Failed to get template details for: ${this.state.templateName}`);
             }
             
             const templateDetails = results.templateDetails;
@@ -776,8 +717,8 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         // First find the phase
         const phases = this.state.generatedPhases;
         if (!phases.some(p => p.name === phaseName)) {
-            this.logger().error(`Phase ${phaseName} not found in generatedPhases array`);
-            throw new Error(`Phase ${phaseName} not found in generatedPhases array`);
+            this.logger().warn(`Phase ${phaseName} not found in generatedPhases array, skipping save`);
+            return;
         }
         
         // Update the phase
@@ -874,29 +815,9 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         });
         await this.ensureTemplateDetails();
 
-        // Ensure blueprint exists; if missing, synthesize a minimal initial phase from template important files
-        try {
-            if (!this.state.blueprint || !(this.state.blueprint as any).initialPhase) {
-                const td = await this.ensureTemplateDetails();
-                const fallbackFiles = (td.importantFiles || []).map((p) => ({ path: p, purpose: 'bootstrap' }));
-                const fallbackPhase: PhaseConceptType = {
-                    name: 'Initial Setup',
-                    description: 'Bootstrap project from template and prepare environment',
-                    files: fallbackFiles,
-                } as any;
-                this.setState({
-                    ...this.state,
-                    blueprint: { ...(this.state.blueprint as any), initialPhase: fallbackPhase } as any,
-                });
-                this.logger().warn('Blueprint missing; created fallback initial phase from template important files');
-            }
-        } catch (e) {
-            this.logger().error('Failed to ensure blueprint; continuing with fallback guard', e);
-        }
-
         let currentDevState = CurrentDevState.PHASE_IMPLEMENTING;
-        const generatedPhases = this.state.generatedPhases || [];
-        const incompletedPhases = generatedPhases.filter(phase => !!phase && !phase.completed);
+        const generatedPhases = this.state.generatedPhases;
+        const incompletedPhases = generatedPhases.filter(phase => !phase.completed);
         let phaseConcept : PhaseConceptType | undefined;
         if (incompletedPhases.length > 0) {
             phaseConcept = incompletedPhases[incompletedPhases.length - 1];
@@ -909,18 +830,11 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                 phase: generatedPhases[generatedPhases.length - 1]
             });
         } else {
-            phaseConcept = (this.state.blueprint as any)?.initialPhase;
-            if (!phaseConcept || !Array.isArray((phaseConcept as any).files)) {
-                const td = await this.ensureTemplateDetails();
-                const files = (td.importantFiles || []).map((p) => ({ path: p, purpose: 'bootstrap' }));
-                phaseConcept = { name: 'Initial Setup', description: 'Bootstrap project from template', files } as any;
-            }
+            phaseConcept = this.state.blueprint.initialPhase;
             this.logger().info('Starting code generation from initial phase', {
                 phase: phaseConcept
             });
-            if (phaseConcept) {
-                this.createNewIncompletePhase(phaseConcept);
-            }
+            this.createNewIncompletePhase(phaseConcept);
         }
 
         let staticAnalysisCache: StaticAnalysisResponse | undefined;
@@ -2060,13 +1974,6 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     async onClose(connection: Connection): Promise<void> {
         handleWebSocketClose(connection);
-        // Stop heartbeat when all connections are closed
-        // Defer check slightly to allow SDK to update connection list
-        setTimeout(() => {
-            if (this.getWebSockets().length === 0) {
-                this.stopHeartbeat();
-            }
-        }, 0);
     }
 
     private async onProjectUpdate(message: string): Promise<void> {
@@ -2096,42 +2003,6 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         broadcastToConnections(this, msg, data || {} as WebSocketMessageData<T>);
     }
 
-    /**
-     * Start WebSocket heartbeat to prevent Cloudflare proxy from closing idle connections.
-     * 
-     * Cloudflare proxies WebSocket connections by default (orange cloud) and closes idle
-     * connections after ~100s. This heartbeat sends keepalive messages every 25s to keep
-     * the connection active during long-running code generation tasks.
-     * 
-     * Equivalent to Socket.IO's pingInterval: 25000, pingTimeout: 5000
-     */
-    private startHeartbeat() {
-        if (this.heartbeatTimer) return;
-        this.logger().info('Starting WebSocket heartbeat (25s interval) to prevent CF proxy timeout');
-        this.heartbeatTimer = setInterval(() => {
-            try {
-                const connections = this.getWebSockets();
-                if (connections.length === 0) {
-                    // No active connections, stop heartbeat
-                    this.stopHeartbeat();
-                    return;
-                }
-                // Lightweight keepalive message to keep CF proxy from closing idle WS
-                // Sends every 25s to stay well under CF's ~100s idle timeout
-                this.broadcast('keepalive', { ts: Date.now() } as any);
-                this.logger().debug(`Heartbeat sent to ${connections.length} connection(s)`);
-            } catch (e) {
-                this.logger().warn('Heartbeat broadcast failed', e);
-            }
-        }, 25000); // 25s - well under CF's ~100s idle timeout
-    }
-
-    private stopHeartbeat() {
-        if (!this.heartbeatTimer) return;
-        try { clearInterval(this.heartbeatTimer as any); } catch {}
-        this.heartbeatTimer = null;
-        this.logger().info('Stopped WebSocket heartbeat');
-    }
     private getBootstrapCommands() {
         const bootstrapCommands = this.state.commandsHistory || [];
         // Validate, deduplicate, and clean
@@ -2363,43 +2234,6 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         } catch (error) {
             this.logger().error('Failed to sync package.json from sandbox', error);
             // Non-critical error - don't throw, just log
-        }
-    }
-
-    /**
-     * Add Supabase integration on-demand (no-code button)
-     * - Ensures supabase client file exists
-     * - Installs @supabase/supabase-js dependency
-     * - Redeploys preview with platform-managed Supabase env vars
-     */
-    async addSupabaseIntegration(): Promise<{ success: boolean; message?: string }> {
-        try {
-            // 1) Ensure client file exists in repo
-            const clientPath = 'src/lib/supabaseClient.ts';
-            const exists = !!this.fileManager.getFile(clientPath);
-            if (!exists) {
-                const clientContent = generateSupabaseClientFile();
-                await this.fileManager.saveGeneratedFile({
-                    filePath: clientPath,
-                    fileContents: clientContent,
-                    filePurpose: 'Supabase client for database access'
-                }, 'feat: add Supabase client');
-                this.broadcast(WebSocketMessageResponses.FILE_GENERATED, {
-                    message: 'Added Supabase client',
-                    file: { filePath: clientPath, fileContents: clientContent, lastDiff: '', language: 'ts' }
-                } as any);
-            }
-
-            // 2) Ensure dependency installed in sandbox and sync package.json
-            await this.execCommands(['bun add @supabase/supabase-js@^2'], true, 60000);
-
-            // 3) Redeploy preview to ensure env vars are applied (DeploymentManager injects Supabase envs if configured)
-            await this.deployToSandbox([], true, 'chore: configure Supabase integration', true);
-
-            return { success: true, message: 'Supabase integrated and preview redeployed' };
-        } catch (error) {
-            this.logger().error('Failed to add Supabase integration', error);
-            return { success: false, message: error instanceof Error ? error.message : String(error) };
         }
     }
 

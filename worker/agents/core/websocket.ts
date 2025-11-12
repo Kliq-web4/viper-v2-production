@@ -9,17 +9,10 @@ const logger = createLogger('CodeGeneratorWebSocket');
 
 export function handleWebSocketMessage(agent: SimpleCodeGeneratorAgent, connection: Connection, message: string): void {
     try {
-        const parsedMessage = JSON.parse(message);
-        if (parsedMessage?.type === 'ping') {
-            // Ignore client heartbeat pings to avoid spurious errors/noise
-            return;
-        }
         logger.info(`Received WebSocket message from ${connection.id}: ${message}`);
+        const parsedMessage = JSON.parse(message);
 
         switch (parsedMessage.type) {
-            case 'ping':
-                // Ignore client heartbeat pings to avoid spurious errors/noise
-                return;
             case WebSocketMessageRequests.GENERATE_ALL:
                 // Set shouldBeGenerating flag to indicate persistent intent
                 agent.setState({ 
@@ -100,11 +93,6 @@ export function handleWebSocketMessage(agent: SimpleCodeGeneratorAgent, connecti
                         ? 'Inference operation cancelled successfully'
                         : 'No active inference to cancel'
                 });
-                
-                // Send updated state to keep clients synced
-                sendToConnection(connection, 'cf_agent_state', {
-                    state: agent.state
-                });
                 break;
             case WebSocketMessageRequests.RESUME_GENERATION:
                 // Set shouldBeGenerating and restart generation
@@ -127,11 +115,6 @@ export function handleWebSocketMessage(agent: SimpleCodeGeneratorAgent, connecti
                     //     message: 'Code generation is already in progress'
                     // });
                 }
-                
-                // Send updated state to keep clients synced
-                sendToConnection(connection, 'cf_agent_state', {
-                    state: agent.state
-                });
                 break;
             case WebSocketMessageRequests.GITHUB_EXPORT:
                 // DEPRECATED: WebSocket-based GitHub export replaced with OAuth flow

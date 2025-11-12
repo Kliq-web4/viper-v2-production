@@ -75,32 +75,16 @@ export async function getTemplateForQuery(
     
     logger.info('Selected template', { selectedTemplate: analyzeQueryResponse });
             
-    // Fallback if AI selection fails: pick a sensible default template
-    let selectedName = analyzeQueryResponse.selectedTemplateName;
-    if (!selectedName) {
-        logger.warn('Template selection returned null; falling back to default template');
-        const preferredOrder = [
-            'vite-cf-DO-v2-runner',
-            'vite-cf-DO-runner',
-            'vite-cfagents-runner'
-        ];
-        selectedName = preferredOrder.find(p => templatesResponse.templates.some(t => t.name === p))
-            || templatesResponse.templates[0]?.name;
-        analyzeQueryResponse.selectedTemplateName = selectedName || null;
+    if (!analyzeQueryResponse.selectedTemplateName) {
+        logger.error('No suitable template found for code generation');
+        throw new Error('No suitable template found for code generation');
     }
-
-    let selectedTemplate = templatesResponse.templates.find(template => template.name === selectedName);
+            
+    const selectedTemplate = templatesResponse.templates.find(template => template.name === analyzeQueryResponse.selectedTemplateName);
     if (!selectedTemplate) {
-        logger.warn('AI-selected template not found; falling back to first available template');
-        selectedTemplate = templatesResponse.templates[0];
-        analyzeQueryResponse.selectedTemplateName = selectedTemplate?.name || null;
+        logger.error('Selected template not found');
+        throw new Error('Selected template not found');
     }
-
-    if (!selectedTemplate) {
-        logger.error('No templates available to select');
-        throw new Error('No templates available to select');
-    }
-
     const templateDetailsResponse = await BaseSandboxService.getTemplateDetails(selectedTemplate.name);
     if (!templateDetailsResponse.success || !templateDetailsResponse.templateDetails) {
         logger.error('Failed to fetch files', { templateDetailsResponse });

@@ -6,8 +6,9 @@ import { getAgentStub, getTemplateForQuery } from '../../../agents';
 import { AgentConnectionData, AgentPreviewResponse, CodeGenArgs } from './types';
 import { ApiResponse, ControllerResponse } from '../types';
 import { RouteContext } from '../../types/route-context';
-import { ModelConfigService, AppService } from '../../../database';
+import { ModelConfigService } from '../../../database';
 import { ModelConfig } from '../../../agents/inferutils/config.types';
+import { RateLimitService } from '../../../services/rate-limit/rateLimits';
 import { validateWebSocketOrigin } from '../../../middleware/security/websocket';
 import { createLogger } from '../../../logger';
 import { getPreviewDomain } from 'worker/utils/urls';
@@ -38,16 +39,6 @@ export class CodingAgentController extends BaseController {
 
             const url = new URL(request.url);
             const hostname = url.hostname === 'localhost' ? `localhost:${url.port}`: getPreviewDomain(env);
-
-            // Preflight: ensure required AI credentials exist (OpenAI-only configuration)
-            const openaiKey = (env as any).OPENAI_API_KEY as string | undefined;
-            if (!openaiKey || typeof openaiKey !== 'string' || openaiKey.trim().length < 10) {
-                return CodingAgentController.createErrorResponse(
-                    'OPENAI_API_KEY is missing. Set it in .dev.vars for local dev or as a Wrangler secret for deployments.',
-                    400
-                );
-            }
-
             // Parse the query from the request body
             let body: CodeGenArgs;
             try {
@@ -73,59 +64,36 @@ export class CodingAgentController extends BaseController {
             const writer = writable.getWriter();
             // Check if user is authenticated (required for app creation)
             const user = context.user!;
-            // App creation rate limits disabled
-
-            // Credit check & consumption (1 credit per generation) - non-fatal on DB issues
             try {
-                const { CreditService } = await import('../../../database/services/CreditService');
-                const { COSTS } = await import('../../../config/pricing');
-                const creditService = new CreditService(env);
-                await creditService.ensureCreditsUpToDate(user.id);
-                const cost = COSTS.startGeneration ?? 1;
-                const consume = await creditService.consumeCredits(user.id, cost);
-                if (!consume.ok) {
-                    return CodingAgentController.createErrorResponse(
-                        new Error('Insufficient credits. Please upgrade your plan.'),
-                        402
-                    );
+                await RateLimitService.enforceAppCreationRateLimit(env, context.config.security.rateLimit, user, request);
+            } catch (error) {
+                if (error instanceof Error) {
+                    return CodingAgentController.createErrorResponse(error, 429);
+                } else {
+                    this.logger.error('Unknown error in enforceAppCreationRateLimit', error);
+                    return CodingAgentController.createErrorResponse(JSON.stringify(error), 429);
                 }
-            } catch (e) {
-                // Log and continue (likely D1 not ready); do not block code generation
-                CodingAgentController.logger.warn('Credit system unavailable, skipping credit enforcement', e);
             }
 
             const agentId = generateId();
             const modelConfigService = new ModelConfigService(env);
-
-            // Fetch user model configs safely (fallback to defaults if DB not available)
-            let userConfigsRecord: Record<string, any> = {};
-            let agentInstance: any;
-            try {
-                const results = await Promise.all([
-                    modelConfigService.getUserModelConfigs(user.id).catch((e) => {
-                        CodingAgentController.logger.warn('ModelConfigService unavailable, using defaults', e);
-                        return {} as Record<string, any>;
-                    }),
-                    getAgentStub(env, agentId),
-                ]);
-                userConfigsRecord = results[0] || {};
-                agentInstance = results[1] as any;
-            } catch (e) {
-                // If agent fetch worked but configs failed unexpectedly, keep going with empty overrides
-                CodingAgentController.logger.warn('Proceeding without user model config overrides', e);
-                agentInstance = await getAgentStub(env, agentId);
-            }
-
+                                
+            // Fetch all user model configs, api keys and agent instance at once
+            const [userConfigsRecord, agentInstance] = await Promise.all([
+                modelConfigService.getUserModelConfigs(user.id),
+                getAgentStub(env, agentId)
+            ]);
+                                
             // Convert Record to Map and extract only ModelConfig properties
             const userModelConfigs = new Map();
             for (const [actionKey, mergedConfig] of Object.entries(userConfigsRecord)) {
-                if ((mergedConfig as any).isUserOverride) {
+                if (mergedConfig.isUserOverride) {
                     const modelConfig: ModelConfig = {
-                        name: (mergedConfig as any).name,
-                        max_tokens: (mergedConfig as any).max_tokens,
-                        temperature: (mergedConfig as any).temperature,
-                        reasoning_effort: (mergedConfig as any).reasoning_effort,
-                        fallbackModel: (mergedConfig as any).fallbackModel
+                        name: mergedConfig.name,
+                        max_tokens: mergedConfig.max_tokens,
+                        temperature: mergedConfig.temperature,
+                        reasoning_effort: mergedConfig.reasoning_effort,
+                        fallbackModel: mergedConfig.fallbackModel
                     };
                     userModelConfigs.set(actionKey, modelConfig);
                 }
@@ -145,20 +113,8 @@ export class CodingAgentController extends BaseController {
 
             const { templateDetails, selection } = await getTemplateForQuery(env, inferenceContext, query, body.images, this.logger);
 
-            let websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws`;
+            const websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws`;
             const httpStatusUrl = `${url.origin}/api/agent/${agentId}`;
-
-            // Issue a short-lived, single-use WS token and append to URL for browser WS auth
-            try {
-                const { WebSocketTokenService } = await import('../../../services/auth/WebSocketTokenService');
-                const wsTokenService = new WebSocketTokenService(env);
-                const token = await wsTokenService.issue(context.user!.id, agentId, 90); // 90s TTL
-                const u = new URL(websocketUrl);
-                u.searchParams.set('token', token);
-                websocketUrl = u.toString();
-            } catch (tokenErr) {
-                CodingAgentController.logger.warn('Failed to issue WS auth token for new session', tokenErr);
-            }
 
             let uploadedImages: ProcessedImageAttachment[] = [];
             if (body.images) {
@@ -177,38 +133,6 @@ export class CodingAgentController extends BaseController {
                     files: getTemplateImportantFiles(templateDetails),
                 }
             });
-
-            // Create placeholder app immediately so the app page can load without 404
-            try {
-                const appService = new AppService(env);
-                await appService.createApp({
-                    id: agentId,
-                    userId: user.id,
-                    sessionToken: null,
-                    title: query.substring(0, 100) || 'New App',
-                    description: null,
-                    originalPrompt: query,
-                    finalPrompt: query,
-                    framework: null,
-                    visibility: 'private',
-                    status: 'generating',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    deploymentId: null,
-                    iconUrl: null,
-                    githubRepositoryUrl: null,
-                    githubRepositoryVisibility: null,
-                    isArchived: 0 as any,
-                    isFeatured: 0 as any,
-                    version: 1,
-                    parentAppId: null,
-                    screenshotUrl: null,
-                    screenshotCapturedAt: null,
-                    lastDeployedAt: null,
-                } as any);
-            } catch (appErr) {
-                CodingAgentController.logger.warn('Failed to pre-create app record; frontend may see 404 until agent saves', appErr);
-            }
 
             const agentPromise = agentInstance.initialize({
                 query,
@@ -354,20 +278,7 @@ export class CodingAgentController extends BaseController {
 
                 // Construct WebSocket URL
                 const url = new URL(request.url);
-                let websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws`;
-
-                // Issue a short-lived, single-use token for WS auth and append as query param
-                try {
-                    const { WebSocketTokenService } = await import('../../../services/auth/WebSocketTokenService');
-                    const wsTokenService = new WebSocketTokenService(env);
-                    const userId = context.user!.id;
-                    const token = await wsTokenService.issue(userId, agentId, 90); // 90s TTL
-                    const u = new URL(websocketUrl);
-                    u.searchParams.set('token', token);
-                    websocketUrl = u.toString();
-                } catch (tokenErr) {
-                    CodingAgentController.logger.warn('Failed to issue WS auth token, proceeding without it', tokenErr);
-                }
+                const websocketUrl = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/api/agent/${agentId}/ws`;
 
                 const responseData: AgentConnectionData = {
                     websocketUrl,
