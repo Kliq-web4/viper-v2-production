@@ -122,6 +122,8 @@ monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
 	noSemanticValidation: true,
 	noSyntaxValidation: true,
 });
+// Ensure the TS worker eagerly syncs models to prevent "inmemory://model/1" lookup errors
+monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
 
 // Configure TypeScript defaults for JSX support
 monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
@@ -148,6 +150,8 @@ monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
 	jsxFactory: 'React.createElement',
 	jsxFragmentFactory: 'React.Fragment',
 });
+// Eagerly sync JS models as well
+monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 
 export type MonacoEditorProps = React.ComponentProps<'div'> & {
 	createOptions?: monaco.editor.IStandaloneEditorConstructionOptions;
@@ -177,13 +181,22 @@ export const MonacoEditor = memo<MonacoEditorProps>(function MonacoEditor({
 		if (theme === 'system') {
 			configuredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 		}
+		// Create a stable file-backed model to avoid TS worker "inmemory" lookups
+		const uri = monaco.Uri.parse('file:///App.tsx');
+		const initialModel = monaco.editor.createModel(
+			createOptions.value ?? defaultCode,
+			createOptions.language || 'typescript',
+			uri,
+		);
 		editor.current = monaco.editor.create(containerRef.current!, {
-			language: createOptions.language || 'typescript',
+			model: initialModel,
 			minimap: { enabled: false },
 			theme: configuredTheme === 'dark' ? 'v1-dev-dark' : 'v1-dev',
 			automaticLayout: true,
-			value: defaultCode,
 			fontSize: 13,
+			quickSuggestions: false,
+			suggestOnTriggerCharacters: false,
+			parameterHints: { enabled: false },
 			...createOptions,
 		});
 
@@ -217,7 +230,7 @@ export const MonacoEditor = memo<MonacoEditorProps>(function MonacoEditor({
 			const model = editor.current.getModel();
 			if (!model) return;
 
-			editor.current.setValue(createOptions.value || '');
+			model.setValue(createOptions.value || '');
 
 			if (stickyScroll.current) {
 				// Scroll to bottom
