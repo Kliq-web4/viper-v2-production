@@ -1,6 +1,6 @@
 import { Blueprint, ScreenshotAnalysisSchema, ScreenshotAnalysisType } from '../schemas';
 import { createSystemMessage, createMultiModalUserMessage } from '../inferutils/common';
-import { executeInference } from '../inferutils/core';
+import { executeInference } from '../inferutils/infer';
 import { PROMPT_UTILS } from '../prompts';
 import { ScreenshotData } from '../core/types';
 import { AgentOperation, OperationOptions } from './common';

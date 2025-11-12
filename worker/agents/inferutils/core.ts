@@ -15,11 +15,7 @@ import {
 } from 'openai/resources.mjs';
 import { Message, MessageContent, MessageRole } from './common';
 import { ToolCallResult, ToolDefinition } from '../tools/types';
-import { AGENT_CONFIG } from './config';
-import { AgentActionKey, AIModels, InferenceMetadata, InferenceContext } from './config.types';
-
-// Supported AI Gateway provider segments
-type AIGatewayProviders = 'cloudflare' | 'compat' | 'openai' | 'anthropic' | 'google' | 'openrouter';
+import { AgentActionKey, AIModels, InferenceMetadata } from './config.types';
 // import { SecretsService } from '../../database';
 import { RateLimitService } from '../../services/rate-limit/rateLimits';
 import { getUserConfigurableSettings } from '../../config';
@@ -200,9 +196,8 @@ export async function buildGatewayUrl(env: Env, providerOverride?: AIGatewayProv
             const url = new URL(env.CLOUDFLARE_AI_GATEWAY_URL);
             // Validate it's actually an HTTP/HTTPS URL
             if (url.protocol === 'http:' || url.protocol === 'https:') {
-                // Normalize path: strip any trailing provider/compat segment, ensure no trailing slash
-                let cleanPathname = url.pathname.replace(/\/$/, '');
-                cleanPathname = cleanPathname.replace(/\/(cloudflare|compat|openai|anthropic|google|openrouter)$/i, '');
+                // Add 'providerOverride' as a segment to the URL
+                const cleanPathname = url.pathname.replace(/\/$/, ''); // Remove trailing slash
                 url.pathname = providerOverride ? `${cleanPathname}/${providerOverride}` : `${cleanPathname}/compat`;
                 return url.toString();
             }
@@ -229,33 +224,83 @@ function isValidApiKey(apiKey: string): boolean {
     return true;
 }
 
+async function getApiKey(provider: string, env: Env, _userId: string): Promise<string> {
+    console.log("Getting API key for provider: ", provider);
+    // try {
+    //     const secretsService = new SecretsService(env);
+    //     const userProviderKeys = await secretsService.getUserBYOKKeysMap(userId);
+    //     // First check if user has a custom API key for this provider
+    //     if (userProviderKeys && provider in userProviderKeys) {
+    //         const userKey = userProviderKeys.get(provider);
+    //         if (userKey && isValidApiKey(userKey)) {
+    //             console.log("Found user API key for provider: ", provider, userKey);
+    //             return userKey;
+    //         }
+    //     }
+    // } catch (error) {
+    //     console.error("Error getting API key for provider: ", provider, error);
+    // }
+    // Fallback to environment variables
+    const providerKeyString = provider.toUpperCase().replaceAll('-', '_');
+    const envKey = `${providerKeyString}_API_KEY` as keyof Env;
+    let apiKey: string = env[envKey] as string;
+    
+    // Check if apiKey is empty or undefined and is valid
+    if (!isValidApiKey(apiKey)) {
+        apiKey = env.CLOUDFLARE_AI_GATEWAY_TOKEN;
+    }
+    return apiKey;
+}
 
 export async function getConfigurationForModel(
-    _model: AIModels | string,
-    env: Env,
-    _userId: string,
+    model: AIModels | string, 
+    env: Env, 
+    userId: string,
 ): Promise<{
     baseURL: string,
     apiKey: string,
     defaultHeaders?: Record<string, string>,
 }> {
-    // Always route via Cloudflare AI Gateway to Cloudflare Workers AI provider
-    // Use the 'cloudflare' provider path to accept '@cf/...' Workers AI model IDs
-    const baseURL = await buildGatewayUrl(env, 'cloudflare');
-
-    // Optional token for Gateway auth (created by setup script); if absent, omit Authorization header
-    const gatewayToken = (env.CLOUDFLARE_AI_GATEWAY_TOKEN as string) || '';
-
-    const result: { baseURL: string; apiKey: string; defaultHeaders?: Record<string, string> } = {
-        baseURL,
-        apiKey: gatewayToken,
-    };
-
-    if (isValidApiKey(gatewayToken)) {
-        result.defaultHeaders = { Authorization: `Bearer ${gatewayToken}` };
+    let providerForcedOverride: AIGatewayProviders | undefined;
+    // Check if provider forceful-override is set
+    const match = model.match(/\[(.*?)\]/);
+    if (match) {
+        const provider = match[1];
+        if (provider === 'openrouter') {
+            return {
+                baseURL: 'https://openrouter.ai/api/v1',
+                apiKey: env.OPENROUTER_API_KEY,
+            };
+        } else if (provider === 'gemini') {
+            return {
+                baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+                apiKey: env.GOOGLE_AI_STUDIO_API_KEY,
+            };
+        } else if (provider === 'claude') {
+            return {
+                baseURL: 'https://api.anthropic.com/v1/',
+                apiKey: env.ANTHROPIC_API_KEY,
+            };
+        }
+        providerForcedOverride = provider as AIGatewayProviders;
     }
 
-    return result;
+    const baseURL = await buildGatewayUrl(env, providerForcedOverride);
+
+    // Extract the provider name from model name. Model name is of type `provider/model_name`
+    const provider = providerForcedOverride || model.split('/')[0];
+    // Try to find API key of type <PROVIDER>_API_KEY else default to CLOUDFLARE_AI_GATEWAY_TOKEN
+    // `env` is an interface of type `Env`
+    const apiKey = await getApiKey(provider, env, userId);
+    // AI Gateway Wholesaling checks
+    const defaultHeaders = env.CLOUDFLARE_AI_GATEWAY_TOKEN && apiKey !== env.CLOUDFLARE_AI_GATEWAY_TOKEN ? {
+        'cf-aig-authorization': `Bearer ${env.CLOUDFLARE_AI_GATEWAY_TOKEN}`,
+    } : undefined;
+    return {
+        baseURL,
+        apiKey,
+        defaultHeaders
+    };
 }
 
 type InferArgsBase = {
@@ -340,99 +385,6 @@ export class AbortError extends InferError {
         super(response, response, toolCallContext);
         this.name = 'AbortError';
     }
-}
-
-// Backwards-compat wrapper: support previous executeInference signature used across codebase
-export function executeInference<T extends z.AnyZodObject>(args: {
-    env: Env;
-    messages: Message[];
-    maxTokens?: number;
-    temperature?: number;
-    modelName?: AIModels | string;
-    retryLimit?: number; // ignored; core handles retries internally
-    agentActionName: AgentActionKey | 'testModelConfig';
-    tools?: ToolDefinition<any, any>[];
-    stream?: { chunk_size: number; onChunk: (chunk: string) => void };
-    reasoning_effort?: ReasoningEffort;
-    modelConfig?: { name: AIModels | string; max_tokens?: number; temperature?: number; reasoning_effort?: ReasoningEffort };
-    context: InferenceContext;
-    format?: SchemaFormat;
-    schema: T;
-}): Promise<{ object: z.infer<T> }>;
-export function executeInference(args: {
-    env: Env;
-    messages: Message[];
-    maxTokens?: number;
-    temperature?: number;
-    modelName?: AIModels | string;
-    retryLimit?: number; // ignored
-    agentActionName: AgentActionKey | 'testModelConfig';
-    tools?: ToolDefinition<any, any>[];
-    stream?: { chunk_size: number; onChunk: (chunk: string) => void };
-    reasoning_effort?: ReasoningEffort;
-    modelConfig?: { name: AIModels | string; max_tokens?: number; temperature?: number; reasoning_effort?: ReasoningEffort };
-    context: InferenceContext;
-    format?: SchemaFormat;
-}): Promise<{ string: string }>;
-export async function executeInference(args: {
-    env: Env;
-    messages: Message[];
-    maxTokens?: number;
-    temperature?: number;
-    modelName?: AIModels | string;
-    retryLimit?: number;
-    agentActionName: AgentActionKey | 'testModelConfig';
-    tools?: ToolDefinition<any, any>[];
-    stream?: { chunk_size: number; onChunk: (chunk: string) => void };
-    reasoning_effort?: ReasoningEffort;
-    modelConfig?: { name: AIModels | string; max_tokens?: number; temperature?: number; reasoning_effort?: ReasoningEffort };
-    context: InferenceContext;
-    format?: SchemaFormat;
-    schema?: z.AnyZodObject;
-}): Promise<{ object: unknown } | { string: string }> {
-    const {
-        env,
-        messages,
-        maxTokens,
-        temperature,
-        modelName,
-        agentActionName,
-        tools,
-        stream,
-        reasoning_effort,
-        modelConfig,
-        context,
-        format,
-        schema,
-    } = args as any;
-
-    // Choose model in priority order: explicit -> modelConfig -> AGENT_CONFIG -> fallback CF llama 8b
-    let effectiveModel: string = (modelName as string)
-        || (modelConfig?.name as string)
-        || (AGENT_CONFIG as any)[agentActionName]?.name
-        || (AIModels.CF_LLAMA_3_1_8B as string);
-
-    const result = await infer({
-        env,
-        metadata: { agentId: context.agentId, userId: context.userId },
-        messages,
-        schema: schema as any,
-        schemaName: schema ? (agentActionName as string) : undefined,
-        actionKey: (agentActionName as any),
-        format,
-        maxTokens,
-        modelName: effectiveModel,
-        stream,
-        tools: tools as any,
-        reasoning_effort,
-        temperature,
-        abortSignal: context.abortSignal,
-    } as any);
-
-    if (schema) {
-        return { object: (result as any).object } as any;
-    }
-    return { string: (result as any).string } as any;
 }
 
 const claude_thinking_budget_tokens = {
@@ -525,11 +477,8 @@ export async function infer<OutputSchema extends z.AnyZodObject>({
     format?: SchemaFormat;
     formatOptions?: FormatterOptions;
 }, toolCallContext?: ToolCallContext): Promise<InferResponseObject<OutputSchema> | InferResponseString> {
-    // Allow overriding or disabling the message limit via env (.dev.vars)
-    const MAX_LLM_MESSAGES_OVERRIDE = parseInt(((globalThis as any)?.process?.env?.MAX_LLM_MESSAGES ?? '') as string, 10);
-    const EFFECTIVE_MAX_LLM_MESSAGES = Number.isFinite(MAX_LLM_MESSAGES_OVERRIDE) ? MAX_LLM_MESSAGES_OVERRIDE : MAX_LLM_MESSAGES;
-    if (EFFECTIVE_MAX_LLM_MESSAGES > 0 && messages.length > EFFECTIVE_MAX_LLM_MESSAGES) {
-        throw new RateLimitExceededError(`Message limit exceeded: ${messages.length} messages (max: ${EFFECTIVE_MAX_LLM_MESSAGES}). Please use context compactification.`, RateLimitType.LLM_CALLS);
+    if (messages.length > MAX_LLM_MESSAGES) {
+        throw new RateLimitExceededError(`Message limit exceeded: ${messages.length} messages (max: ${MAX_LLM_MESSAGES}). Please use context compactification.`, RateLimitType.LLM_CALLS);
     }
     
     // Check tool calling depth to prevent infinite recursion
@@ -635,67 +584,40 @@ export async function infer<OutputSchema extends z.AnyZodObject>({
         const toolsOpts = tools ? { tools, tool_choice: 'auto' as const } : {};
         let response: OpenAI.ChatCompletion | OpenAI.ChatCompletionChunk | Stream<OpenAI.ChatCompletionChunk>;
         try {
-            // Simple, configurable retry for provider 429 responses
-            // Default to 3 retries if env var not set or invalid
-            const MAX_LLM_RETRIES_RAW = (globalThis as any)?.process?.env?.MAX_LLM_RETRIES;
-            const MAX_LLM_RETRIES = Number.isFinite(parseInt(MAX_LLM_RETRIES_RAW as string, 10))
-                ? parseInt(MAX_LLM_RETRIES_RAW as string, 10)
-                : 3;
-            const BASE_DELAY_MS_RAW = (globalThis as any)?.process?.env?.LLM_RETRY_BASE_DELAY_MS;
-            const BASE_DELAY_MS = Number.isFinite(parseInt(BASE_DELAY_MS_RAW as string, 10))
-                ? parseInt(BASE_DELAY_MS_RAW as string, 10)
-                : 300;
-
-            let attempt = 0;
-            while (true) {
-                try {
-                    // Call OpenAI-compatible API via Cloudflare AI Gateway (Workers AI provider)
-                    const openaiModel = modelName; // Do not strip provider prefix; Gateway accepts '@cf/...'
-                    response = await client.chat.completions.create({
-                        ...schemaObj,
-                        ...extraBody,
-                        ...toolsOpts,
-                        model: openaiModel,
-                        messages: messagesToPass as OpenAI.ChatCompletionMessageParam[],
-                        max_completion_tokens: maxTokens || 150000,
-                        stream: stream ? true : false,
-                        reasoning_effort,
-                        temperature,
-                    }, {
-                        signal: abortSignal,
-                        headers: {
-                            "cf-aig-metadata": JSON.stringify({
-                                chatId: metadata.agentId,
-                                userId: metadata.userId,
-                                schemaName,
-                                actionKey,
-                            })
-                        }
-                    });
-                    console.log(`Inference response received`);
-                    break; // success
-                } catch (e) {
-                    // Check if aborted
-                    if (e instanceof Error && (e.name === 'AbortError' || e.message?.includes('aborted') || e.message?.includes('abort'))) {
-                        console.log('Inference cancelled by user');
-                        throw new AbortError('**User cancelled inference**', toolCallContext);
-                    }
-                    const msg = typeof e === 'string' ? e : (e as Error)?.message || '';
-                    const is429 = msg.includes('429') || msg.toLowerCase().includes('rate limit');
-                    if (is429 && attempt < MAX_LLM_RETRIES) {
-                        const delay = BASE_DELAY_MS * Math.pow(2, attempt) + Math.floor(Math.random() * 250);
-                        console.warn(`LLM provider returned 429; retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_LLM_RETRIES})`);
-                        await new Promise(res => setTimeout(res, delay));
-                        attempt++;
-                        continue;
-                    }
-                    // Propagate as a generic error instead of RateLimitExceededError to avoid internal rate-limit handling
-                    console.error(`Failed to get inference response from OpenAI: ${msg}`);
-                    throw (e instanceof Error ? e : new Error(String(e)));
+            // Call OpenAI API with proper structured output format
+            response = await client.chat.completions.create({
+                ...schemaObj,
+                ...extraBody,
+                ...toolsOpts,
+                model: modelName,
+                messages: messagesToPass as OpenAI.ChatCompletionMessageParam[],
+                max_completion_tokens: maxTokens || 150000,
+                stream: stream ? true : false,
+                reasoning_effort,
+                temperature,
+            }, {
+                signal: abortSignal,
+                headers: {
+                    "cf-aig-metadata": JSON.stringify({
+                        chatId: metadata.agentId,
+                        userId: metadata.userId,
+                        schemaName,
+                        actionKey,
+                    })
                 }
-            }
+            });
+            console.log(`Inference response received`);
         } catch (error) {
-            // Already handled abort and retries above; just rethrow
+            // Check if error is due to abort
+            if (error instanceof Error && (error.name === 'AbortError' || error.message?.includes('aborted') || error.message?.includes('abort'))) {
+                console.log('Inference cancelled by user');
+                throw new AbortError('**User cancelled inference**', toolCallContext);
+            }
+            
+            console.error(`Failed to get inference response from OpenAI: ${error}`);
+            if ((error instanceof Error && error.message.includes('429')) || (typeof error === 'string' && error.includes('429'))) {
+                throw new RateLimitExceededError('Rate limit exceeded in LLM calls, Please try again later', RateLimitType.LLM_CALLS);
+            }
             throw error;
         }
         let toolCalls: ChatCompletionMessageFunctionToolCall[] = [];
