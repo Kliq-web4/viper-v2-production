@@ -178,6 +178,38 @@ export class CodingAgentController extends BaseController {
                 }
             });
 
+            // Create placeholder app immediately so the app page can load without 404
+            try {
+                const appService = new AppService(env);
+                await appService.createApp({
+                    id: agentId,
+                    userId: user.id,
+                    sessionToken: null,
+                    title: query.substring(0, 100) || 'New App',
+                    description: null,
+                    originalPrompt: query,
+                    finalPrompt: query,
+                    framework: null,
+                    visibility: 'private',
+                    status: 'generating',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    deploymentId: null,
+                    iconUrl: null,
+                    githubRepositoryUrl: null,
+                    githubRepositoryVisibility: null,
+                    isArchived: 0 as any,
+                    isFeatured: 0 as any,
+                    version: 1,
+                    parentAppId: null,
+                    screenshotUrl: null,
+                    screenshotCapturedAt: null,
+                    lastDeployedAt: null,
+                } as any);
+            } catch (appErr) {
+                CodingAgentController.logger.warn('Failed to pre-create app record; frontend may see 404 until agent saves', appErr);
+            }
+
             const agentPromise = agentInstance.initialize({
                 query,
                 language: body.language || defaultCodeGenArgs.language,

@@ -68,55 +68,57 @@ OR
 
 
 export const AGENT_CONFIG: AgentConfig = {
+    // Planning / selection should be cheap and fast
     templateSelection: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5_MINI,
         max_tokens: 2000,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
         temperature: 0.6,
     },
-    // Bootstrapping: now using OpenAI for initial planning and setup
+    // Bootstrapping and blueprint use GPT-5-mini
     blueprint: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'medium',
         max_tokens: 64000,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
         temperature: 0.7,
     },
     projectSetup: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 10000,
         temperature: 0.2,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
-    // Phases: use OpenAI
+    // Phase planning uses mini
     phaseGeneration: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
+    // Main code generation uses GPT-5
     firstPhaseImplementation: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5,
         reasoning_effort: 'low',
         max_tokens: 64000,
         temperature: 0.2,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
     phaseImplementation: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5,
         reasoning_effort: 'low',
         max_tokens: 64000,
         temperature: 0.2,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
     realtimeCodeFixer: {
         name: AIModels.DISABLED,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 1,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
     // Not used right now
     fastCodeFixer: {
@@ -124,43 +126,43 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: undefined,
         max_tokens: 64000,
         temperature: 0.0,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
     conversationalResponse: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 4000,
         temperature: 0,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
     deepDebugger: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 0.5,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
     codeReview: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5,
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.1,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
     fileRegeneration: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 0,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
     // Not used right now
     screenshotAnalysis: {
-        name: AIModels.OPENAI_O4_MINI,
+        name: AIModels.OPENAI_5_MINI,
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: AIModels.OPENAI_O4_MINI,
+        fallbackModel: AIModels.OPENAI_5_MINI,
     },
 };
 

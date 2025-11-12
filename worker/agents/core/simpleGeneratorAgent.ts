@@ -428,10 +428,28 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     async ensureTemplateDetails() {
         if (!this.templateDetailsCache) {
-            this.logger().info(`Loading template details for: ${this.state.templateName}`);
-            const results = await BaseSandboxService.getTemplateDetails(this.state.templateName);
+            let templateName = this.state.templateName;
+            if (!templateName || templateName.trim().length === 0) {
+                this.logger().warn('Template name not set yet; selecting a fallback template');
+                try {
+                    const list = await BaseSandboxService.listTemplates();
+                    if (list.success && list.templates.length > 0) {
+                        const preferredOrder = ['vite-cf-DO-v2-runner', 'vite-cf-DO-runner', 'vite-cfagents-runner'];
+                        templateName = preferredOrder.find(p => list.templates.some(t => t.name === p)) || list.templates[0].name;
+                        // Persist to state so subsequent calls are stable
+                        this.setState({ ...this.state, templateName });
+                    } else {
+                        throw new Error(list.error || 'No templates available');
+                    }
+                } catch (e) {
+                    throw new Error(`Failed to get template details: ${e instanceof Error ? e.message : String(e)}`);
+                }
+            }
+
+            this.logger().info(`Loading template details for: ${templateName}`);
+            const results = await BaseSandboxService.getTemplateDetails(templateName);
             if (!results.success || !results.templateDetails) {
-                throw new Error(`Failed to get template details for: ${this.state.templateName}`);
+                throw new Error(`Failed to get template details for: ${templateName}`);
             }
             
             const templateDetails = results.templateDetails;
