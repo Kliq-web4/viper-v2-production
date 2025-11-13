@@ -40,6 +40,17 @@ export function MarketingFooter() {
             <p className="text-xs text-text-tertiary mt-2">By subscribing you agree to our terms.</p>
           </div>
         </div>
+        <div className="mt-8 flex justify-center">
+          <a href="https://www.producthunt.com/products/web4-sbs?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-web4&#0045;sbs" target="_blank" rel="noopener noreferrer">
+            <img
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1037027&theme=dark&t=1762969127698"
+              alt="Web4&#0046;sbs - Turn&#0032;ideas&#0032;into&#0032;fully&#0032;functional&#0032;apps&#0032;no&#0032;coding&#0032;required | Product Hunt"
+              style={{ width: 250, height: 54 }}
+              width="250"
+              height="54"
+            />
+          </a>
+        </div>
         <div className="mt-10 flex flex-col-reverse sm:flex-row items-center justify-between gap-3 text-xs text-text-tertiary">
           <div>© {new Date().getFullYear()} web4.sbs. All rights reserved.</div>
           <div className="flex items-center gap-4">
