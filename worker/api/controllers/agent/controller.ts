@@ -6,7 +6,7 @@ import { getAgentStub, getTemplateForQuery } from '../../../agents';
 import { AgentConnectionData, AgentPreviewResponse, CodeGenArgs } from './types';
 import { ApiResponse, ControllerResponse } from '../types';
 import { RouteContext } from '../../types/route-context';
-import { ModelConfigService } from '../../../database';
+import { ModelConfigService, AppService } from '../../../database';
 import { ModelConfig } from '../../../agents/inferutils/config.types';
 import { RateLimitService } from '../../../services/rate-limit/rateLimits';
 import { validateWebSocketOrigin } from '../../../middleware/security/websocket';
@@ -77,6 +77,34 @@ export class CodingAgentController extends BaseController {
             }
 
             const agentId = generateId();
+
+            // Create the app record in the database immediately so that
+            // owner-only WebSocket auth checks and app lookups can find it
+            const appService = new AppService(env);
+            try {
+                await appService.createApp({
+                    id: agentId,
+                    userId: user.id,
+                    sessionToken: null,
+                    title: query.length > 100 ? `${query.substring(0, 97)}...` : query,
+                    description: `App generated from query: ${query}`,
+                    originalPrompt: query,
+                    finalPrompt: query,
+                    framework: (body.frameworks || defaultCodeGenArgs.frameworks).join(','),
+                    visibility: 'private',
+                    status: 'generating',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                });
+                this.logger.info(`Successfully created app record in DB for agent ${agentId}`);
+            } catch (dbError) {
+                this.logger.error(`Failed to create app record in DB for agent ${agentId}`, dbError);
+                return CodingAgentController.createErrorResponse(
+                    'Failed to initialize app session',
+                    500,
+                );
+            }
+
             const modelConfigService = new ModelConfigService(env);
                                 
             // Fetch all user model configs, api keys and agent instance at once

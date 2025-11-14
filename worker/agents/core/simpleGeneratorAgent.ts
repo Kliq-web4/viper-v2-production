@@ -561,28 +561,58 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     private async saveToDatabase() {
         this.logger().info(`Blueprint generated successfully for agent ${this.getAgentId()}`);
-        // Save the app to database (authenticated users only)
+        // Update the app in database with rich metadata from the blueprint
         const appService = new AppService(this.env);
-        await appService.createApp({
-            id: this.state.inferenceContext.agentId,
-            userId: this.state.inferenceContext.userId,
-            sessionToken: null,
+        const appId = this.state.inferenceContext.agentId;
+        const userId = this.state.inferenceContext.userId;
+
+        const updates = {
+            userId,
+            sessionToken: null as string | null,
             title: this.state.blueprint.title || this.state.query.substring(0, 100),
             description: this.state.blueprint.description || null,
             originalPrompt: this.state.query,
             finalPrompt: this.state.query,
             framework: this.state.blueprint.frameworks?.[0],
+            visibility: 'private' as const,
+            status: 'generating' as const,
+        };
+
+        const updated = await appService.updateApp(appId, updates);
+
+        if (!updated) {
+            // Fallback for older flows where the app row might not exist yet
+            this.logger().warn(`App ${appId} not found when updating; creating new app record`);
+            try {
+                await appService.createApp({
+                    id: appId,
+                    userId,
+                    sessionToken: null,
+                    title: updates.title,
+                    description: updates.description,
+                    originalPrompt: updates.originalPrompt,
+                    finalPrompt: updates.finalPrompt,
+                    framework: updates.framework,
+                    visibility: updates.visibility,
+                    status: updates.status,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                });
+            } catch (error) {
+                this.logger().error('Failed to create app record from blueprint metadata', {
+                    appId,
+                    userId,
+                    error,
+                });
+            }
+        }
+
+        this.logger().info(`App saved/updated successfully in database for agent ${appId}`, {
+            agentId: appId,
+            userId,
             visibility: 'private',
-            status: 'generating',
-            createdAt: new Date(),
-            updatedAt: new Date()
         });
-        this.logger().info(`App saved successfully to database for agent ${this.state.inferenceContext.agentId}`, { 
-            agentId: this.state.inferenceContext.agentId, 
-            userId: this.state.inferenceContext.userId,
-            visibility: 'private'
-        });
-        this.logger().info(`Agent initialized successfully for agent ${this.state.inferenceContext.agentId}`);
+        this.logger().info(`Agent initialized successfully for agent ${appId}`);
     }
 
     getPreviewUrlCache() {
