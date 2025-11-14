@@ -415,8 +415,8 @@ onChange={(e) => {
 				</section>
 
 				{/* Templates Section */}
-				<section id="templates" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 lg:gap-6">
+				<section id="templates" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
 						{templates.map(({ title, icon: Icon, prompt }) => (
 							<motion.div
 								key={title}
@@ -428,7 +428,7 @@ onChange={(e) => {
 								className="w-full"
 							>
 								<Card 
-									className="aspect-square group relative overflow-hidden border-2 border-accent/15 dark:border-accent/25 bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur-lg supports-backdrop:backdrop-blur-lg hover:bg-bg-4/90 dark:hover:bg-bg-2/90 transition-all duration-300 cursor-pointer hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1 flex flex-col"
+									className="group relative overflow-hidden border-2 border-accent/15 dark:border-accent/25 bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur-lg supports-backdrop:backdrop-blur-lg hover:bg-bg-4/90 dark:hover:bg-bg-2/90 transition-all duration-300 cursor-pointer hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1 flex flex-col h-[210px] sm:h-[220px] md:h-[240px] rounded-2xl"
 									onClick={() => handleCreateApp(prompt, agentMode)}
 									role="button"
 									tabIndex={0}
@@ -440,8 +440,8 @@ onChange={(e) => {
 									</div>
 									<CardHeader className="pb-4 pt-12">
 										<div className="flex flex-col items-center text-center gap-3">
-											<div className="size-12 md:size-14 rounded-xl bg-gradient-to-br from-accent/20 to-accent/30 text-accent flex items-center justify-center group-hover:from-accent/30 group-hover:to-accent/40 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent/10 ring-2 ring-accent/10 group-hover:ring-accent/20">
-												<Icon className="size-6 md:size-7" />
+											<div className="size-11 md:size-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/30 text-accent flex items-center justify-center group-hover:from-accent/30 group-hover:to-accent/40 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent/10 ring-2 ring-accent/10 group-hover:ring-accent/20">
+												<Icon className="size-6" />
 											</div>
 											<CardTitle className="text-sm md:text-base font-semibold group-hover:text-accent transition-colors">{title}</CardTitle>
 											<div className="text-[10px] md:text-[11px] text-text-tertiary">Click to start</div>
