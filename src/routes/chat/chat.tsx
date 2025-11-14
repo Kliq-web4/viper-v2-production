@@ -48,6 +48,10 @@ export default function Chat() {
 	const [searchParams] = useSearchParams();
 	const userQuery = searchParams.get('query');
 	const agentMode = searchParams.get('agentMode') || 'deterministic';
+
+	// Mobile layout: which primary section is visible (chat vs preview)
+	const [activeMobileSection, setActiveMobileSection] = useState<'chat' | 'preview'>('chat');
+	const isDesktop = useMediaQuery('(min-width: 768px)');
 	
 	// Extract images from URL params if present
 	const userImages = useMemo(() => {
@@ -512,6 +516,10 @@ const isGitHubExportReady = useMemo(() => {
 		return [completedPhases, totalPhases];
 	}, [phaseTimeline, blueprint?.implementationRoadmap]);
 
+	// Layout visibility helpers
+	const showChatPane = isDesktop || activeMobileSection === 'chat';
+	const showSecondaryPane = showMainView && (isDesktop || activeMobileSection === 'preview');
+
 	if (import.meta.env.DEV) {
 		logger.debug({
 			messages,
@@ -540,12 +548,13 @@ const isGitHubExportReady = useMemo(() => {
 
 	return (
 		<div className="size-full flex flex-col min-h-0 text-text-primary">
-			<div className="flex-1 flex min-h-0 overflow-hidden justify-center">
-				<motion.div
-					layout="position"
-					className="flex-1 shrink-0 flex flex-col basis-0 max-w-lg relative z-10 h-full min-h-0"
-				>
-					<div 
+			<div className="flex-1 flex min-h-0 overflow-hidden justify-center flex-col md:flex-row">
+				{showChatPane && (
+					<motion.div
+						layout="position"
+						className="flex-1 shrink-0 flex flex-col basis-0 md:max-w-lg relative z-10 h-full min-h-0"
+					>
+						<div 
 					className={clsx(
 						'flex-1 overflow-y-auto min-h-0 chat-messages-scroll',
 						isDebugging && 'animate-debug-pulse'
@@ -813,13 +822,17 @@ const isGitHubExportReady = useMemo(() => {
 							</div>
 						</div>
 					</form>
-				</motion.div>
+					</motion.div>
+				)}
 
 				<AnimatePresence>
-					{showMainView && (
+					{showSecondaryPane && (
 					<motion.div
 						layout="position"
-						className="flex-1 flex shrink-0 basis-0 p-4 pl-0 ml-2 z-30 min-h-0"
+						className={clsx(
+							'flex-1 flex shrink-0 basis-0 p-4 z-30 min-h-0',
+							isDesktop ? 'pl-0 ml-2' : 'mt-4'
+						)}
 						initial={{ opacity: 0, scale: 0.84 }}
 						animate={{ opacity: 1, scale: 1 }}
 						transition={{ duration: 0.3, ease: 'easeInOut' }}
@@ -1224,6 +1237,42 @@ const isGitHubExportReady = useMemo(() => {
 				</AnimatePresence>
 			</div>
 
+			{/* Mobile Chat/Preview segmented control */}
+			{!isDesktop && (
+				<div className="sticky bottom-0 z-40 flex justify-center pb-3 pt-1 bg-gradient-to-t from-bg-1/95 via-bg-1/60 to-transparent">
+					<div className="inline-flex items-center rounded-full bg-bg-2/95 shadow-lg px-1 py-1 border border-border-primary">
+						<button
+							type="button"
+							onClick={() => setActiveMobileSection('chat')}
+							className={clsx(
+								'px-4 py-1.5 rounded-full text-sm font-medium transition-all',
+								activeMobileSection === 'chat'
+									? 'bg-bg-1 shadow-sm text-text-primary'
+									: 'text-text-secondary'
+							)}
+						>
+							Chat
+						</button>
+						<button
+							type="button"
+							onClick={() => {
+								if (previewUrl) setActiveMobileSection('preview');
+							}}
+							disabled={!previewUrl}
+							className={clsx(
+								'px-4 py-1.5 rounded-full text-sm font-medium transition-all',
+								activeMobileSection === 'preview'
+									? 'bg-bg-1 shadow-sm text-text-primary'
+									: 'text-text-secondary',
+								!previewUrl && 'opacity-50 cursor-not-allowed'
+							)}
+						>
+							Preview
+						</button>
+					</div>
+				</div>
+			)}
+
 			{/* Debug Panel */}
 			<DebugPanel
 				messages={debugMessages}
@@ -1275,4 +1324,27 @@ const isGitHubExportReady = useMemo(() => {
 			)}
 		</div>
 	);
+}
+
+function useMediaQuery(query: string): boolean {
+	const getMatches = () => {
+		if (typeof window === 'undefined') return false;
+		return window.matchMedia(query).matches;
+	};
+
+	const [matches, setMatches] = useState<boolean>(getMatches);
+
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+
+		const mediaQueryList = window.matchMedia(query);
+		const listener = (event: MediaQueryListEvent) => {
+			setMatches(event.matches);
+		};
+
+		mediaQueryList.addEventListener('change', listener);
+		return () => mediaQueryList.removeEventListener('change', listener);
+	}, [query]);
+
+	return matches;
 }
