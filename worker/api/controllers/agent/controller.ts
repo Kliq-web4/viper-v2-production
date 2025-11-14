@@ -150,11 +150,32 @@ export class CodingAgentController extends BaseController {
                 },
                 templateInfo: { templateDetails, selection },
             }, body.agentMode || defaultCodeGenArgs.agentMode) as Promise<CodeGenState>;
-            agentPromise.then(async (_state: CodeGenState) => {
-                writer.write("terminate");
-                writer.close();
-                this.logger.info(`Agent ${agentId} terminated successfully`);
-            });
+
+            agentPromise
+                .then(async (_state: CodeGenState) => {
+                    await writer.write("terminate");
+                    writer.close();
+                    this.logger.info(`Agent ${agentId} terminated successfully`);
+                })
+                .catch(async (error: unknown) => {
+                    this.logger.error(`Agent ${agentId} initialization failed`, error);
+                    try {
+                        await writer.write({
+                            type: 'error',
+                            message: 'Agent initialization failed',
+                            error: error instanceof Error ? error.message : String(error),
+                        });
+                        await writer.write("terminate");
+                    } catch (writeError) {
+                        this.logger.error(`Failed to write error to stream for agent ${agentId}`, writeError);
+                    } finally {
+                        try {
+                            writer.close();
+                        } catch (_closeError) {
+                            // Ignore errors on close
+                        }
+                    }
+                });
 
             this.logger.info(`Agent ${agentId} init launched successfully`);
             
