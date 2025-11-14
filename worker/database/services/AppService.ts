@@ -49,14 +49,32 @@ export class AppService extends BaseService {
     /**
      * Create a new app
      */
-    async createApp(appData:schema.NewApp): Promise<schema.App> {
-        const [app] = await this.database
-            .insert(schema.apps)
-            .values({
-                ...appData,
-            })
-            .returning();
-        return app;
+    async createApp(appData: schema.NewApp): Promise<schema.App> {
+        this.logger.info('[AppService] Creating app', {
+            appId: appData.id,
+            userId: appData.userId,
+            title: appData.title,
+        });
+        try {
+            const [app] = await this.database
+                .insert(schema.apps)
+                .values({
+                    ...appData,
+                })
+                .returning();
+            this.logger.info('[AppService] App created', {
+                appId: app.id,
+                userId: app.userId,
+            });
+            return app;
+        } catch (error) {
+            this.logger.error('[AppService] Failed to create app', {
+                appId: appData.id,
+                userId: appData.userId,
+                error,
+            });
+            throw error;
+        }
     }
     /**
      * Get public apps with pagination and sorting

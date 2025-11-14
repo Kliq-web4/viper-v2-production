@@ -2,7 +2,7 @@
 import { BaseController } from '../baseController';
 import { ApiResponse, ControllerResponse } from '../types';
 import type { RouteContext } from '../../types/route-context';
-import { getAgentStubLightweight } from '../../../agents';
+import { getAgentStubLightweight, getAgentState } from '../../../agents';
 import { AppService } from '../../../database/services/AppService';
 import { 
     AppDetailsData, 
@@ -31,10 +31,53 @@ export class AppViewController extends BaseController {
 
             // Get app details with stats using app service
             const appService = new AppService(env);
-            const appResult = await appService.getAppDetails(appId, userId);
+            let appResult = await appService.getAppDetails(appId, userId);
 
             if (!appResult) {
-                return AppViewController.createErrorResponse<AppDetailsData>('App not found', 404);
+                // Fallback: try to reconstruct missing app row from agent state if the Durable Object exists
+                try {
+                    const agentState = await getAgentState(env, appId);
+                    const ownerId = agentState.inferenceContext.userId;
+
+                    if (!ownerId) {
+                        this.logger.warn('Agent state found but missing owner userId when reconstructing app', { appId });
+                        return AppViewController.createErrorResponse<AppDetailsData>('App not found', 404);
+                    }
+
+                    this.logger.info('Reconstructing missing app from agent state', {
+                        appId,
+                        ownerId,
+                    });
+
+                    await appService.createApp({
+                        id: appId,
+                        userId: ownerId,
+                        sessionToken: null,
+                        title: agentState.blueprint?.title || agentState.query?.substring(0, 100) || 'New App',
+                        description: agentState.blueprint?.description || null,
+                        originalPrompt: agentState.query || '',
+                        finalPrompt: agentState.query || '',
+                        framework: agentState.blueprint?.frameworks?.[0],
+                        visibility: 'private',
+                        status: 'generating',
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    });
+
+                    // Re-fetch using standard path to include analytics/statistics
+                    appResult = await appService.getAppDetails(appId, userId);
+
+                    if (!appResult) {
+                        this.logger.error('Reconstructed app but getAppDetails still returned null', { appId, ownerId });
+                        return AppViewController.createErrorResponse<AppDetailsData>('App not found', 404);
+                    }
+                } catch (reconstructError) {
+                    this.logger.error('Failed to reconstruct app from agent state', {
+                        appId,
+                        error: reconstructError,
+                    });
+                    return AppViewController.createErrorResponse<AppDetailsData>('App not found', 404);
+                }
             }
 
             // Check if user has permission to view
