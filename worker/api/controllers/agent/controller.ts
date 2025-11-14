@@ -52,6 +52,12 @@ export class CodingAgentController extends BaseController {
             if (!query) {
                 return CodingAgentController.createErrorResponse('Missing "query" field in request body', 400);
             }
+
+            // Resolve effective language/frameworks/agentMode with safe fallbacks
+            const language = body.language ?? defaultCodeGenArgs.language ?? 'typescript';
+            const frameworks = body.frameworks ?? defaultCodeGenArgs.frameworks ?? ['react', 'vite'];
+            const agentMode = body.agentMode ?? defaultCodeGenArgs.agentMode;
+
             const { readable, writable } = new TransformStream({
                 transform(chunk, controller) {
                     if (chunk === "terminate") {
@@ -90,7 +96,7 @@ export class CodingAgentController extends BaseController {
                     description: `App generated from query: ${query}`,
                     originalPrompt: query,
                     finalPrompt: query,
-                    framework: (body.frameworks || defaultCodeGenArgs.frameworks).join(','),
+                    framework: frameworks.join(','),
                     visibility: 'private',
                     status: 'generating',
                     createdAt: new Date(),
@@ -168,8 +174,8 @@ export class CodingAgentController extends BaseController {
 
             const agentPromise = agentInstance.initialize({
                 query,
-                language: body.language || defaultCodeGenArgs.language,
-                frameworks: body.frameworks || defaultCodeGenArgs.frameworks,
+                language,
+                frameworks,
                 hostname,
                 inferenceContext,
                 images: uploadedImages,
@@ -177,7 +183,7 @@ export class CodingAgentController extends BaseController {
                     writer.write({chunk});
                 },
                 templateInfo: { templateDetails, selection },
-            }, body.agentMode || defaultCodeGenArgs.agentMode) as Promise<CodeGenState>;
+            }, agentMode) as Promise<CodeGenState>;
 
             agentPromise
                 .then(async (_state: CodeGenState) => {
