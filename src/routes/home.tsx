@@ -416,7 +416,7 @@ onChange={(e) => {
 
 				{/* Templates Section */}
 				<section id="templates" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5 lg:gap-6">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 lg:gap-6">
 						{templates.map(({ title, icon: Icon, prompt }) => (
 							<motion.div
 								key={title}
@@ -425,10 +425,10 @@ onChange={(e) => {
 								viewport={{ once: true, amount: 0.2 }}
 								transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
 								whileHover={{ y: -4 }}
-								className="h-full"
+								className="w-full"
 							>
 								<Card 
-									className="h-full group relative overflow-hidden border-2 border-accent/15 dark:border-accent/25 bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur-lg supports-backdrop:backdrop-blur-lg hover:bg-bg-4/90 dark:hover:bg-bg-2/90 transition-all duration-300 cursor-pointer hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1"
+									className="aspect-square group relative overflow-hidden border-2 border-accent/15 dark:border-accent/25 bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur-lg supports-backdrop:backdrop-blur-lg hover:bg-bg-4/90 dark:hover:bg-bg-2/90 transition-all duration-300 cursor-pointer hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1 flex flex-col"
 									onClick={() => handleCreateApp(prompt, agentMode)}
 									role="button"
 									tabIndex={0}
