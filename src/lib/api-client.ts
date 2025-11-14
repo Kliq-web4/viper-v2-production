@@ -271,7 +271,34 @@ private async requestRaw<T>(
 				return { response, data: null };
 			}
 			
-			const data = await response.json() as ApiResponse<T>;
+			let data: ApiResponse<T> | null = null;
+			try {
+				data = await response.json() as ApiResponse<T>;
+			} catch (parseError) {
+				console.error('[ApiClient] Failed to parse JSON response', {
+					endpoint,
+					url,
+					error: parseError,
+				});
+				// If the response was not ok, surface a generic error instead of
+				// leaking low-level JSON parse errors like "Unexpected token '<'".
+				if (!response.ok) {
+					throw new ApiError(
+						response.status,
+						response.statusText,
+						`Request failed with status ${response.status}`,
+						endpoint,
+					);
+				}
+				// For successful responses that failed JSON parsing, treat as a
+				// network/parsing error.
+				throw new ApiError(
+					0,
+					'Network Error',
+					'Failed to parse JSON response',
+					endpoint,
+				);
+			}
 
 			if (!response.ok) {
                 if (
