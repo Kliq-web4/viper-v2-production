@@ -157,6 +157,7 @@ export async function enforceAuthRequirement(c: Context<AppEnv>) : Promise<Respo
                     const wsTokenService = new WebSocketTokenService(c.env);
                     const result = await wsTokenService.validateAndConsume(token, agentId);
                     if (result.valid && result.userId) {
+                        logger.info('WebSocket token validated', { agentId, userId: result.userId });
                         // Minimal user context – sufficient for ownership checks
                         user = { id: result.userId, email: 'ws-token@local', isAnonymous: false } as AuthUser;
                         c.set('user', user);
@@ -165,7 +166,17 @@ export async function enforceAuthRequirement(c: Context<AppEnv>) : Promise<Respo
 
                         const config = await getUserConfigurableSettings(c.env, user.id);
                         c.set('config', config);
+                    } else {
+                        logger.warn('Invalid or expired WebSocket token', {
+                            agentId,
+                            tokenPrefix: token.slice(0, 8),
+                        });
                     }
+                } else {
+                    logger.warn('Missing WebSocket token or agentId on WS auth', {
+                        hasToken: !!token,
+                        agentId,
+                    });
                 }
             } catch (e) {
                 logger.warn('WS token validation failed', e);

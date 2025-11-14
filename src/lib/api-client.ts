@@ -300,6 +300,14 @@ private async requestRaw<T>(
                         }
                     }
                     console.log("Came here");
+                    console.error('[ApiClient] Request failed', {
+                        endpoint,
+                        url,
+                        status: response.status,
+                        statusText: response.statusText,
+                        error: data.error,
+                        message: data.message,
+                    });
 
                     throw new ApiError(
                         response.status,
@@ -311,7 +319,7 @@ private async requestRaw<T>(
 
 		    return { response, data };
 		} catch (error) {
-            console.error(error);
+            console.error('[ApiClient] Network or parsing error', { endpoint, error });
 			if (error instanceof ApiError || error instanceof RateLimitExceededError || error instanceof SecurityError) {
 				throw error;
 			}

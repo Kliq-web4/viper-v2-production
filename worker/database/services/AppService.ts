@@ -404,8 +404,8 @@ export class AppService extends BaseService {
      * Check if user owns an app
      */
     async checkAppOwnership(appId: string, userId: string): Promise<OwnershipResult> {
-        // Use read replica for ownership checks
-        const readDb = this.getReadDb('fast');
+        // Use fresh primary connection for ownership checks to avoid replica lag
+        const readDb = this.getReadDb('fresh');
         const app = await readDb
             .select({
                 id: schema.apps.id,
@@ -522,7 +522,8 @@ export class AppService extends BaseService {
      * Get app details with stats
      */
     async getAppDetails(appId: string, userId?: string): Promise<EnhancedAppData | null> {
-        const readDb = this.getReadDb('fast');
+        // Use fresh primary connection so newly created apps are immediately visible
+        const readDb = this.getReadDb('fresh');
         
         const appResult = await readDb
             .select({
