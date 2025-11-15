@@ -638,7 +638,7 @@ If you're genuinely stuck after trying 3 different approaches, honestly report: 
         const fileSummaries = summarizeFiles(session.filesIndex);
         
         // Fetch template details from agent
-        const operationOptions = session.agent.getOperationOptions();
+        const operationOptions = await session.agent.getOperationOptions();
         const templateInfo = operationOptions.context.templateDetails 
             ? PROMPT_UTILS.serializeTemplate(operationOptions.context.templateDetails)
             : undefined;

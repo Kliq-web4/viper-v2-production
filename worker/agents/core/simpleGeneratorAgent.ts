@@ -388,7 +388,6 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         }
     }
 
-<<<<<<< HEAD
     async onConnect(connection: Connection, ctx: ConnectionContext): Promise<void> {
         this.logger().info(`Agent connected for agent ${this.getAgentId()}`, { connection, ctx });
         try {
@@ -407,14 +406,6 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             // letting the runtime send a 1011 and avoid infinite retries without context.
             throw error instanceof Error ? error : new Error(String(error));
         }
-=======
-    async onConnect(connection: Connection, ctx: ConnectionContext) {
-        this.logger().info(`Agent connected for agent ${this.getAgentId()}`, { connection, ctx });
-        sendToConnection(connection, 'agent_connected', {
-            state: this.state,
-            templateDetails: await this.getTemplateDetails()
-        });
->>>>>>> origin/compyle/websocket-template-details-load
     }
 
     async ensureTemplateDetails() {
@@ -448,20 +439,11 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         return this.templateDetailsCache;
     }
 
-    private async getTemplateDetails(): Promise<TemplateDetails> {
+    private getTemplateDetails(): TemplateDetails {
         if (!this.templateDetailsCache) {
-<<<<<<< HEAD
-            // Caller is responsible for awaiting ensureTemplateDetails() beforehand
-            this.ensureTemplateDetails();
             throw new Error('Template details not loaded. Call ensureTemplateDetails() first.');
         }
-        // Non-null assertion is safe due to the guard above and our initialization flows
-        return this.templateDetailsCache!;
-=======
-            await this.ensureTemplateDetails();
-        }
-        return this.templateDetailsCache!; // Non-null assertion since we just ensured it exists
->>>>>>> origin/compyle/websocket-template-details-load
+        return this.templateDetailsCache;
     }
 
     /**
@@ -650,12 +632,14 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     async getProjectSetupAssistant(): Promise<ProjectSetupAssistant> {
         if (this.projectSetupAssistant === undefined) {
+            // Ensure template details are loaded before constructing assistant
+            await this.ensureTemplateDetails();
             this.projectSetupAssistant = new ProjectSetupAssistant({
                 env: this.env,
                 agentId: this.getAgentId(),
                 query: this.state.query,
                 blueprint: this.state.blueprint,
-                template: await this.getTemplateDetails(),
+                template: this.getTemplateDetails(),
                 inferenceContext: this.state.inferenceContext
             });
         }
@@ -701,10 +685,12 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
     }
 
     async getOperationOptions(): Promise<OperationOptions> {
+        // Ensure template details are loaded before building generation context
+        await this.ensureTemplateDetails();
         return {
             env: this.env,
             agentId: this.getAgentId(),
-            context: GenerationContext.from(this.state, await this.getTemplateDetails(), this.logger()),
+            context: GenerationContext.from(this.state, this.getTemplateDetails(), this.logger()),
             logger: this.logger(),
             inferenceContext: this.getInferenceContext(),
             agent: this.codingAgent
@@ -1242,7 +1228,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                 userContext,
                 isUserSuggestedPhase: userContext?.suggestions && userContext.suggestions.length > 0 && this.state.mvpGenerated,
             },
-            this.getOperationOptions()
+            await this.getOperationOptions()
         )
         // Execute install commands if any
         if (result.installCommands && result.installCommands.length > 0) {

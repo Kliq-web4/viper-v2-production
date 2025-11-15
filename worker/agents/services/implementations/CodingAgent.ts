@@ -52,7 +52,7 @@ export class CodingAgentInterface {
         this.agentStub.clearConversation();
     }
 
-    getOperationOptions(): OperationOptions {
+    getOperationOptions(): Promise<OperationOptions> {
         return this.agentStub.getOperationOptions();
     }
 
