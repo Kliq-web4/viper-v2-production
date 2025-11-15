@@ -388,11 +388,11 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         }
     }
 
-    onConnect(connection: Connection, ctx: ConnectionContext) {
+    async onConnect(connection: Connection, ctx: ConnectionContext) {
         this.logger().info(`Agent connected for agent ${this.getAgentId()}`, { connection, ctx });
         sendToConnection(connection, 'agent_connected', {
             state: this.state,
-            templateDetails: this.getTemplateDetails()
+            templateDetails: await this.getTemplateDetails()
         });
     }
 
