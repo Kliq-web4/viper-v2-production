@@ -220,8 +220,8 @@ export async function generateBlueprint({ env, inferenceContext, query, language
         // Optimistically start the stream so the UI shows progress immediately
         if (stream) {
             try {
-                // Send a small prefix to trigger the UI streaming indicator
-                stream.onChunk('{');
+                // Send a harmless whitespace to trigger the UI streaming indicator without breaking JSON assembly
+                stream.onChunk(' ');
             } catch (_) {}
         }
 
