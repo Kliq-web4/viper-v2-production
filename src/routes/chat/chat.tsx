@@ -42,6 +42,21 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { sendWebSocketMessage } from './utils/websocket-helpers';
 import { apiClient } from '@/lib/api-client';
 
+// Minimal Supabase logo for buttons (brand-inspired arrow mark)
+const SupabaseIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    focusable="false"
+    className={className}
+  >
+    <path
+      d="M5 3c0-.552.448-1 1-1h7.5a.75.75 0 0 1 .6 1.2L11 9h3.5c.61 0 .98.676.66 1.2l-6 9.75A.75.75 0 0 1 8 20H6a1 1 0 0 1-1-1V3Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 export default function Chat() {
 	const { chatId: urlChatId } = useParams();
 
@@ -146,8 +161,11 @@ const {
 		onDebugMessage: addDebugMessage,
 	});
 
-	// GitHub export functionality - use urlChatId directly from URL params
-	const githubExport = useGitHubExport(websocket, urlChatId, refetchApp);
+	// Prefer the concrete agent id once available
+	const effectiveAgentId = chatId || urlChatId;
+
+	// GitHub export functionality - use effective agent id
+	const githubExport = useGitHubExport(websocket, effectiveAgentId, refetchApp);
 	const { user } = useAuth();
 
 	const navigate = useNavigate();
@@ -187,10 +205,11 @@ const [isAddingSupabase, setIsAddingSupabase] = useState(false);
 
 // Add Supabase integration handler
 const handleAddSupabase = useCallback(async () => {
-  if (!urlChatId || isAddingSupabase) return;
+  const targetId = effectiveAgentId;
+  if (!targetId || isAddingSupabase) return;
   try {
     setIsAddingSupabase(true);
-    await apiClient.addSupabaseIntegration(urlChatId);
+    await apiClient.addSupabaseIntegration(targetId);
     // trigger preview refresh
     setManualRefreshTrigger(Date.now());
   } catch (e) {
@@ -198,7 +217,7 @@ const handleAddSupabase = useCallback(async () => {
   } finally {
     setIsAddingSupabase(false);
   }
-}, [urlChatId, isAddingSupabase]);
+}, [effectiveAgentId, isAddingSupabase]);
 
 // Listen for model config info WebSocket messages
 	useEffect(() => {
@@ -347,13 +366,13 @@ const handleAddSupabase = useCallback(async () => {
 		return phaseTimeline.length > 0 && phaseTimeline[0].status === 'completed';
 	}, [phaseTimeline]);
 
-const isGitHubExportReady = useMemo(() => {
-		return isPhase1Complete && !!urlChatId;
-	}, [isPhase1Complete, urlChatId]);
+	const isGitHubExportReady = useMemo(() => {
+		return isPhase1Complete && !!effectiveAgentId;
+	}, [isPhase1Complete, effectiveAgentId]);
 
 	const isDeployReady = useMemo(() => {
-		return isPhase1Complete && !!urlChatId;
-	}, [isPhase1Complete, urlChatId]);
+		return isPhase1Complete && !!effectiveAgentId;
+	}, [isPhase1Complete, effectiveAgentId]);
 
 	const showMainView = useMemo(
 		() =>
@@ -892,10 +911,10 @@ const isGitHubExportReady = useMemo(() => {
 											<button
 												className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 text-xs font-medium shadow-sm ${
 													isDeployReady
-														? 'bg-orange-500 hover:bg-orange-600 text-white'
+														? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white'
 														: 'bg-bg-3 text-text-tertiary cursor-not-allowed'
 												}`}
-												onClick={isDeployReady ? () => handleDeployToCloudflare(urlChatId || '') : undefined}
+												onClick={isDeployReady ? () => handleDeployToCloudflare(effectiveAgentId || '') : undefined}
 												disabled={!isDeployReady || isDeploying}
 												title={isDeployReady ? 'Deploy to Cloudflare' : 'Complete Phase 1 to enable deploy'}
 											>
@@ -910,24 +929,29 @@ const isGitHubExportReady = useMemo(() => {
 														Deploy
 													</>
 												)}
-</button>
-                                <button
-                                    className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 text-xs font-medium shadow-sm ${
-                                        isAddingSupabase ? 'bg-gray-600 text-gray-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                                    }`}
-                                    onClick={handleAddSupabase}
-                                    disabled={isAddingSupabase}
-                                    title="Add Supabase (no-code)"
-                                >
-                                    {isAddingSupabase ? (
-                                        <>
-                                            <LoaderCircle className="size-3 animate-spin" />
-                                            Adding...
-                                        </>
-                                    ) : (
-                                        <>Add Supabase</>
-                                    )}
-                                </button>
+											</button>
+											<button
+												className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all duration-200 text-xs font-medium shadow-sm border ${
+													isAddingSupabase
+														? 'bg-emerald-900/40 text-emerald-100 border-emerald-700 cursor-wait'
+														: 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500'
+												}`}
+												onClick={handleAddSupabase}
+												disabled={isAddingSupabase}
+												title="Add Supabase (no-code)"
+											>
+												{isAddingSupabase ? (
+													<>
+														<LoaderCircle className="size-3 animate-spin" />
+														Adding...
+													</>
+												) : (
+													<>
+														<SupabaseIcon className="size-3.5 text-emerald-300" />
+														<span>Supabase</span>
+													</>
+												)}
+											</button>
 											<button
 												className="group relative flex items-center gap-1.5 p-1.5 group-hover:pl-2 group-hover:pr-2.5 rounded-full group-hover:rounded-md transition-all duration-300 ease-in-out hover:bg-bg-4 border border-transparent hover:border-border-primary hover:shadow-sm overflow-hidden"
 												onClick={() => setIsGitCloneModalOpen(true)}
@@ -939,30 +963,30 @@ const isGitHubExportReady = useMemo(() => {
 												</span>
 											</button>
 											<button
-												className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 text-xs font-medium shadow-sm ${
+												className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all duration-200 text-xs font-medium shadow-sm border ${
 													isGitHubExportReady
-														? 'bg-gray-800 hover:bg-gray-900 text-white'
-														: 'bg-gray-600 text-gray-400 cursor-not-allowed'
+														? 'bg-gray-900 hover:bg-black text-white border-gray-700'
+														: 'bg-gray-700/70 text-gray-300/80 border-gray-600 cursor-not-allowed'
 												}`}
 												onClick={isGitHubExportReady ? githubExport.openModal : undefined}
 												disabled={!isGitHubExportReady}
 												title={
 													isGitHubExportReady
-														? "Export to GitHub"
+														? 'Export to GitHub'
 														: !isPhase1Complete
-															? "Complete Phase 1 to enable GitHub export"
-															: "Waiting for chat session to initialize..."
+															? 'Complete Phase 1 to enable GitHub export'
+															: 'Waiting for chat session to initialize...'
 												}
 												aria-label={
 													isGitHubExportReady
-														? "Export to GitHub"
+														? 'Export to GitHub'
 														: !isPhase1Complete
-															? "GitHub export disabled - complete Phase 1 first"
-															: "GitHub export disabled - waiting for chat session"
+															? 'GitHub export disabled - complete Phase 1 first'
+															: 'GitHub export disabled - waiting for chat session'
 												}
 											>
 												<Github className="size-3.5" />
-												GitHub
+												<span>GitHub</span>
 											</button>
 											<button
 												className="p-1.5 rounded-full transition-all duration-300 ease-in-out hover:bg-bg-4 border border-transparent hover:border-border-primary hover:shadow-sm"
