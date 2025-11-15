@@ -341,9 +341,11 @@ export function useChat({
 					// Always request conversation state explicitly (running/full history)
 					sendWebSocketMessage(ws, 'get_conversation_state');
 
-					// Request file generation for new chats only
-					if (!disableGenerate && urlChatId === 'new') {
-						logger.debug('🔄 Starting code generation for new chat');
+					// Request file generation only on the initial connection for new chats.
+					// For retries, we rely on the backend's shouldBeGenerating flag via
+					// cf_agent_state/agent_connected to resume if needed.
+					if (!isRetry && !disableGenerate && urlChatId === 'new') {
+						logger.debug('🔄 Starting code generation for new chat (initial connect)');
 						sendWebSocketMessage(ws, 'generate_all');
 					}
 				});
@@ -567,6 +569,10 @@ export function useChat({
     }, []);
 
 	// Heartbeat to keep connection alive and detect half-open sockets
+	// Only force reconnect when we *expect* activity (e.g. during bootstrap,
+	// blueprint generation, or active code generation/deployment). Once the
+	// app is idle with Phase 1 complete, it's normal for the socket to be
+	// quiet and we should not spam reconnects.
 	useEffect(() => {
 		if (!websocket) return;
 		const HEARTBEAT_INTERVAL = 25000; // 25s
@@ -575,15 +581,24 @@ export function useChat({
 			try {
 				if (websocket.readyState === WebSocket.OPEN) {
 					websocket.send(JSON.stringify({ type: 'ping', ts: Date.now() }));
-					if (Date.now() - lastMessageAtRef.current > INACTIVITY_TIMEOUT) {
-						logger.warn('⏳ WebSocket inactive, forcing reconnect');
+					const inactiveFor = Date.now() - lastMessageAtRef.current;
+
+					// We only care about inactivity while work is ongoing.
+					const expectingActivity =
+						isBootstrapping ||
+						isGeneratingBlueprint ||
+						isGenerating ||
+						isPreviewDeploying;
+
+					if (expectingActivity && inactiveFor > INACTIVITY_TIMEOUT) {
+						logger.warn('⏳ WebSocket inactive during active work, forcing reconnect');
 						websocket.close();
 					}
 				}
 			} catch {}
 		}, HEARTBEAT_INTERVAL);
 		return () => clearInterval(id);
-	}, [websocket]);
+	}, [websocket, isBootstrapping, isGeneratingBlueprint, isGenerating, isPreviewDeploying]);
 
 	// Fast reconnect when network comes back online
 	useEffect(() => {
