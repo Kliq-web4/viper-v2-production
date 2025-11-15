@@ -483,12 +483,13 @@ export function useChat({
 								updateStage('blueprint', { status: 'active' });
 							}
 							parser.feed(obj.chunk);
-							try {
-								const partial = parser.finalize();
-								setBlueprint(partial);
-							} catch (e) {
-								logger.error('Error parsing JSON:', e, obj.chunk);
-							}
+                            try {
+                                const partial = parser.finalize();
+                                setBlueprint(partial);
+                            } catch (e) {
+                                // During streaming, partial JSON may fail to repair; this is expected until final chunk
+                                logger.debug('Blueprint chunk parse pending');
+                            }
 						} 
 						if (obj.agentId) {
 							result.agentId = obj.agentId;

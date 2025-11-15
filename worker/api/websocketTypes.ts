@@ -418,6 +418,11 @@ type KeepAliveMessage = {
 	ts: number;
 };
 
+type CfAgentMcpServersMessage = {
+    type: 'cf_agent_mcp_servers';
+    servers?: unknown[];
+};
+
 export type WebSocketMessage =
 	| StateMessage
 	| AgentConnectedMessage
@@ -472,8 +477,9 @@ export type WebSocketMessage =
 	| ModelConfigsInfoMessage
 	| TerminalCommandMessage
 	| TerminalOutputMessage
-	| ServerLogMessage
-	| KeepAliveMessage;
+    | ServerLogMessage
+	| KeepAliveMessage
+    | CfAgentMcpServersMessage;
 
 // A type representing all possible message type strings (e.g., 'generation_started', 'file_generating', etc.)
 export type WebSocketMessageType = WebSocketMessage['type'];

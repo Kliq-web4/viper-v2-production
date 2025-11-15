@@ -154,6 +154,36 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
                 // No-op heartbeat message from server
                 break;
             }
+
+            case 'cf_agent_mcp_servers': {
+                // Informational payload about MCP servers; ignore for now
+                break;
+            }
+
+            case 'screenshot_capture_started': {
+                // Optional: show subtle status in chat
+                sendMessage(createAIMessage('screenshot_capture_started', 'Capturing preview screenshot...'));
+                break;
+            }
+
+            case 'screenshot_capture_success': {
+                // Optional: announce success; avoid flooding chat if frequent
+                onDebugMessage?.('info', 'Screenshot captured', JSON.stringify({ url: (message as any).url, size: (message as any).screenshotSize }));
+                break;
+            }
+
+            case 'command_executing': {
+                // Show running commands
+                const cmds = (message as any).commands || [];
+                sendMessage(createAIMessage('command_executing', `Executing commands: ${cmds.join('; ')}`));
+                break;
+            }
+
+            case 'command_executed': {
+                const cmds = (message as any).commands || [];
+                sendMessage(createAIMessage('command_executed', `Commands completed: ${cmds.join('; ')}`));
+                break;
+            }
             case 'conversation_cleared': {
                 // Reset chat messages to a subtle tool-event entry indicating success
                 setMessages(() => appendToolEvent([], 'conversation_cleared', {
