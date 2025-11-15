@@ -391,6 +391,26 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
     async onConnect(connection: Connection, ctx: ConnectionContext): Promise<void> {
         this.logger().info(`Agent connected for agent ${this.getAgentId()}`, { connection, ctx });
         try {
+            // Migrate state if needed (handles older sessions missing templateName, etc.)
+            this.migrateStateIfNeeded();
+
+            // Fallback: if template name is still missing (older persisted sessions), use first available template
+            if (!this.state.templateName || this.state.templateName.trim() === '') {
+                this.logger().warn('templateName missing on connect; attempting fallback selection from catalog');
+                try {
+                    const catalog = await BaseSandboxService.listTemplates();
+                    if (catalog.success && catalog.templates.length > 0) {
+                        const fallbackTemplate = catalog.templates[0].name;
+                        this.setState({ ...this.state, templateName: fallbackTemplate });
+                        this.logger().info('Selected fallback template for session', { templateName: fallbackTemplate });
+                    } else {
+                        this.logger().error('No templates available in catalog for fallback');
+                    }
+                } catch (e) {
+                    this.logger().error('Failed to list templates for fallback template selection', e);
+                }
+            }
+
             // Ensure template details are loaded for this session (handles resumed agents)
             const templateDetails = await this.ensureTemplateDetails();
 
@@ -410,31 +430,59 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     async ensureTemplateDetails() {
         if (!this.templateDetailsCache) {
-            this.logger().info(`Loading template details for: ${this.state.templateName}`);
-            const results = await BaseSandboxService.getTemplateDetails(this.state.templateName);
-            if (!results.success || !results.templateDetails) {
-                throw new Error(`Failed to get template details for: ${this.state.templateName}`);
+            // Guard: template name must be available
+            const name = (this.state.templateName || '').trim();
+            if (!name) {
+                throw new Error('Template name is not set in state; cannot load template details');
             }
-            
-            const templateDetails = results.templateDetails;
-            
-            const customizedAllFiles = { ...templateDetails.allFiles };
-            
-            this.logger().info('Customizing template files for older app');
-            const customizedFiles = customizeTemplateFiles(
-                templateDetails.allFiles,
-                {
-                    projectName: this.state.projectName,
-                    commandsHistory: this.getBootstrapCommands()
+
+            this.logger().info(`Loading template details for: ${name}`);
+
+            // Retry a few times to mitigate transient network issues
+            const maxAttempts = 3;
+            let lastError: unknown = null;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    const results = await BaseSandboxService.getTemplateDetails(name);
+                    if (!results.success || !results.templateDetails) {
+                        throw new Error(results.error || `Unknown error fetching template details`);
+                    }
+
+                    const templateDetails = results.templateDetails;
+
+                    const customizedAllFiles = { ...templateDetails.allFiles };
+
+                    this.logger().info('Customizing template files for older app');
+                    const customizedFiles = customizeTemplateFiles(
+                        templateDetails.allFiles,
+                        {
+                            projectName: this.state.projectName,
+                            commandsHistory: this.getBootstrapCommands()
+                        }
+                    );
+                    Object.assign(customizedAllFiles, customizedFiles);
+
+                    this.templateDetailsCache = {
+                        ...templateDetails,
+                        allFiles: customizedAllFiles
+                    };
+                    this.logger().info('Template details loaded and customized');
+                    break; // success
+                } catch (e) {
+                    lastError = e;
+                    this.logger().warn(`Attempt ${attempt} to load template details failed`, e);
+                    if (attempt < maxAttempts) {
+                        const backoff = Math.min(500 * Math.pow(2, attempt - 1), 2000);
+                        await new Promise((r) => setTimeout(r, backoff));
+                        continue;
+                    }
                 }
-            );
-            Object.assign(customizedAllFiles, customizedFiles);
-            
-            this.templateDetailsCache = {
-                ...templateDetails,
-                allFiles: customizedAllFiles
-            };
-            this.logger().info('Template details loaded and customized');
+            }
+
+            if (!this.templateDetailsCache) {
+                const msg = lastError instanceof Error ? lastError.message : String(lastError);
+                throw new Error(`Failed to get template details for: ${name}. ${msg ? `Reason: ${msg}` : ''}`);
+            }
         }
         return this.templateDetailsCache;
     }
