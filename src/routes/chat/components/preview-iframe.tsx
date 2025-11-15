@@ -10,6 +10,10 @@ interface PreviewIframeProps {
     shouldRefreshPreview?: boolean;
     manualRefreshTrigger?: number;
     webSocket?: WebSocket | null;
+    // If true, keep the branded overlay visible even after iframe load until isReadyToReveal becomes true
+    blockRevealUntilReady?: boolean;
+    // When blockRevealUntilReady is true, flip this to reveal the iframe and hide the overlay
+    isReadyToReveal?: boolean;
 }
 
 // ============================================================================
@@ -39,9 +43,9 @@ const getRetryDelay = (attempt: number): number => {
 // ============================================================================
 
 export const PreviewIframe = forwardRef<HTMLIFrameElement, PreviewIframeProps>(
-	({ src, className = '', title = 'Preview', shouldRefreshPreview = false, manualRefreshTrigger, webSocket }, ref) => {
-		
-		const [loadState, setLoadState] = useState<LoadState>({
+    ({ src, className = '', title = 'Preview', shouldRefreshPreview = false, manualRefreshTrigger, webSocket, blockRevealUntilReady = false, isReadyToReveal = false }, ref) => {
+        
+        const [loadState, setLoadState] = useState<LoadState>({
 			status: 'idle',
 			attempt: 0,
 			loadedSrc: null,
@@ -333,25 +337,49 @@ export const PreviewIframe = forwardRef<HTMLIFrameElement, PreviewIframeProps>(
 		// Render
 		// ====================================================================
 
-		// Successfully loaded - show iframe
-		if (loadState.status === 'loaded' && loadState.loadedSrc) {
-			return (
-				<iframe
-					ref={ref}
-					src={loadState.loadedSrc}
-					className={className}
-					title={title}
-					onError={() => {
-						console.error('Iframe failed to load');
-						setLoadState(prev => ({
-							...prev,
-							status: 'error',
-							errorMessage: 'Preview failed to render',
-						}));
-					}}
-				/>
-			);
-		}
+        // Successfully loaded
+        if (loadState.status === 'loaded' && loadState.loadedSrc) {
+            if (blockRevealUntilReady && !isReadyToReveal) {
+                // Keep branded overlay visible; pre-load the iframe hidden underneath
+                return (
+                    <div className={`${className} relative bg-black border border-text/10 rounded-lg overflow-hidden`}>
+                        <iframe
+                            ref={ref}
+                            src={loadState.loadedSrc}
+                            className="absolute inset-0 opacity-0 pointer-events-none"
+                            title={title}
+                            aria-hidden="true"
+                            onError={() => {
+                                console.error('Iframe failed to load');
+                                setLoadState(prev => ({
+                                    ...prev,
+                                    status: 'error',
+                                    errorMessage: 'Preview failed to render',
+                                }));
+                            }}
+                        />
+                        <Hero />
+                    </div>
+                );
+            }
+            // Reveal actual iframe
+            return (
+                <iframe
+                    ref={ref}
+                    src={loadState.loadedSrc}
+                    className={className}
+                    title={title}
+                    onError={() => {
+                        console.error('Iframe failed to load');
+                        setLoadState(prev => ({
+                            ...prev,
+                            status: 'error',
+                            errorMessage: 'Preview failed to render',
+                        }));
+                    }}
+                />
+            );
+        }
 
 		// Loading state
 		if (loadState.status === 'loading' || loadState.status === 'idle' || loadState.status === 'postload') {

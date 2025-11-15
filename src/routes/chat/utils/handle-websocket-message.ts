@@ -567,6 +567,13 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
                 break;
             }
 
+            case 'command_execution_failed': {
+                const cmds = (message as any).commands || [];
+                const err = (message as any).error || 'Unknown error';
+                sendMessage(createAIMessage('command_execution_failed', `❌ Commands failed: ${cmds.join('; ')}\n\n${err}`));
+                break;
+            }
+
             case 'code_reviewed': {
                 const reviewData = message.review;
                 const totalIssues = reviewData?.filesToFix?.reduce((count: number, file: any) =>
@@ -812,6 +819,20 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
                 break;
             }
 
+            case 'screenshot_capture_error': {
+                const e = message as any;
+                onDebugMessage?.('error', 'Screenshot capture failed', JSON.stringify({ url: e.url, statusCode: e.statusCode, statusText: e.statusText, apiResponse: e.apiResponse }, null, 2), 'Screenshot');
+                toast.error('Screenshot capture failed');
+                break;
+            }
+
+            case 'screenshot_analysis_result': {
+                const a = (message as any).analysis;
+                const summary = a?.hasIssues ? `Screenshot analysis: ${a.issues?.length || 0} issue(s), ${a.suggestions?.length || 0} suggestion(s)` : 'Screenshot analysis: no issues found';
+                onDebugMessage?.('info', 'Screenshot analysis', summary, 'Screenshot');
+                break;
+            }
+
             case 'github_export_started': {
                 sendMessage(createAIMessage('github_export_started', message.message));
                 break;
@@ -832,6 +853,42 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
 
                 toast.error(`Error: ${message.error}`);
                 
+                break;
+            }
+
+            case 'user_suggestions_processing': {
+                sendMessage(createAIMessage('user_suggestions_processing', message.message));
+                break;
+            }
+
+            case 'project_name_updated': {
+                // No special UI beyond toast for now
+                toast.info(message.message);
+                break;
+            }
+
+            case 'blueprint_updated': {
+                toast.info('Blueprint updated');
+                break;
+            }
+
+            case 'deterministic_code_fix_started': {
+                sendMessage(createAIMessage('deterministic_code_fix_started', message.message));
+                break;
+            }
+
+            case 'deterministic_code_fix_completed': {
+                sendMessage(createAIMessage('deterministic_code_fix_completed', message.message));
+                break;
+            }
+
+            case 'model_configs_info': {
+                onDebugMessage?.('info', 'Model configs info', JSON.stringify((message as any).configs, null, 2), 'Model Configs');
+                break;
+            }
+
+            case 'terminal_command': {
+                onTerminalMessage?.({ id: `termcmd-${Date.now()}`, content: (message as any).command, type: 'command', timestamp: (message as any).timestamp });
                 break;
             }
 

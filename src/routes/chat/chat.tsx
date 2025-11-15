@@ -975,19 +975,22 @@ const isGitHubExportReady = useMemo(() => {
 											</button>
 										</div>
 									</div>
-									<PreviewIframe
-										src={previewUrl}
-										ref={previewRef}
-										className="flex-1 w-full h-full border-0"
-										title="Preview"
-										shouldRefreshPreview={
-											shouldRefreshPreview
-										}
-										manualRefreshTrigger={
-											manualRefreshTrigger
-										}
-										webSocket={websocket}
-									/>
+										<PreviewIframe
+											src={previewUrl}
+											ref={previewRef}
+											className="flex-1 w-full h-full border-0"
+											title="Preview"
+											shouldRefreshPreview={
+												shouldRefreshPreview
+											}
+											manualRefreshTrigger={
+												manualRefreshTrigger
+											}
+											webSocket={websocket}
+											// Keep branded overlay until at least one phase completes to avoid showing template screen
+											blockRevealUntilReady={true}
+											isReadyToReveal={phaseTimeline?.some(p => p.status === 'completed')}
+										/>
 								</div>
 							)}
 
