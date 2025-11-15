@@ -429,10 +429,12 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     private getTemplateDetails(): TemplateDetails {
         if (!this.templateDetailsCache) {
+            // Caller is responsible for awaiting ensureTemplateDetails() beforehand
             this.ensureTemplateDetails();
             throw new Error('Template details not loaded. Call ensureTemplateDetails() first.');
         }
-        return this.templateDetailsCache;
+        // Non-null assertion is safe due to the guard above and our initialization flows
+        return this.templateDetailsCache!;
     }
 
     /**
