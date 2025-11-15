@@ -1141,7 +1141,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         const debugPromise = (async () => {
             try {
                 const previousTranscript = this.state.lastDeepDebugTranscript ?? undefined;
-                const operationOptions = this.getOperationOptions();
+                const operationOptions = await this.getOperationOptions();
                 const filesIndex = operationOptions.context.allFiles
                     .filter((f) =>
                         !focusPaths?.length ||
