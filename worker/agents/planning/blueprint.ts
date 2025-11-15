@@ -206,26 +206,24 @@ export async function generateBlueprint({ env, inferenceContext, query, language
 
         const userMessage = images && images.length > 0
             ? createMultiModalUserMessage(
-                `CLIENT REQUEST: "${query}"`,
+                `CLIENT REQUEST: \"${query}\"`,
                 await imagesToBase64(env, images), 
                 'high'
               )
-            : createUserMessage(`CLIENT REQUEST: "${query}"`);
+            : createUserMessage(`CLIENT REQUEST: \"${query}\"`);
 
         const messages = [
             systemPromptMessage,
             userMessage
         ];
 
-        // Log messages to console for debugging
-        // logger.info('Blueprint messages:', JSON.stringify(messages, null, 2));
-        
-        // let reasoningEffort: "high" | "medium" | "low" | undefined = "medium" as const;
-        // if (templateMetaInfo?.complexity === 'simple' || templateMetaInfo?.complexity === 'moderate') {
-        //     console.log(`Using medium reasoning for simple/moderate queries`);
-        //     modelName = AIModels.OPENAI_O4_MINI;
-        //     reasoningEffort = undefined;
-        // }
+        // Optimistically start the stream so the UI shows progress immediately
+        if (stream) {
+            try {
+                // Send a small prefix to trigger the UI streaming indicator
+                stream.onChunk('{');
+            } catch (_) {}
+        }
 
         const { object: results } = await executeInference({
             env,
@@ -241,10 +239,19 @@ export async function generateBlueprint({ env, inferenceContext, query, language
             results.initialPhase.files = results.initialPhase.files.filter(f => !f.path.endsWith('.pdf'));
         }
 
-        // // A hack
-        // if (results?.initialPhase) {
-        //     results.initialPhase.lastPhase = false;
-        // }
+        // Send the final JSON in chunks if a stream is provided (simulated streaming)
+        if (stream && results) {
+            try {
+                const json = JSON.stringify(results);
+                const chunkSize = Math.max(128, Math.min(stream.chunk_size || 256, 2048));
+                for (let i = 0; i < json.length; i += chunkSize) {
+                    stream.onChunk(json.slice(i, i + chunkSize));
+                }
+            } catch (e) {
+                logger.error('Failed to stream blueprint JSON chunks', e);
+            }
+        }
+
         return results as Blueprint;
     } catch (error) {
         logger.error("Error generating blueprint:", error);
