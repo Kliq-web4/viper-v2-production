@@ -2534,8 +2534,8 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                     errors,
                     projectUpdates,
                     images: uploadedImages
-                }, 
-                this.getOperationOptions()
+                },
+                await this.getOperationOptions()
             );
 
             const { conversationResponse, conversationState } = conversationalResponse;
