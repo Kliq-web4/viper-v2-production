@@ -181,15 +181,29 @@ export const MonacoEditor = memo<MonacoEditorProps>(function MonacoEditor({
 		if (theme === 'system') {
 			configuredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 		}
-		// Create a stable file-backed model to avoid TS worker "inmemory" lookups
-		const uri = monaco.Uri.parse('file:///App.tsx');
-		const initialModel = monaco.editor.createModel(
-			createOptions.value ?? defaultCode,
-			createOptions.language || 'typescript',
-			uri,
-		);
+		// Create or reuse a file-backed model to avoid TS worker "inmemory" lookups
+		let uri = monaco.Uri.parse('file:///App.tsx');
+		let initialModel = monaco.editor.getModel(uri);
+		if (!initialModel) {
+			// If a model with the default URI already exists (another editor mounted), create a unique URI
+			try {
+				initialModel = monaco.editor.createModel(
+					createOptions.value ?? defaultCode,
+					createOptions.language || 'typescript',
+					uri,
+				);
+			} catch (_e) {
+				// Fallback: use a unique URI to avoid ModelService collision
+				uri = monaco.Uri.parse(`file:///App-${Date.now()}-${Math.random().toString(36).slice(2)}.tsx`);
+				initialModel = monaco.editor.createModel(
+					createOptions.value ?? defaultCode,
+					createOptions.language || 'typescript',
+					uri,
+				);
+			}
+		}
 		editor.current = monaco.editor.create(containerRef.current!, {
-			model: initialModel,
+			model: initialModel!,
 			minimap: { enabled: false },
 			theme: configuredTheme === 'dark' ? 'v1-dev-dark' : 'v1-dev',
 			automaticLayout: true,
@@ -220,6 +234,7 @@ export const MonacoEditor = memo<MonacoEditorProps>(function MonacoEditor({
 		}
 
 		return () => {
+			// Only dispose the editor; keep the model to avoid breaking other editors sharing it
 			editor.current?.dispose();
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
