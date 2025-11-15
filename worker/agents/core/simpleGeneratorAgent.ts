@@ -2212,7 +2212,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                     
                     if (failedInstallCommands.length > 0 && retryCount < maxRetries) {
                         // Use AI to suggest alternative commands
-                        const newCommands = await this.getProjectSetupAssistant().generateSetupCommands(
+                        const newCommands = await (await this.getProjectSetupAssistant()).generateSetupCommands(
                             `The following install commands failed: ${JSON.stringify(failures, null, 2)}. Please suggest alternative commands.`
                         );
                         
