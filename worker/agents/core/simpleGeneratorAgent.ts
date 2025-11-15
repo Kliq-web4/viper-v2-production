@@ -1016,18 +1016,9 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                 this.broadcastError("Error during generation", error);
             }
             
-            // Update app status to failed on error
-            try {
-                const appService = new AppService(this.env);
-                await appService.updateApp(
-                    this.getAgentId(),
-                    {
-                        status: 'error',
-                    }
-                );
-            } catch (dbError) {
-                this.logger().error("Failed to update app status to error:", dbError);
-            }
+            // Note: we intentionally do not update app.status here, since the
+            // schema currently only allows 'generating' | 'completed'.
+            // The app will remain in its previous status on failure.
         }
     }
 
