@@ -618,14 +618,14 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         return this.previewUrlCache;
     }
 
-    getProjectSetupAssistant(): ProjectSetupAssistant {
+    async getProjectSetupAssistant(): Promise<ProjectSetupAssistant> {
         if (this.projectSetupAssistant === undefined) {
             this.projectSetupAssistant = new ProjectSetupAssistant({
                 env: this.env,
                 agentId: this.getAgentId(),
                 query: this.state.query,
                 blueprint: this.state.blueprint,
-                template: this.getTemplateDetails(),
+                template: await this.getTemplateDetails(),
                 inferenceContext: this.state.inferenceContext
             });
         }
