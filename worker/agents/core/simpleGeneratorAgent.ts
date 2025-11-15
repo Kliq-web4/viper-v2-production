@@ -431,7 +431,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         if (!this.templateDetailsCache) {
             await this.ensureTemplateDetails();
         }
-        return this.templateDetailsCache;
+        return this.templateDetailsCache!; // Non-null assertion since we just ensured it exists
     }
 
     /**
