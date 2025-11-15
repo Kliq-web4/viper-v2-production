@@ -388,12 +388,24 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         }
     }
 
-    onConnect(connection: Connection, ctx: ConnectionContext) {
+    async onConnect(connection: Connection, ctx: ConnectionContext): Promise<void> {
         this.logger().info(`Agent connected for agent ${this.getAgentId()}`, { connection, ctx });
-        sendToConnection(connection, 'agent_connected', {
-            state: this.state,
-            templateDetails: this.getTemplateDetails()
-        });
+        try {
+            // Ensure template details are loaded for this session (handles resumed agents)
+            const templateDetails = await this.ensureTemplateDetails();
+
+            sendToConnection(connection, 'agent_connected', {
+                state: this.state,
+                templateDetails,
+            });
+        } catch (error) {
+            this.logger().error('Error during onConnect - failed to load template details', error);
+            this.broadcastError('Failed to initialize session on connect', error);
+
+            // Proactively close the connection from server side by throwing,
+            // letting the runtime send a 1011 and avoid infinite retries without context.
+            throw error instanceof Error ? error : new Error(String(error));
+        }
     }
 
     async ensureTemplateDetails() {
