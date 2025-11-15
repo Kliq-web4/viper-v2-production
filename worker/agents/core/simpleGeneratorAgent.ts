@@ -427,10 +427,9 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         return this.templateDetailsCache;
     }
 
-    private getTemplateDetails(): TemplateDetails {
+    private async getTemplateDetails(): Promise<TemplateDetails> {
         if (!this.templateDetailsCache) {
-            this.ensureTemplateDetails();
-            throw new Error('Template details not loaded. Call ensureTemplateDetails() first.');
+            await this.ensureTemplateDetails();
         }
         return this.templateDetailsCache;
     }
