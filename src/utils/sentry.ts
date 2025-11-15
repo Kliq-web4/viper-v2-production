@@ -16,7 +16,7 @@ export function initSentry() {
   const release = import.meta.env.VITE_RELEASE || 'unknown';
   
   if (!dsn) {
-    console.warn('Sentry DSN not configured, skipping initialization');
+    // DSN not configured: silently skip without logging to avoid noisy console
     return;
   }
 
