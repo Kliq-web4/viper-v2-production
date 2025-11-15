@@ -294,7 +294,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         try {
             const [, setupCommands] = await Promise.all([
                 this.deployToSandbox(),
-                this.getProjectSetupAssistant().generateSetupCommands(),
+                (await this.getProjectSetupAssistant()).generateSetupCommands(),
                 this.generateReadme()
             ]);
             this.logger().info("Deployment to sandbox service and initial commands predictions completed successfully");
@@ -388,6 +388,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         }
     }
 
+<<<<<<< HEAD
     async onConnect(connection: Connection, ctx: ConnectionContext): Promise<void> {
         this.logger().info(`Agent connected for agent ${this.getAgentId()}`, { connection, ctx });
         try {
@@ -406,6 +407,14 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             // letting the runtime send a 1011 and avoid infinite retries without context.
             throw error instanceof Error ? error : new Error(String(error));
         }
+=======
+    async onConnect(connection: Connection, ctx: ConnectionContext) {
+        this.logger().info(`Agent connected for agent ${this.getAgentId()}`, { connection, ctx });
+        sendToConnection(connection, 'agent_connected', {
+            state: this.state,
+            templateDetails: await this.getTemplateDetails()
+        });
+>>>>>>> origin/compyle/websocket-template-details-load
     }
 
     async ensureTemplateDetails() {
@@ -439,14 +448,20 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         return this.templateDetailsCache;
     }
 
-    private getTemplateDetails(): TemplateDetails {
+    private async getTemplateDetails(): Promise<TemplateDetails> {
         if (!this.templateDetailsCache) {
+<<<<<<< HEAD
             // Caller is responsible for awaiting ensureTemplateDetails() beforehand
             this.ensureTemplateDetails();
             throw new Error('Template details not loaded. Call ensureTemplateDetails() first.');
         }
         // Non-null assertion is safe due to the guard above and our initialization flows
         return this.templateDetailsCache!;
+=======
+            await this.ensureTemplateDetails();
+        }
+        return this.templateDetailsCache!; // Non-null assertion since we just ensured it exists
+>>>>>>> origin/compyle/websocket-template-details-load
     }
 
     /**
@@ -633,14 +648,14 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         return this.previewUrlCache;
     }
 
-    getProjectSetupAssistant(): ProjectSetupAssistant {
+    async getProjectSetupAssistant(): Promise<ProjectSetupAssistant> {
         if (this.projectSetupAssistant === undefined) {
             this.projectSetupAssistant = new ProjectSetupAssistant({
                 env: this.env,
                 agentId: this.getAgentId(),
                 query: this.state.query,
                 blueprint: this.state.blueprint,
-                template: this.getTemplateDetails(),
+                template: await this.getTemplateDetails(),
                 inferenceContext: this.state.inferenceContext
             });
         }
@@ -685,11 +700,11 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         return this.state.phasesCounter;
     }
 
-    getOperationOptions(): OperationOptions {
+    async getOperationOptions(): Promise<OperationOptions> {
         return {
             env: this.env,
             agentId: this.getAgentId(),
-            context: GenerationContext.from(this.state, this.getTemplateDetails(), this.logger()),
+            context: GenerationContext.from(this.state, await this.getTemplateDetails(), this.logger()),
             logger: this.logger(),
             inferenceContext: this.getInferenceContext(),
             agent: this.codingAgent
@@ -796,7 +811,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             filePurpose: 'Project documentation and setup instructions'
         });
 
-        const readme = await this.operations.implementPhase.generateReadme(this.getOperationOptions());
+        const readme = await this.operations.implementPhase.generateReadme(await this.getOperationOptions());
 
         await this.fileManager.saveGeneratedFile(readme, "feat: README.md");
 
@@ -1156,7 +1171,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         const debugPromise = (async () => {
             try {
                 const previousTranscript = this.state.lastDeepDebugTranscript ?? undefined;
-                const operationOptions = this.getOperationOptions();
+                const operationOptions = await this.getOperationOptions();
                 const filesIndex = operationOptions.context.allFiles
                     .filter((f) =>
                         !focusPaths?.length ||
@@ -1311,7 +1326,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                     });
                 }
             },
-            this.getOperationOptions()
+            await this.getOperationOptions()
         );
         
         this.broadcast(WebSocketMessageResponses.PHASE_VALIDATING, {
@@ -1576,7 +1591,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                 query: this.state.query,
                 issues,
                 allFiles,
-            }, this.getOperationOptions());
+            }, await this.getOperationOptions());
 
             if (fastCodeFixer.length > 0) {
                 await this.fileManager.saveGeneratedFiles(fastCodeFixer, "fix: Fast smart code fixes");
@@ -1787,7 +1802,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         
         const result = await this.operations.regenerateFile.execute(
             {file, issues, retryIndex},
-            this.getOperationOptions()
+            await this.getOperationOptions()
         );
 
         const fileState = await this.fileManager.saveGeneratedFile(result);
@@ -2227,7 +2242,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                     
                     if (failedInstallCommands.length > 0 && retryCount < maxRetries) {
                         // Use AI to suggest alternative commands
-                        const newCommands = await this.getProjectSetupAssistant().generateSetupCommands(
+                        const newCommands = await (await this.getProjectSetupAssistant()).generateSetupCommands(
                             `The following install commands failed: ${JSON.stringify(failures, null, 2)}. Please suggest alternative commands.`
                         );
                         
@@ -2549,8 +2564,8 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                     errors,
                     projectUpdates,
                     images: uploadedImages
-                }, 
-                this.getOperationOptions()
+                },
+                await this.getOperationOptions()
             );
 
             const { conversationResponse, conversationState } = conversationalResponse;

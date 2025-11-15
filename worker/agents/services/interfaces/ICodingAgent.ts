@@ -27,7 +27,7 @@ export abstract class ICodingAgent {
 
     abstract updateBlueprint(patch: Partial<Blueprint>): Promise<Blueprint>;
 
-    abstract getOperationOptions(): OperationOptions;
+    abstract getOperationOptions(): Promise<OperationOptions>;
 
     abstract readFiles(paths: string[]): Promise<{ files: { path: string; content: string }[] }>;
 
