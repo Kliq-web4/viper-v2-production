@@ -1561,7 +1561,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                 query: this.state.query,
                 issues,
                 allFiles,
-            }, this.getOperationOptions());
+            }, await this.getOperationOptions());
 
             if (fastCodeFixer.length > 0) {
                 await this.fileManager.saveGeneratedFiles(fastCodeFixer, "fix: Fast smart code fixes");
