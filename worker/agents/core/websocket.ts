@@ -13,6 +13,10 @@ export function handleWebSocketMessage(agent: SimpleCodeGeneratorAgent, connecti
         const parsedMessage = JSON.parse(message);
 
         switch (parsedMessage.type) {
+            case 'ping':
+                // Heartbeat from client — ignore or respond if needed
+                // Optionally respond: sendToConnection(connection, 'keepalive', { message: 'pong', ts: Date.now() } as any);
+                return;
             case WebSocketMessageRequests.GENERATE_ALL:
                 // Set shouldBeGenerating flag to indicate persistent intent
                 agent.setState({ 
