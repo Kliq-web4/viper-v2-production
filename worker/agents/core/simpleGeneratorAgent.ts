@@ -294,7 +294,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         try {
             const [, setupCommands] = await Promise.all([
                 this.deployToSandbox(),
-                this.getProjectSetupAssistant().generateSetupCommands(),
+                (await this.getProjectSetupAssistant()).generateSetupCommands(),
                 this.generateReadme()
             ]);
             this.logger().info("Deployment to sandbox service and initial commands predictions completed successfully");
