@@ -205,6 +205,8 @@ export const MonacoEditor = memo<MonacoEditorProps>(function MonacoEditor({
 		editor.current = monaco.editor.create(containerRef.current!, {
 			model: initialModel!,
 			minimap: { enabled: false },
+			// Disable Monaco's built-in sticky scroll to prevent lineNumber rendering errors on rapid model updates
+			stickyScroll: { enabled: false } as any,
 			theme: configuredTheme === 'dark' ? 'v1-dev-dark' : 'v1-dev',
 			automaticLayout: true,
 			fontSize: 13,
@@ -248,9 +250,14 @@ export const MonacoEditor = memo<MonacoEditorProps>(function MonacoEditor({
 			model.setValue(createOptions.value || '');
 
 			if (stickyScroll.current) {
-				// Scroll to bottom
-				const lineCount = model.getLineCount();
-				editor.current.revealLine(lineCount);
+				// Scroll to bottom safely (avoid invalid lineNumber errors if model is empty)
+				const count = model.getLineCount();
+				const safeLine = Math.max(1, count || 1);
+				try {
+					editor.current.revealLine(safeLine);
+				} catch {
+					/* no-op: guard against transient Monaco sticky rendering states */
+				}
 			}
 
 			if (createOptions.language) {
