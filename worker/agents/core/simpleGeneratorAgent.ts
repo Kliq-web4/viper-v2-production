@@ -430,10 +430,25 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     async ensureTemplateDetails() {
         if (!this.templateDetailsCache) {
-            // Guard: template name must be available
-            const name = (this.state.templateName || '').trim();
+            // Allow migration here too for safety on non-WS entrypoints
+            this.migrateStateIfNeeded();
+
+            let name = (this.state.templateName || '').trim();
             if (!name) {
-                throw new Error('Template name is not set in state; cannot load template details');
+                this.logger().warn('Template name missing in state during ensureTemplateDetails; attempting fallback selection');
+                try {
+                    const catalog = await BaseSandboxService.listTemplates();
+                    if (catalog.success && catalog.templates.length > 0) {
+                        name = catalog.templates[0].name;
+                        this.setState({ ...this.state, templateName: name });
+                        this.logger().info('Selected fallback template in ensureTemplateDetails', { templateName: name });
+                    } else {
+                        throw new Error('No templates available in catalog');
+                    }
+                } catch (e) {
+                    const msg = e instanceof Error ? e.message : String(e);
+                    throw new Error(`Template name is not set and fallback selection failed: ${msg}`);
+                }
             }
 
             this.logger().info(`Loading template details for: ${name}`);
