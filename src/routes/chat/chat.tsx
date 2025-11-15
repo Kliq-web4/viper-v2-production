@@ -363,8 +363,16 @@ const handleAddSupabase = useCallback(async () => {
 	]);
 
 	const isPhase1Complete = useMemo(() => {
-		return phaseTimeline.length > 0 && phaseTimeline[0].status === 'completed';
-	}, [phaseTimeline]);
+		const firstPhaseCompleted =
+			phaseTimeline.length > 0 && phaseTimeline[0].status === 'completed';
+
+		const codeStage = projectStages.find((stage) => stage.id === 'code');
+		const codeStageCompleted = codeStage?.status === 'completed';
+
+		// Consider Phase 1 complete if either the first phase is marked completed
+		// or the overall code stage has been marked completed (e.g. after generation_complete).
+		return firstPhaseCompleted || codeStageCompleted;
+	}, [phaseTimeline, projectStages]);
 
 	const isGitHubExportReady = useMemo(() => {
 		return isPhase1Complete && !!effectiveAgentId;
