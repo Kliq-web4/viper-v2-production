@@ -670,11 +670,11 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         return this.state.phasesCounter;
     }
 
-    getOperationOptions(): OperationOptions {
+    async getOperationOptions(): Promise<OperationOptions> {
         return {
             env: this.env,
             agentId: this.getAgentId(),
-            context: GenerationContext.from(this.state, this.getTemplateDetails(), this.logger()),
+            context: GenerationContext.from(this.state, await this.getTemplateDetails(), this.logger()),
             logger: this.logger(),
             inferenceContext: this.getInferenceContext(),
             agent: this.codingAgent
