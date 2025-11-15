@@ -20,6 +20,11 @@ declare global {
 
 const router = createBrowserRouter(routes, {
 	hydrationData: window.__staticRouterHydrationData,
+	future: {
+		// Opt in to v7 behaviors early to silence React Router future warnings
+		v7_startTransition: true,
+		v7_relativeSplatPath: true,
+	},
 });
 
 createRoot(document.getElementById('root')!).render(

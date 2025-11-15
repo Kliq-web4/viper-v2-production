@@ -132,6 +132,22 @@ export function createWebSocketMessageHandler(deps: HandleMessageDeps) {
             onTerminalMessage,
         } = deps;
 
+        // Some environments (like the Cloudflare Agents devtools hook) send
+        // state snapshots where the entire payload is stuffed into `type` as a
+        // JSON string, e.g. { type: "{\"state\":{...},\"type\":\"cf_agent_state\"}" }.
+        // These are devtools-only envelopes that our app doesn't need; if we
+        // don't guard them, they fall through to the default case and spam the
+        // console with "Unhandled message" warnings.
+        if (
+            message &&
+            typeof message.type === 'string' &&
+            message.type.startsWith('{"state":') &&
+            message.type.includes('"type":"cf_agent_state"')
+        ) {
+            logger.debug('Ignoring malformed cf_agent_state envelope message from devtools');
+            return;
+        }
+
         // Log messages except for frequent ones
         if (
             message.type !== 'file_chunk_generated' &&
