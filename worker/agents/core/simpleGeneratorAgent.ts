@@ -781,7 +781,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             filePurpose: 'Project documentation and setup instructions'
         });
 
-        const readme = await this.operations.implementPhase.generateReadme(this.getOperationOptions());
+        const readme = await this.operations.implementPhase.generateReadme(await this.getOperationOptions());
 
         await this.fileManager.saveGeneratedFile(readme, "feat: README.md");
 
