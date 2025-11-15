@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, forwardRef, useCallback } from 'react';
 import { RefreshCw, AlertCircle } from 'lucide-react';
+import { Hero } from '@/components/preview/Hero';
 import { WebSocket } from 'partysocket';
 
 interface PreviewIframeProps {
@@ -354,11 +355,10 @@ export const PreviewIframe = forwardRef<HTMLIFrameElement, PreviewIframeProps>(
 
 		// Loading state
 		if (loadState.status === 'loading' || loadState.status === 'idle' || loadState.status === 'postload') {
-			const delay = getRetryDelay(loadState.attempt - 1);
-			const delaySeconds = Math.ceil(delay / 1000);
+			// const delay = getRetryDelay(loadState.attempt - 1);
 
-			return (
-				<div className={`${className} relative flex flex-col items-center justify-center bg-bg-3 border border-text/10 rounded-lg`}>
+return (
+                <div className={`${className} relative bg-black border border-text/10 rounded-lg overflow-hidden`}>
                     {loadState.status === 'postload' && loadState.loadedSrc && (
                         <iframe
                             ref={ref}
@@ -376,27 +376,9 @@ export const PreviewIframe = forwardRef<HTMLIFrameElement, PreviewIframeProps>(
                             }}
                         />
                     )}
-					<div className="text-center p-8 max-w-md">
-                        <img
-                            src="/kliq-logo.png"
-                            alt="web4.sbs loader"
-                            className="mx-auto mb-5 h-14 w-14 select-none animate-pulse"
-                            style={{ filter: 'drop-shadow(0 0 24px rgba(168,85,247,0.45)) drop-shadow(0 0 14px rgba(249,115,22,0.35))' }}
-                        />
-						<h3 className="text-lg font-medium text-text-primary mb-2">Preparing your preview</h3>
-						<p className="text-text-primary/70 text-sm mb-4">
-							{loadState.attempt === 0
-								? 'Booting the app sandbox and wiring services...'
-								: `Still provisioning… retrying in ${delaySeconds}s (attempt ${loadState.attempt}/${MAX_RETRIES})`
-							}
-						</p>
-						{loadState.attempt >= REDEPLOY_AFTER_ATTEMPT && (
-							<p className="text-xs text-accent/70">Auto-refresh triggered to keep the preview up to date</p>
-						)}
-						<div className="text-xs text-text-primary/50 mt-2">This can take a moment after a fresh deployment</div>
-					</div>
-				</div>
-			);
+                    <Hero />
+                </div>
+            );
 		}
 
 		// Error state - after max retries
