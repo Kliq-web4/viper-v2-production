@@ -1296,7 +1296,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                     });
                 }
             },
-            this.getOperationOptions()
+            await this.getOperationOptions()
         );
         
         this.broadcast(WebSocketMessageResponses.PHASE_VALIDATING, {
