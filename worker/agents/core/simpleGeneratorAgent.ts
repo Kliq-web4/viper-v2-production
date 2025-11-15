@@ -985,15 +985,8 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             }
 
             this.logger().info("State machine completed successfully");
-        } catch (error) {
-            if (error instanceof RateLimitExceededError) {
-                this.logger().error("Error in state machine:", error);
-                this.broadcast(WebSocketMessageResponses.RATE_LIMIT_ERROR, { error });
-            } else {
-                this.broadcastError("Error during generation", error);
-            }
-        } finally {
-            // Clear abort controller after generation completes
+            
+            // Clear abort controller and mark generation as complete
             this.clearAbortController();
             
             const appService = new AppService(this.env);
@@ -1003,11 +996,38 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                     status: 'completed',
                 }
             );
+            
             this.generationPromise = null;
+            
+            // Broadcast completion ONLY after successful state machine completion
             this.broadcast(WebSocketMessageResponses.GENERATION_COMPLETE, {
                 message: "Code generation and review process completed.",
                 instanceId: this.state.sandboxInstanceId,
             });
+        } catch (error) {
+            // Clear abort controller on error too
+            this.clearAbortController();
+            this.generationPromise = null;
+            
+            if (error instanceof RateLimitExceededError) {
+                this.logger().error("Error in state machine:", error);
+                this.broadcast(WebSocketMessageResponses.RATE_LIMIT_ERROR, { error });
+            } else {
+                this.broadcastError("Error during generation", error);
+            }
+            
+            // Update app status to failed on error
+            try {
+                const appService = new AppService(this.env);
+                await appService.updateApp(
+                    this.getAgentId(),
+                    {
+                        status: 'error',
+                    }
+                );
+            } catch (dbError) {
+                this.logger().error("Failed to update app status to error:", dbError);
+            }
         }
     }
 
