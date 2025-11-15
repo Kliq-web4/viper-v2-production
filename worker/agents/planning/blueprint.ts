@@ -217,13 +217,6 @@ export async function generateBlueprint({ env, inferenceContext, query, language
             userMessage
         ];
 
-        // Optimistically start the stream so the UI shows progress immediately
-        if (stream) {
-            try {
-                // Send a harmless whitespace to trigger the UI streaming indicator without breaking JSON assembly
-                stream.onChunk(' ');
-            } catch (_) {}
-        }
 
         const { object: results } = await executeInference({
             env,

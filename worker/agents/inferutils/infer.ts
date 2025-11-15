@@ -9,6 +9,7 @@ import { AGENT_CONFIG } from './config';
 import { AIModels, AgentActionKey, InferenceContext, ModelConfig } from './config.types';
 import type { ReasoningEffort } from 'openai/resources.mjs';
 import type { SchemaFormat } from './schemaFormatters';
+import { getConfigurationForModel } from './core';
 
 const logger = createLogger('InferenceUtils');
 
@@ -135,14 +136,26 @@ export async function executeInference(
     schema?: z.AnyZodObject;
   }
 ): Promise<{ object: unknown } | { string: string }> {
-  const modelName = (args.modelName ?? args.modelConfig?.name ?? AGENT_CONFIG[args.agentActionName]?.name ?? 'openai/o4-mini') as string;
+  const chosen = AGENT_CONFIG[args.agentActionName];
+  const primaryModel = (args.modelName ?? args.modelConfig?.name ?? chosen?.name ?? AIModels.CF_LLAMA_3_1_8B) as string;
+  const fallbackModel = (args.modelConfig?.fallbackModel ?? chosen?.fallbackModel ?? 'google-ai-studio/gemini-2.5-flash') as string;
 
-  const result = await infer({
-    operationId: args.agentActionName,
-    modelName,
-    messages: args.messages,
-    schema: args.schema as any,
-  }, args.env);
+  async function run(model: string) {
+    return await infer({
+      operationId: args.agentActionName,
+      modelName: model,
+      messages: args.messages,
+      schema: args.schema as any,
+    }, args.env);
+  }
+
+  let result;
+  try {
+    result = await run(primaryModel);
+  } catch (e) {
+    logger.warn(`Primary model failed (${primaryModel}); falling back to ${fallbackModel}`, e as any);
+    result = await run(fallbackModel);
+  }
 
   if (args.schema) {
     return { object: result.content as unknown };
@@ -249,18 +262,24 @@ async function runProviderInference<T extends z.AnyZodObject | undefined>(
     };
   }
 
-  // --- OPENAI CLIENT LOGIC (Responses API) ---
+  // --- CLOUDLFARE AI GATEWAY / OPENAI-COMPAT LOGIC ---
   logger.info(
-    `Running OPENAI Responses API with ${modelName} (attempt ${attempt}/${config.retries})`,
+    `Running OpenAI-compatible inference with ${modelName} (attempt ${attempt}/${config.retries})`,
   );
 
+  // Resolve baseURL/apiKey depending on provider (Workers AI vs OpenAI)
+  const { baseURL, apiKey, defaultHeaders } = await getConfigurationForModel(modelName, env, (env as any).CURRENT_USER_ID || 'system');
   const openai = new OpenAI({
-    apiKey: env.OPENAI_API_KEY as string,
-    baseURL: 'https://api.openai.com/v1',
+    apiKey: apiKey as string,
+    baseURL: baseURL as string,
+    defaultHeaders: defaultHeaders as any,
   });
 
-  // Responses API expects a provider-less model id (e.g., "o4-mini", "gpt-5")
-  const openaiModel = modelName.includes('/') ? modelName.split('/')[1] : modelName;
+  // For Workers AI models, pass the full model id (e.g., '@cf/meta/llama-3.1-8b-instruct')
+  // For OpenAI models, strip provider prefix
+  const openaiModel = modelName.startsWith('@cf/')
+    ? modelName
+    : (modelName.includes('/') ? modelName.split('/')[1] : modelName);
 
   // Extract system messages as high-priority instructions
   const systemInstructions = (messages || [])
