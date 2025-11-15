@@ -1772,7 +1772,7 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         
         const result = await this.operations.regenerateFile.execute(
             {file, issues, retryIndex},
-            this.getOperationOptions()
+            await this.getOperationOptions()
         );
 
         const fileState = await this.fileManager.saveGeneratedFile(result);
