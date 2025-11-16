@@ -1144,7 +1144,8 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             if (error instanceof RateLimitExceededError) {
                 throw error;
             }
-            return {currentDevState: CurrentDevState.IDLE};
+            // Propagate non-rate-limit errors so the state machine can halt and not broadcast completion
+            throw error;
         }
     }
 
@@ -1404,6 +1405,14 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                 }
             }).filter((f): f is FileOutputType => f !== null);
         });
+
+        if (finalFiles.length === 0) {
+            this.logger().error(`Phase ${phase.name} produced no files; treating as failure.`);
+            this.broadcast(WebSocketMessageResponses.ERROR, {
+                error: `Phase implementation produced no files for phase: ${phase.name}. Generation will be halted.`,
+            });
+            throw new Error(`Phase implementation produced no files for phase: ${phase.name}`);
+        }
     
         // Update state with completed phase
         await this.fileManager.saveGeneratedFiles(finalFiles, `feat: ${phase.name}\n\n${phase.description}`);
