@@ -373,12 +373,30 @@ async function runProviderInference<T extends z.AnyZodObject | undefined>(
       chatPayload.response_format = { type: 'json_object' } as const;
     }
     const chat = await openai.chat.completions.create(chatPayload);
-    const content = chat.choices[0]?.message?.content;
-    if (!content) {
+    const rawContent = chat.choices[0]?.message?.content as any;
+
+    // Normalize content to a plain string so downstream SCOF parsing and streaming work reliably
+    let contentText = '';
+    if (Array.isArray(rawContent)) {
+      // OpenAI-style content array (e.g., [{ type: 'text', text: '...' }])
+      contentText = rawContent
+        .map((part: any) => {
+          if (typeof part === 'string') return part;
+          if (part && typeof part.text === 'string') return part.text;
+          if (part && part.type === 'text' && typeof part.text === 'string') return part.text;
+          return '';
+        })
+        .join('');
+    } else if (typeof rawContent === 'string') {
+      contentText = rawContent;
+    }
+
+    if (!contentText || contentText.trim().length === 0) {
       throw new Error('OpenAI fallback (Chat Completions) returned empty content.');
     }
+
     return {
-      content,
+      content: contentText,
       model: chat.model,
       usage: {
         prompt_tokens: chat.usage?.prompt_tokens || 0,
