@@ -1,4 +1,4 @@
-import { PhaseConceptType, FileOutputType, PhaseConceptSchema } from '../schemas';
+import { PhaseConceptType, FileOutputType, PhaseConceptSchema, FileGenerationOutputType } from '../schemas';
 import { IssueReport } from '../domain/values/IssueReport';
 import { createUserMessage, createMultiModalUserMessage } from '../inferutils/common';
 import { executeInference } from '../inferutils/infer';
@@ -497,16 +497,17 @@ export class PhaseImplementationOperation extends AgentOperation<PhaseImplementa
         const shouldEnableRealtimeCodeFixer = inputs.shouldAutoFix && IsRealtimeCodeFixerEnabled(options.inferenceContext);
 
         // Helper to process a fully generated file object into the pipeline
-        const processCompletedFile = (filePath: string, file: FileOutputType) => {
+        const processCompletedFile = (filePath: string, file: FileGenerationOutputType) => {
             const originalContents = context.allFiles.find(f => f.filePath === filePath)?.fileContents || '';
-            file.fileContents = FileProcessing.processGeneratedFileContents(
+            const processedContents = FileProcessing.processGeneratedFileContents(
                 file,
                 originalContents,
                 logger
             );
 
             const generatedFile: FileOutputType = {
-                ...file,
+                filePath: file.filePath,
+                fileContents: processedContents,
                 filePurpose: FileProcessing.findFilePurpose(
                     filePath,
                     phase,
@@ -607,7 +608,7 @@ export class PhaseImplementationOperation extends AgentOperation<PhaseImplementa
                         inputs.fileChunkGeneratedCallback(filePath, file.fileContents, file.format ?? 'full_content');
                     }
 
-                    processCompletedFile(filePath, file as FileOutputType);
+                    processCompletedFile(filePath, file);
                 }
             }
         }
