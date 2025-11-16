@@ -314,6 +314,9 @@ const [, setPlansLoading] = useState(true);
 						<p className="text-base sm:text-lg text-text-secondary mb-2">
 							Powered by Kliq AI
 						</p>
+						<p className="text-xs sm:text-sm text-text-tertiary mb-2 max-w-2xl">
+							Our engineers are actively enhancing Web4.sbs for an even smoother experience — but everything is fully functional and ready to use.
+						</p>
 						<p className="text-sm sm:text-base text-text-secondary/80 mb-8 max-w-2xl">
 							Create apps and websites by chatting with AI
 						</p>
