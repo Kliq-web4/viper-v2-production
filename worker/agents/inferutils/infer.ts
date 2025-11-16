@@ -157,6 +157,17 @@ export async function executeInference(
     result = await run(fallbackModel);
   }
 
+  // If a stream callback is provided and we're not doing structured JSON output,
+  // forward the full response content as a single chunk so streaming-based
+  // consumers (e.g. SCOF code generation) still receive data.
+  if (args.stream && !args.schema && typeof result?.content === 'string') {
+    try {
+      args.stream.onChunk(result.content as string);
+    } catch (err) {
+      logger.warn('Error while forwarding streamed chunk to consumer', err as any);
+    }
+  }
+
   if (args.schema) {
     return { object: result.content as unknown };
   }
