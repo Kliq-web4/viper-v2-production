@@ -495,8 +495,44 @@ export class PhaseImplementationOperation extends AgentOperation<PhaseImplementa
         const agentActionName = inputs.isFirstPhase ? 'firstPhaseImplementation' : 'phaseImplementation';
 
         const shouldEnableRealtimeCodeFixer = inputs.shouldAutoFix && IsRealtimeCodeFixerEnabled(options.inferenceContext);
+
+        // Helper to process a fully generated file object into the pipeline
+        const processCompletedFile = (filePath: string, file: FileOutputType) => {
+            const originalContents = context.allFiles.find(f => f.filePath === filePath)?.fileContents || '';
+            file.fileContents = FileProcessing.processGeneratedFileContents(
+                file,
+                originalContents,
+                logger
+            );
+
+            const generatedFile: FileOutputType = {
+                ...file,
+                filePurpose: FileProcessing.findFilePurpose(
+                    filePath,
+                    phase,
+                    context.allFiles.reduce((acc, f) => ({ ...acc, [f.filePath]: f }), {})
+                )
+            };
+
+            if (shouldEnableRealtimeCodeFixer && generatedFile.fileContents.split('\n').length > 50) {
+                const realtimeCodeFixer = new RealtimeCodeFixer(env, options.inferenceContext);
+                const fixPromise = realtimeCodeFixer.run(
+                    generatedFile,
+                    {
+                        query: context.query,
+                        template: context.templateDetails
+                    },
+                    phase
+                );
+                fixedFilePromises.push(fixPromise);
+            } else {
+                fixedFilePromises.push(Promise.resolve(generatedFile));
+            }
+
+            inputs.fileClosedCallback(generatedFile, `Completed generation of ${filePath}`);
+        };
     
-        // Execute inference with streaming
+        // Execute inference with streaming first
         await executeInference({
             env: env,
             agentActionName,
@@ -511,7 +547,14 @@ export class PhaseImplementationOperation extends AgentOperation<PhaseImplementa
                         // File generation started
                         (filePath: string) => {
                             logger.info(`Starting generation of file: ${filePath}`);
-                            inputs.fileGeneratingCallback(filePath, FileProcessing.findFilePurpose(filePath, phase, context.allFiles.reduce((acc, f) => ({ ...acc, [f.filePath]: f }), {})));
+                            inputs.fileGeneratingCallback(
+                                filePath,
+                                FileProcessing.findFilePurpose(
+                                    filePath,
+                                    phase,
+                                    context.allFiles.reduce((acc, f) => ({ ...acc, [f.filePath]: f }), {})
+                                )
+                            );
                         },
                         // Stream file content chunks
                         (filePath: string, fileChunk: string, format: 'full_content' | 'unified_diff') => {
@@ -525,50 +568,50 @@ export class PhaseImplementationOperation extends AgentOperation<PhaseImplementa
                                 logger.error(`Completed file not found: ${filePath}`);
                                 return;
                             }
-    
-                            // Process the file contents
-                            const originalContents = context.allFiles.find(f => f.filePath === filePath)?.fileContents || '';
-                            completedFile.fileContents = FileProcessing.processGeneratedFileContents(
-                                completedFile,
-                                originalContents,
-                                logger
-                            );
-    
-                            const generatedFile: FileOutputType = {
-                                ...completedFile,
-                                filePurpose: FileProcessing.findFilePurpose(
-                                    filePath, 
-                                    phase, 
-                                    context.allFiles.reduce((acc, f) => ({ ...acc, [f.filePath]: f }), {})
-                                )
-                            };
-
-                            if (shouldEnableRealtimeCodeFixer && generatedFile.fileContents.split('\n').length > 50) {
-                                // Call realtime code fixer immediately - this is the "realtime" aspect
-                                const realtimeCodeFixer = new RealtimeCodeFixer(env, options.inferenceContext);
-                                const fixPromise = realtimeCodeFixer.run(
-                                    generatedFile, 
-                                    {
-                                        // previousFiles: previousFiles,
-                                        query: context.query,
-                                        template: context.templateDetails
-                                    },
-                                    phase
-                                );
-                                fixedFilePromises.push(fixPromise);
-                            } else {
-                                fixedFilePromises.push(Promise.resolve(generatedFile));
-                            }
-    
-                            inputs.fileClosedCallback(generatedFile, `Completed generation of ${filePath}`);
+                            processCompletedFile(filePath, completedFile);
                         }
                     );
                 }
             }
         });
 
-        // // Extract commands from the generated files
-        // const commands = extractCommands(results.string, true);
+        // If streaming produced no files, fall back to non-streaming SCOF parsing
+        if (fixedFilePromises.length === 0 && streamingState.completedFiles.size === 0) {
+            logger.warn(`No files generated via streaming for phase ${phase.name}; falling back to non-streaming SCOF parsing.`);
+
+            const result = await executeInference({
+                env: env,
+                agentActionName,
+                context: options.inferenceContext,
+                messages,
+            });
+
+            if (!result || !result.string) {
+                logger.error(`Non-streaming SCOF fallback returned empty result for phase ${phase.name}`);
+            } else {
+                const files = codeGenerationFormat.deserialize(result.string);
+                for (const file of files) {
+                    const filePath = file.filePath;
+                    logger.info(`(Fallback) Starting generation of file: ${filePath}`);
+                    inputs.fileGeneratingCallback(
+                        filePath,
+                        FileProcessing.findFilePurpose(
+                            filePath,
+                            phase,
+                            context.allFiles.reduce((acc, f) => ({ ...acc, [f.filePath]: f }), {})
+                        )
+                    );
+
+                    // Emit the whole file as a single chunk for UI streaming
+                    if (file.fileContents && file.fileContents.length > 0) {
+                        inputs.fileChunkGeneratedCallback(filePath, file.fileContents, file.format ?? 'full_content');
+                    }
+
+                    processCompletedFile(filePath, file as FileOutputType);
+                }
+            }
+        }
+
         const commands = streamingState.parsingState.extractedInstallCommands;
 
         logger.info("Files generated for phase:", phase.name, "with", fixedFilePromises.length, "files being fixed in real-time and extracted install commands:", commands);
