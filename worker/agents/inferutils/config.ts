@@ -75,12 +75,12 @@ export const AGENT_CONFIG: AgentConfig = {
         fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Upgrade to more powerful model
         temperature: 0.6,
     },
-    // Bootstrapping and blueprint
+    // Bootstrapping and blueprint - KEEP GEMINI (excellent at structured JSON output)
     blueprint: {
-        name: AIModels.CF_LLAMA_3_1_70B,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'medium',
         max_tokens: 64000,
-        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // DeepSeek for reasoning
+        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Fallback to Workers AI if Gemini fails
         temperature: 0.7,
     },
     projectSetup: {
