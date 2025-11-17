@@ -9,7 +9,7 @@ import { AGENT_CONFIG } from './config';
 import { AIModels, AgentActionKey, InferenceContext, ModelConfig } from './config.types';
 import type { ReasoningEffort } from 'openai/resources.mjs';
 import type { SchemaFormat } from './schemaFormatters';
-import { getConfigurationForModel } from './core';
+import { getConfigurationForModel, infer as coreInfer } from './core';
 
 const logger = createLogger('InferenceUtils');
 
@@ -150,13 +150,39 @@ export async function executeInference(
            errorMsg.includes('429');
   }
 
-  async function run(model: string, skipRetries = false) {
-    return await infer({
-      operationId: args.agentActionName,
-      modelName: model,
-      messages: args.messages,
-      schema: args.schema as any,
-    }, args.env, skipRetries ? 1 : undefined);
+  async function run(model: string) {
+    // Use the core infer() function which has proper streaming support
+    // Match working commit pattern: conditionally call with/without schema
+    return args.schema
+      ? await coreInfer({
+          env: args.env,
+          metadata: args.context,
+          messages: args.messages,
+          schema: args.schema,
+          schemaName: args.agentActionName,
+          actionKey: args.agentActionName,
+          format: args.format,
+          maxTokens: args.maxTokens,
+          modelName: model,
+          tools: args.tools as any,
+          stream: args.stream,
+          reasoning_effort: args.reasoning_effort,
+          temperature: args.temperature,
+          abortSignal: args.context.abortSignal,
+        })
+      : await coreInfer({
+          env: args.env,
+          metadata: args.context,
+          messages: args.messages,
+          maxTokens: args.maxTokens,
+          modelName: model,
+          tools: args.tools as any,
+          stream: args.stream,
+          actionKey: args.agentActionName,
+          reasoning_effort: args.reasoning_effort,
+          temperature: args.temperature,
+          abortSignal: args.context.abortSignal,
+        });
   }
 
   let result;
@@ -169,25 +195,20 @@ export async function executeInference(
     } else {
       logger.warn(`Primary model failed (${primaryModel}); falling back to ${fallbackModel}`, e as any);
     }
-    // Try fallback without retries if primary was rate limited (to fail fast if fallback also fails)
-    result = await run(fallbackModel, isRateLimit);
+    // Try fallback model
+    result = await run(fallbackModel);
   }
 
-  // If a stream callback is provided and we're not doing structured JSON output,
-  // forward the full response content as a single chunk so streaming-based
-  // consumers (e.g. SCOF code generation) still receive data.
-  if (args.stream && !args.schema && typeof result?.content === 'string') {
-    try {
-      args.stream.onChunk(result.content as string);
-    } catch (err) {
-      logger.warn('Error while forwarding streamed chunk to consumer', err as any);
-    }
-  }
+  // Streaming is now handled directly by the infer() function in core.ts
+  // No need to forward as a single chunk - chunks are streamed as they arrive
 
+  // Adapt core.ts response format to executeInference format
   if (args.schema) {
-    return { object: result.content as unknown };
+    // result is InferResponseObject<T> which has { object: T }
+    return { object: (result as any).object };
   }
-  return { string: result.content as string };
+  // result is InferResponseString which has { string: string }
+  return { string: (result as any).string };
 }
 
 /**

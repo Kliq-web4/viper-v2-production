@@ -264,7 +264,7 @@ These are the instructions and quality standards that must be followed to implem
     •   Make sure everything that is needed is exported correctly from relevant files. Do not put duplicate 'default' exports.
     •   You may need to rewrite a file from a *previous* phase *if* you identify a critical issue or runtime errors in it.
     •   If any previous phase files were not made correctly or were corrupt, You shall also rewrite them in this phase. You are to ensure that the entire codebase is correct and working as expected.
-    •   **Write the whole, raw contents for every file (\`full_content\` format). Do not use diff format.**
+    •   **Use the most appropriate format for each file: \`full_content\` for new files or major rewrites, \`unified_diff\` for targeted changes to existing files.**
     •   **Every phase needs to be deployable with all the views/pages working properly!**
     •   **If its the first phase, make sure you override the template pages in the boilerplate with actual application frontend page!**
     •   **Make sure the product after this phase is FUNCTIONAL, POLISHED, AND VISUALLY STUNNING**
