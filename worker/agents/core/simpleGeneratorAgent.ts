@@ -322,6 +322,9 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         // Ensure state is migrated for any previous versions
         this.migrateStateIfNeeded();
         
+        // Clean up any corrupted phases (missing required fields)
+        this.cleanupCorruptedPhases();
+        
         // Check if this is a read-only operation
         const readOnlyMode = props?.readOnlyMode === true;
         
@@ -393,6 +396,9 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         try {
             // Migrate state if needed (handles older sessions missing templateName, etc.)
             this.migrateStateIfNeeded();
+            
+            // Clean up any corrupted phases (missing required fields)
+            this.cleanupCorruptedPhases();
 
             // Fallback: if template name is still missing (older persisted sessions), use first available template
             if (!this.state.templateName || this.state.templateName.trim() === '') {
@@ -809,7 +815,32 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         };
     }
 
+    private cleanupCorruptedPhases() {
+        const originalCount = this.state.generatedPhases.length;
+        const validPhases = this.state.generatedPhases.filter(phase => 
+            phase && 
+            phase.name && 
+            phase.description && 
+            Array.isArray(phase.files)
+        );
+        
+        if (validPhases.length < originalCount) {
+            const corruptedCount = originalCount - validPhases.length;
+            this.logger().warn(`Removed ${corruptedCount} corrupted phase(s) from state`);
+            this.setState({
+                ...this.state,
+                generatedPhases: validPhases
+            });
+        }
+    }
+
     private createNewIncompletePhase(phaseConcept: PhaseConceptType) {
+        // Validate phase has all required fields
+        if (!phaseConcept || !phaseConcept.name || !phaseConcept.description || !Array.isArray(phaseConcept.files)) {
+            this.logger().error("Attempted to create phase with invalid/missing properties:", phaseConcept);
+            throw new Error(`Invalid phase concept: missing required fields (name, description, or files)`);
+        }
+        
         this.setState({
             ...this.state,
             generatedPhases: [...this.state.generatedPhases, {
@@ -930,7 +961,13 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         // If state is IDLE, determine where to start
         if (currentDevState === CurrentDevState.IDLE) {
             const generatedPhases = this.state.generatedPhases;
-            const incompletedPhases = generatedPhases.filter(phase => !phase.completed);
+            // Filter out corrupted phases (missing required fields) and incomplete phases
+            const incompletedPhases = generatedPhases.filter(phase => 
+                !phase.completed && 
+                phase.name && 
+                phase.description && 
+                Array.isArray(phase.files)
+            );
             
             if (incompletedPhases.length > 0) {
                 currentDevState = CurrentDevState.PHASE_IMPLEMENTING;
