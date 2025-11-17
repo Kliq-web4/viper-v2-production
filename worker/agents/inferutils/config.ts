@@ -72,7 +72,7 @@ export const AGENT_CONFIG: AgentConfig = {
     templateSelection: {
         name: AIModels.CF_LLAMA_3_1_8B,
         max_tokens: 2000,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Upgrade to more powerful model
         temperature: 0.6,
     },
     // Bootstrapping and blueprint
@@ -80,7 +80,7 @@ export const AGENT_CONFIG: AgentConfig = {
         name: AIModels.CF_LLAMA_3_1_70B,
         reasoning_effort: 'medium',
         max_tokens: 64000,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // DeepSeek for reasoning
         temperature: 0.7,
     },
     projectSetup: {
@@ -88,7 +88,7 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: 'low',
         max_tokens: 10000,
         temperature: 0.2,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Solid fallback
     },
     // Phase planning uses smaller model
     phaseGeneration: {
@@ -96,7 +96,7 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.7,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // Great at planning
     },
     // Main code generation uses a stronger coder model
     firstPhaseImplementation: {
@@ -104,21 +104,21 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: 'low',
         max_tokens: 64000,
         temperature: 0.2,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // DeepSeek excellent at coding
     },
     phaseImplementation: {
         name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'high',
         max_tokens: 64000,
         temperature: 0.3,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // DeepSeek excellent at coding
     },
     realtimeCodeFixer: {
         name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'high',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // Best for fixing code
     },
     // Not used right now
     fastCodeFixer: {
@@ -126,35 +126,35 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: undefined,
         max_tokens: 64000,
         temperature: 0.0,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Generic fallback
     },
     conversationalResponse: {
         name: AIModels.CF_LLAMA_3_1_8B,
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.8,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Upgrade for conversations
     },
     deepDebugger: {
         name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // DeepSeek for deep analysis
     },
     codeReview: {
         name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.1,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Solid reviewer
     },
     fileRegeneration: {
         name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'high',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // DeepSeek for code regen
     },
     // Not used right now
     screenshotAnalysis: {
@@ -162,7 +162,7 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
+        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Upgrade for analysis
     },
 };
 
