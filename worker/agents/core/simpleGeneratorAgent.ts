@@ -52,6 +52,7 @@ import { StateMigration } from './stateMigration';
 import { generateNanoId } from 'worker/utils/idGenerator';
 import { updatePackageJson } from '../utils/packageSyncer';
 import { IdGenerator } from '../utils/idGenerator';
+import { generateLoadingScreenPage } from '../utils/loadingScreen';
 
 interface Operations {
     regenerateFile: FileRegenerationOperation;
@@ -282,6 +283,9 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         
         this.logger().info('Committed customized template files to git');
 
+        // Generate and deploy loading screen immediately after blueprint
+        await this.deployLoadingScreen(projectName, query);
+
         this.initializeAsync().catch((error: unknown) => {
             this.broadcastError("Initialization failed", error);
         });
@@ -290,14 +294,52 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         return this.state;
     }
 
+    /**
+     * Deploy loading screen to show user that app is being built
+     */
+    private async deployLoadingScreen(projectName: string, query: string): Promise<void> {
+        try {
+            this.logger().info('Deploying loading screen');
+            this.broadcast(WebSocketMessageResponses.DEPLOYMENT_STARTED, {
+                message: 'Deploying loading screen while your app is being built...'
+            });
+
+            // Check if template has src/pages/HomePage.tsx or src/pages/Home.tsx
+            const templateFiles = this.getTemplateDetails()?.allFiles || {};
+            const homePagePath = Object.keys(templateFiles).find(path => 
+                path.includes('/pages/Home') && path.endsWith('.tsx')
+            ) || 'src/pages/HomePage.tsx';
+
+            const loadingScreenContent = generateLoadingScreenPage(projectName, query);
+
+            // Replace the homepage with loading screen
+            const loadingScreenFile = {
+                filePath: homePagePath,
+                fileContents: loadingScreenContent,
+                filePurpose: 'Loading screen while app is being built'
+            };
+
+            await this.fileManager.saveGeneratedFile(loadingScreenFile, 'chore: deploy loading screen');
+
+            // Deploy to sandbox
+            await this.deployToSandbox([loadingScreenFile], false, 'Loading screen deployment');
+
+            this.logger().info('Loading screen deployed successfully');
+        } catch (error) {
+            this.logger().error('Error deploying loading screen:', error);
+            // Don't fail initialization if loading screen fails
+        }
+    }
+
     private async initializeAsync(): Promise<void> {
         try {
+            // Don't redeploy - loading screen is already deployed
             const [, setupCommands] = await Promise.all([
-                this.deployToSandbox(),
+                Promise.resolve(), // Skip initial deployment since loading screen is already deployed
                 (await this.getProjectSetupAssistant()).generateSetupCommands(),
                 this.generateReadme()
             ]);
-            this.logger().info("Deployment to sandbox service and initial commands predictions completed successfully");
+            this.logger().info("Initial commands predictions completed successfully");
             await this.executeCommands(setupCommands.commands);
             this.logger().info("Initial commands executed successfully");
         } catch (error) {
