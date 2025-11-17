@@ -283,8 +283,10 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         
         this.logger().info('Committed customized template files to git');
 
-        // Generate and deploy loading screen immediately after blueprint
-        await this.deployLoadingScreen(projectName, query);
+        // Generate and deploy loading screen immediately after blueprint (non-blocking)
+        this.deployLoadingScreen(projectName, query).catch((error: unknown) => {
+            this.logger().error("Loading screen deployment failed (non-critical):", error);
+        });
 
         this.initializeAsync().catch((error: unknown) => {
             this.broadcastError("Initialization failed", error);
