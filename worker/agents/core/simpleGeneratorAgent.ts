@@ -981,12 +981,30 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                     phase: generatedPhases[generatedPhases.length - 1]
                 });
             } else {
-                currentDevState = CurrentDevState.PHASE_IMPLEMENTING;
-                phaseConcept = this.state.blueprint.initialPhase;
-                this.logger().info('Starting code generation from initial phase', {
-                    phase: phaseConcept
-                });
-                this.createNewIncompletePhase(phaseConcept);
+                // Check if blueprint has valid initialPhase
+                phaseConcept = this.state.blueprint?.initialPhase;
+                if (!phaseConcept || !phaseConcept.name || !phaseConcept.description || !Array.isArray(phaseConcept.files)) {
+                    const errorMsg = 'Blueprint is empty or missing initialPhase. Cannot start code generation.';
+                    this.logger().error(errorMsg, {
+                        hasBlueprint: !!this.state.blueprint,
+                        hasInitialPhase: !!this.state.blueprint?.initialPhase,
+                        initialPhase: this.state.blueprint?.initialPhase
+                    });
+                    this.broadcastError('Invalid blueprint', new Error(errorMsg));
+                    // Set state to IDLE and return early
+                    currentDevState = CurrentDevState.IDLE;
+                    this.setState({
+                        ...this.state,
+                        currentDevState: CurrentDevState.IDLE
+                    });
+                } else {
+                    // Valid blueprint - proceed with initial phase
+                    currentDevState = CurrentDevState.PHASE_IMPLEMENTING;
+                    this.logger().info('Starting code generation from initial phase', {
+                        phase: phaseConcept
+                    });
+                    this.createNewIncompletePhase(phaseConcept);
+                }
             }
             
             // Persist initial state and current phase
@@ -1006,6 +1024,13 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             reviewCycles: reviewCycles
         });
 
+        // Check if we should bail early due to invalid state
+        if (currentDevState === CurrentDevState.IDLE) {
+            this.logger().warn('State machine starting in IDLE state, nothing to do');
+            this.generationPromise = null;
+            return;
+        }
+        
         try {
             let executionResults: PhaseExecutionResult;
             // State machine loop - continues until IDLE state
