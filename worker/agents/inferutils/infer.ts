@@ -140,21 +140,37 @@ export async function executeInference(
   const primaryModel = (args.modelName ?? args.modelConfig?.name ?? chosen?.name ?? AIModels.CF_LLAMA_3_1_8B) as string;
   const fallbackModel = (args.modelConfig?.fallbackModel ?? chosen?.fallbackModel ?? 'google-ai-studio/gemini-2.5-flash') as string;
 
-  async function run(model: string) {
+  // Helper to check if error is rate limit/overload related
+  function isRateLimitError(error: any): boolean {
+    const errorMsg = error?.message?.toLowerCase() || '';
+    return errorMsg.includes('503') || 
+           errorMsg.includes('overloaded') || 
+           errorMsg.includes('rate limit') ||
+           errorMsg.includes('quota') ||
+           errorMsg.includes('429');
+  }
+
+  async function run(model: string, skipRetries = false) {
     return await infer({
       operationId: args.agentActionName,
       modelName: model,
       messages: args.messages,
       schema: args.schema as any,
-    }, args.env);
+    }, args.env, skipRetries ? 1 : undefined);
   }
 
   let result;
   try {
     result = await run(primaryModel);
   } catch (e) {
-    logger.warn(`Primary model failed (${primaryModel}); falling back to ${fallbackModel}`, e as any);
-    result = await run(fallbackModel);
+    const isRateLimit = isRateLimitError(e);
+    if (isRateLimit) {
+      logger.warn(`Primary model rate limited/overloaded (${primaryModel}); immediately falling back to ${fallbackModel}`, e as any);
+    } else {
+      logger.warn(`Primary model failed (${primaryModel}); falling back to ${fallbackModel}`, e as any);
+    }
+    // Try fallback without retries if primary was rate limited (to fail fast if fallback also fails)
+    result = await run(fallbackModel, isRateLimit);
   }
 
   // If a stream callback is provided and we're not doing structured JSON output,
@@ -413,9 +429,11 @@ async function runProviderInference<T extends z.AnyZodObject | undefined>(
 export async function infer<T extends z.AnyZodObject | undefined = undefined>(
   params: InferenceParams<T>,
   env: Env,
+  maxRetries?: number,
 ): Promise<InferenceResult<T>> {
   const { operationId, modelName, messages, schema } = params;
   const config = getInferenceConfig(operationId, env);
+  const retries = maxRetries ?? config.retries;
   const tokenCounter = getTokenCounter(modelName);
 
   const { trimmedMessages, ...trimStats } = await trimMessages(
@@ -432,7 +450,7 @@ export async function infer<T extends z.AnyZodObject | undefined = undefined>(
 
   const paramsWithTrimmedMessages = { ...params, messages: trimmedMessages };
 
-  for (let i = 0; i < config.retries; i++) {
+  for (let i = 0; i < retries; i++) {
     try {
       const attempt = i + 1;
       const result = await runProviderInference(
@@ -474,26 +492,36 @@ export async function infer<T extends z.AnyZodObject | undefined = undefined>(
       };
     } catch (error: any) {
       logger.error(
-        `Error during ${operationId} operation (attempt ${i + 1}/${config.retries}):`,
+        `Error during ${operationId} operation (attempt ${i + 1}/${retries}):`,
         error,
       );
-      if (i === config.retries - 1) {
+      if (i === retries - 1) {
         throw new InferenceError(
-          `Inference failed for ${operationId} after ${config.retries} attempt(s): ${error.message}`,
+          `Inference failed for ${operationId} after ${retries} attempt(s): ${error.message}`,
           error,
         );
       }
-      await new Promise((resolve) =>
-        setTimeout(resolve, config.retryDelay * (i + 1)),
-      );
-      if (i > 0) {
-        logger.info(`Retrying in ${config.retryDelay * (i + 1)}ms...`);
-      }
+      
+      // Check if it's a rate limit or overload error - use exponential backoff
+      const errorMsg = error?.message?.toLowerCase() || '';
+      const isRateLimit = errorMsg.includes('503') || 
+                          errorMsg.includes('overloaded') || 
+                          errorMsg.includes('rate limit') ||
+                          errorMsg.includes('quota') ||
+                          errorMsg.includes('429');
+      
+      // Use exponential backoff for rate limit errors, regular backoff otherwise
+      const delayMs = isRateLimit 
+        ? config.retryDelay * Math.pow(2, i + 1) // Exponential: 800ms, 1600ms, 3200ms
+        : config.retryDelay * (i + 1);            // Linear: 400ms, 800ms, 1200ms
+      
+      logger.info(`Retrying in ${delayMs}ms... (${isRateLimit ? 'rate limit detected - exponential backoff' : 'linear backoff'})`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
 
   throw new InferenceError(
-    `Inference failed for ${operationId} after ${config.retries} attempts.`,
+    `Inference failed for ${operationId} after ${retries} attempts.`,
   );
 }
 

@@ -104,21 +104,21 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: 'low',
         max_tokens: 64000,
         temperature: 0.2,
-        fallbackModel: 'google-ai-studio/gemini-2.5-pro',
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
     phaseImplementation: {
         name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'high',
         max_tokens: 64000,
         temperature: 0.3,
-        fallbackModel: 'google-ai-studio/gemini-2.5-pro',
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
     realtimeCodeFixer: {
         name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'high',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: 'google-ai-studio/gemini-2.5-pro',
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
     // Not used right now
     fastCodeFixer: {
@@ -140,21 +140,21 @@ export const AGENT_CONFIG: AgentConfig = {
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: 'google-ai-studio/gemini-2.5-pro',
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
     codeReview: {
         name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.1,
-        fallbackModel: 'google-ai-studio/gemini-2.5-pro',
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
     fileRegeneration: {
         name: AIModels.CF_QWEN_2_5_CODER_32B,
         reasoning_effort: 'high',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: 'google-ai-studio/gemini-2.5-pro',
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
     // Not used right now
     screenshotAnalysis: {
