@@ -923,26 +923,41 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
         });
         await this.ensureTemplateDetails();
 
-        let currentDevState = CurrentDevState.PHASE_IMPLEMENTING;
-        const generatedPhases = this.state.generatedPhases;
-        const incompletedPhases = generatedPhases.filter(phase => !phase.completed);
-        let phaseConcept : PhaseConceptType | undefined;
-        if (incompletedPhases.length > 0) {
-            phaseConcept = incompletedPhases[incompletedPhases.length - 1];
-            this.logger().info('Resuming code generation from incompleted phase', {
-                phase: phaseConcept
+        // Use persisted state if available, otherwise determine initial state
+        let currentDevState = this.state.currentDevState;
+        let phaseConcept: PhaseConceptType | undefined = this.state.currentPhase;
+        
+        // If state is IDLE, determine where to start
+        if (currentDevState === CurrentDevState.IDLE) {
+            const generatedPhases = this.state.generatedPhases;
+            const incompletedPhases = generatedPhases.filter(phase => !phase.completed);
+            
+            if (incompletedPhases.length > 0) {
+                currentDevState = CurrentDevState.PHASE_IMPLEMENTING;
+                phaseConcept = incompletedPhases[incompletedPhases.length - 1];
+                this.logger().info('Resuming code generation from incompleted phase', {
+                    phase: phaseConcept
+                });
+            } else if (generatedPhases.length > 0) {
+                currentDevState = CurrentDevState.PHASE_GENERATING;
+                this.logger().info('Resuming code generation after generating all phases', {
+                    phase: generatedPhases[generatedPhases.length - 1]
+                });
+            } else {
+                currentDevState = CurrentDevState.PHASE_IMPLEMENTING;
+                phaseConcept = this.state.blueprint.initialPhase;
+                this.logger().info('Starting code generation from initial phase', {
+                    phase: phaseConcept
+                });
+                this.createNewIncompletePhase(phaseConcept);
+            }
+            
+            // Persist initial state and current phase
+            this.setState({
+                ...this.state,
+                currentDevState,
+                currentPhase: phaseConcept
             });
-        } else if (generatedPhases.length > 0) {
-            currentDevState = CurrentDevState.PHASE_GENERATING;
-            this.logger().info('Resuming code generation after generating all phases', {
-                phase: generatedPhases[generatedPhases.length - 1]
-            });
-        } else {
-            phaseConcept = this.state.blueprint.initialPhase;
-            this.logger().info('Starting code generation from initial phase', {
-                phase: phaseConcept
-            });
-            this.createNewIncompletePhase(phaseConcept);
         }
 
         let staticAnalysisCache: StaticAnalysisResponse | undefined;
@@ -959,6 +974,14 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             // State machine loop - continues until IDLE state
             while (currentDevState !== CurrentDevState.IDLE) {
                 this.logger().info(`[generateAllFiles] Executing state: ${currentDevState}`);
+                
+                // Persist current state before execution
+                this.setState({
+                    ...this.state,
+                    currentDevState,
+                    currentPhase: phaseConcept
+                });
+                
                 switch (currentDevState) {
                     case CurrentDevState.PHASE_GENERATING:
                         executionResults = await this.executePhaseGeneration();
@@ -982,12 +1005,25 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
                     default:
                         break;
                 }
+                
+                // Persist state after each transition
+                this.setState({
+                    ...this.state,
+                    currentDevState,
+                    currentPhase: phaseConcept
+                });
             }
 
             this.logger().info("State machine completed successfully");
             
             // Clear abort controller and mark generation as complete
             this.clearAbortController();
+            
+            // Reset state to IDLE
+            this.setState({
+                ...this.state,
+                currentDevState: CurrentDevState.IDLE
+            });
             
             const appService = new AppService(this.env);
             await appService.updateApp(
@@ -1008,6 +1044,12 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             // Clear abort controller on error too
             this.clearAbortController();
             this.generationPromise = null;
+            
+            // Reset state to IDLE on error
+            this.setState({
+                ...this.state,
+                currentDevState: CurrentDevState.IDLE
+            });
             
             if (error instanceof RateLimitExceededError) {
                 this.logger().error("Error in state machine:", error);
