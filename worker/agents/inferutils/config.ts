@@ -68,106 +68,106 @@ OR
 
 
 export const AGENT_CONFIG: AgentConfig = {
-    // Planning / selection – use Workers AI llama-4-scout as primary, vision model as fallback
+    // Planning / selection – use Gemini 2.5 Flash everywhere to simplify routing
     templateSelection: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         max_tokens: 2000,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
         temperature: 0.6,
     },
-    // Bootstrapping and blueprint - KEEP GEMINI (excellent at structured JSON output)
+    // Bootstrapping and blueprint – already using Gemini 2.5 Flash
     blueprint: {
         name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'medium',
         max_tokens: 64000,
-        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B, // Fallback unchanged per request (blueprint only)
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
         temperature: 0.7,
     },
-    // Project setup and template customization – Workers AI llama-4-scout with vision fallback
+    // Project setup and template customization – Gemini 2.5 Flash
     projectSetup: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'low',
         max_tokens: 10000,
         temperature: 0.2,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
-    // Phase planning – Workers AI llama-4-scout with vision fallback
+    // Phase planning – Gemini 2.5 Flash
     phaseGeneration: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.7,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
     // Main code generation – implementation phases
     firstPhaseImplementation: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'medium',
         max_tokens: 64000,
         temperature: 0.3,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
     phaseImplementation: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'high',
         max_tokens: 64000,
         temperature: 0.3,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
-    // Realtime code fixer – same Workers AI models
+    // Realtime code fixer – Gemini 2.5 Flash
     realtimeCodeFixer: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'high',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
-    // Fast code fixer – same pair
+    // Fast code fixer – Gemini 2.5 Flash
     fastCodeFixer: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: undefined,
         max_tokens: 64000,
         temperature: 0.0,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
-    // Chat / conversational responses – llama-4-scout primary
+    // Chat / conversational responses – Gemini 2.5 Flash
     conversationalResponse: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.8,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
-    // Deep debugger – analysis on llama-4-scout
+    // Deep debugger – Gemini 2.5 Flash
     deepDebugger: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
-    // Code review – same Workers AI pair
+    // Code review – Gemini 2.5 Flash
     codeReview: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.1,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
     fileRegeneration: {
-        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'high',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
-    // Screenshot analysis – use the vision model primarily
+    // Screenshot analysis – Gemini 2.5 Flash
     screenshotAnalysis: {
-        name: AIModels.CF_LLAMA_3_2_11B_VISION,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
+        fallbackModel: 'google-ai-studio/gemini-2.5-flash',
     },
 };
 
