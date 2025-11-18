@@ -132,7 +132,7 @@ const SYSTEM_PROMPT = `<ROLE>
     **RECOMMENDED VISUAL ENHANCEMENT FRAMEWORKS:**
     - **UI/Animation:** framer-motion, react-spring, @radix-ui/react-*
     - **Icons:** lucide-react, @radix-ui/react-icons, heroicons
-    - **Visual Effects:** react-intersection-observer, react-parallax
+    - **Visual Effects:** react-intersection-observer
     - **Charts/Data Viz:** recharts, @tremor/react (if data visualization needed)
     - **Media/Images:** react-image-gallery or vanilla <img>; prefer aspect-video / aspect-[16/9] and object-cover; avoid Next.js-only APIs
     Suggest whatever additional frameworks are needed to achieve visual excellence.
