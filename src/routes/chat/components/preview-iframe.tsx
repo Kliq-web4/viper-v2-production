@@ -65,14 +65,24 @@ export const PreviewIframe = forwardRef<HTMLIFrameElement, PreviewIframeProps>(
 		 */
 		const testAvailability = useCallback(async (url: string): Promise<'sandbox' | 'dispatcher' | null> => {
 			try {
+				// Use GET instead of HEAD so we exercise the same code path as the iframe.
+				// Some generated apps do not handle HEAD correctly and respond with 500.
 				const response = await fetch(url, {
-					method: 'HEAD',
+					method: 'GET',
 					mode: 'cors', // Using CORS to read security-validated headers
 					cache: 'no-cache',
+					redirect: 'follow',
 					signal: AbortSignal.timeout(8000),
 				});
-                console.log('Preview availability test response:', response, response.headers.forEach((value, key) => console.log("Header: ",key, value)));
-				
+
+				console.log('Preview availability test response:', response);
+
+				// Handle hard server failures explicitly so we surface clearer logs
+				if (response.status === 500) {
+					console.error(`Preview server returned 500 Internal Server Error for ${url}.`);
+					return null;
+				}
+
 				if (!response.ok) {
 					console.log('Preview not ready (status:', response.status, ')');
 					return null;
@@ -82,10 +92,10 @@ export const PreviewIframe = forwardRef<HTMLIFrameElement, PreviewIframeProps>(
 				// Header will only be present if origin validation passed on server
 				const previewType = response.headers.get('X-Preview-Type');
 				
-                if (previewType === 'sandbox-error') {
-                    console.log('Preview not ready (sandbox error)');
-                    return null;
-                } else if (previewType === 'sandbox' || previewType === 'dispatcher') {
+				if (previewType === 'sandbox-error') {
+					console.log('Preview not ready (sandbox error)');
+					return null;
+				} else if (previewType === 'sandbox' || previewType === 'dispatcher') {
 					console.log('Preview available, type:', previewType);
 					return previewType;
 				}
@@ -95,7 +105,7 @@ export const PreviewIframe = forwardRef<HTMLIFrameElement, PreviewIframeProps>(
 				console.log('Preview available (type unknown, assuming sandbox)');
 				return 'sandbox';
 			} catch (error) {
-				console.log('Preview not available yet:', error);
+				console.error('Preview availability check failed:', error);
 				return null;
 			}
 		}, []);
