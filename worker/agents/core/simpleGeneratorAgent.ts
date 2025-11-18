@@ -269,12 +269,22 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
             files: Object.keys(customizedFiles) 
         });
         
-        // Save customized files to git
+        // Save customized files (and critical template files) to git
         const filesToSave = Object.entries(customizedFiles).map(([filePath, content]) => ({
             filePath,
             fileContents: content,
             filePurpose: 'Project configuration file'
         }));
+
+        // Ensure global styles exist in the generated project so previews do not 500 on /src/index.css
+        const templateIndexCss = templateInfo.templateDetails.allFiles['src/index.css'];
+        if (templateIndexCss) {
+            filesToSave.push({
+                filePath: 'src/index.css',
+                fileContents: templateIndexCss,
+                filePurpose: 'Global styles from starting template'
+            });
+        }
         
         await this.fileManager.saveGeneratedFiles(
             filesToSave,
