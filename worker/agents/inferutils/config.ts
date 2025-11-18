@@ -68,11 +68,11 @@ OR
 
 
 export const AGENT_CONFIG: AgentConfig = {
-    // Planning / selection should be cheap and fast
+    // Planning / selection should be cheap and fast – use a small Workers model
     templateSelection: {
-        name: AIModels.CF_LLAMA_3_1_8B,
+        name: AIModels.CF_LLAMA_3_2_3B,
         max_tokens: 2000,
-        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Upgrade to more powerful model
+        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B, // Upgrade to more powerful model
         temperature: 0.6,
     },
     // Bootstrapping and blueprint - KEEP GEMINI (excellent at structured JSON output)
@@ -80,92 +80,94 @@ export const AGENT_CONFIG: AgentConfig = {
         name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'medium',
         max_tokens: 64000,
-        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Fallback to Workers AI if Gemini fails
+        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B, // Fallback to Workers AI if Gemini fails
         temperature: 0.7,
     },
+    // Use Workers AI for project setup and template customization
     projectSetup: {
-        name: AIModels.CF_QWEN_2_5_CODER_32B,
+        name: AIModels.CF_MISTRAL_SMALL_24B,
         reasoning_effort: 'low',
         max_tokens: 10000,
         temperature: 0.2,
-        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Solid fallback
+        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B,
     },
-    // Phase planning uses smaller model
+    // Phase planning – medium-sized Workers model with strong fallback
     phaseGeneration: {
-        name: AIModels.CF_LLAMA_3_1_70B,
+        name: AIModels.CF_LLAMA_3_2_3B,
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.7,
-        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // Great at planning
+        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B,
     },
-    // Main code generation uses Gemini via google-ai-studio for phase implementation
-    // This is still invoked from within Workers, but routes to the Gemini OpenAI-compatible endpoint.
+    // Main code generation – heavy Workers AI model for implementation phases
     firstPhaseImplementation: {
-        name: 'google-ai-studio/gemini-2.5-flash',
+        name: AIModels.CF_OPENAI_GPT_OSS_120B,
         reasoning_effort: 'medium',
         max_tokens: 64000,
         temperature: 0.3,
-        // Fall back to a strong Workers AI coder model if Gemini fails
-        fallbackModel: AIModels.CF_QWEN_2_5_CODER_32B,
+        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
     },
     phaseImplementation: {
-        name: 'google-ai-studio/gemini-2.5-flash',
+        name: AIModels.CF_OPENAI_GPT_OSS_120B,
         reasoning_effort: 'high',
         max_tokens: 64000,
         temperature: 0.3,
-        // Fall back to a strong Workers AI coder model if Gemini fails
-        fallbackModel: AIModels.CF_QWEN_2_5_CODER_32B,
+        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
     },
+    // Realtime code fixer – use strong coder model with Workers-only fallback
     realtimeCodeFixer: {
-        name: AIModels.CF_QWEN_2_5_CODER_32B,
+        name: AIModels.CF_OPENAI_GPT_OSS_120B,
         reasoning_effort: 'high',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // Best for fixing code
+        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
     },
-    // Not used right now
+    // Not used right now – keep in Workers ecosystem
     fastCodeFixer: {
-        name: AIModels.CF_QWEN_2_5_CODER_32B,
+        name: AIModels.CF_MISTRAL_SMALL_24B,
         reasoning_effort: undefined,
         max_tokens: 64000,
         temperature: 0.0,
-        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Generic fallback
+        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B,
     },
+    // Chat / conversational responses – smaller model primary, larger as fallback
     conversationalResponse: {
-        name: AIModels.CF_LLAMA_3_1_8B,
+        name: AIModels.CF_LLAMA_3_2_3B,
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.8,
-        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Upgrade for conversations
+        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B,
     },
+    // Deep debugger – heavy model for analysis with smaller fallback
     deepDebugger: {
-        name: AIModels.CF_QWEN_2_5_CODER_32B,
+        name: AIModels.CF_OPENAI_GPT_OSS_120B,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // DeepSeek for deep analysis
+        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
     },
+    // Code review – balanced Workers config
     codeReview: {
-        name: AIModels.CF_QWEN_2_5_CODER_32B,
+        name: AIModels.CF_OPENAI_GPT_OSS_120B,
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.1,
-        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Solid reviewer
+        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
     },
     fileRegeneration: {
-        name: AIModels.CF_QWEN_2_5_CODER_32B,
+        name: AIModels.CF_OPENAI_GPT_OSS_120B,
         reasoning_effort: 'high',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // DeepSeek for code regen
+        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
     },
-    // Not used right now
+    // Screenshot analysis – lighter model with upgrade path
     screenshotAnalysis: {
-        name: AIModels.CF_LLAMA_3_1_8B,
+        name: AIModels.CF_LLAMA_3_2_3B,
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: AIModels.CF_LLAMA_3_1_70B, // Upgrade for analysis
+        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B,
     },
 };
 

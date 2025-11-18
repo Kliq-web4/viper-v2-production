@@ -14,6 +14,11 @@ export enum AIModels {
     CF_LLAMA_3_1_70B = '@cf/meta/llama-3.1-70b-instruct',
     CF_QWEN_2_5_CODER_32B = '@cf/qwen/qwen2.5-coder-32b-instruct',
     CF_DEEPSEEK_R1_DISTILL_32B = '@cf/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B',
+
+    // New Workers AI models available in this environment
+    CF_OPENAI_GPT_OSS_120B = '@cf/openai/gpt-oss-120b',
+    CF_LLAMA_3_2_3B = '@cf/meta/llama-3.2-3b-instruct',
+    CF_MISTRAL_SMALL_24B = '@cf/mistralai/mistral-small-3.1-24b-instruct',
 }
 
 export interface ModelConfig {
