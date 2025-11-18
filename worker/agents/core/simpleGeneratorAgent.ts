@@ -915,9 +915,28 @@ export class SimpleCodeGeneratorAgent extends Agent<Env, CodeGenState> {
 
     private broadcastError(context: string, error: unknown): void {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        this.logger().error(`${context}:`, error);
+        const rawError = error instanceof Error ? (error.stack || error.message) : String(error);
+
+        // Log full context server-side
+        this.logger().error(`${context}:`, {
+            error,
+            errorMessage,
+            rawError,
+        });
+
+        // Special handling for Cloudflare AI Gateway "Invalid provider" errors (code 2008)
+        const isInvalidProvider =
+            rawError.includes('Invalid provider') ||
+            rawError.includes('"code":2008') ||
+            rawError.includes("'code': 2008");
+
+        let clientError = `${context}: ${errorMessage}`;
+        if (isInvalidProvider) {
+            clientError = `${context}: Cloudflare AI Gateway returned \"Invalid provider\" (code 2008). This usually means the model provider in your model string is not enabled or misconfigured on the AI Gateway. Raw error: ${errorMessage}`;
+        }
+
         this.broadcast(WebSocketMessageResponses.ERROR, {
-            error: `${context}: ${errorMessage}`
+            error: clientError,
         });
     }
 
