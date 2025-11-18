@@ -394,7 +394,20 @@ async function runProviderInference<T extends z.AnyZodObject | undefined>(
         total_tokens: 0,
       },
     };
-  } catch (err) {
+  } catch (err: any) {
+    const errMsg = String(err?.message ?? err ?? '');
+    if (errMsg.includes('Invalid provider') || errMsg.includes('"code":2008')) {
+      // Surface rich context so we can debug AI Gateway provider issues from logs.
+      logger.error('[AI_GATEWAY_INVALID_PROVIDER]', {
+        modelName,
+        openaiModel,
+        providerHint: (modelName || '').split('/')[0],
+        gatewayBinding: (env as any).CLOUDFLARE_AI_GATEWAY,
+        gatewayUrlEnv: (env as any).CLOUDFLARE_AI_GATEWAY_URL,
+        accountTag: (env as any).CF_ACCOUNT_ID || (env as any).CLOUDFLARE_ACCOUNT_ID || null,
+        rawError: errMsg,
+      });
+    }
     // Fallback to Chat Completions if Responses API is unavailable
     logger.warn('Responses API call failed; falling back to Chat Completions', err as any);
     const chatPayload: any = {
