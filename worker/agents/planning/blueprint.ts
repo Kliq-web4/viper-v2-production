@@ -63,11 +63,12 @@ const SYSTEM_PROMPT = `<ROLE>
 
     ${PROMPT_UTILS.UI_GUIDELINES}
 
-    ## Frameworks & Dependencies
+    • **Frameworks & Dependencies**
     • Choose an exhaustive set of well-known libraries, components and dependencies that can be used to build the application with as little effort as possible.
         - **Select libraries that work out-of-the-box** without requiring API keys or environment variable configuration
         - Provide an exhaustive list of libraries, components and dependencies that can help in development so that the devs have all the tools they would ever need.
         - Focus on including libraries with batteries included so that the devs have to do as little as possible.
+        - **CRITICAL:** For every third-party library you use in the code (for example `react-parallax`), you MUST also add it to the app's `package.json` dependencies so that installs succeed and Vite can resolve imports.
 
     • **Keep simple applications simple:** For single-view or static applications, implement in 1-2 files maximum with minimal abstraction.
     • **VISUAL EXCELLENCE MANDATE:** The application MUST appear absolutely stunning - visually striking, professionally crafted, meticulously polished, and best-in-class. Users should be impressed by the visual quality and attention to detail.
@@ -132,7 +133,7 @@ const SYSTEM_PROMPT = `<ROLE>
     **RECOMMENDED VISUAL ENHANCEMENT FRAMEWORKS:**
     - **UI/Animation:** framer-motion, react-spring, @radix-ui/react-*
     - **Icons:** lucide-react, @radix-ui/react-icons, heroicons
-    - **Visual Effects:** react-intersection-observer
+    - **Visual Effects:** react-intersection-observer, react-parallax
     - **Charts/Data Viz:** recharts, @tremor/react (if data visualization needed)
     - **Media/Images:** react-image-gallery or vanilla <img>; prefer aspect-video / aspect-[16/9] and object-cover; avoid Next.js-only APIs
     Suggest whatever additional frameworks are needed to achieve visual excellence.
