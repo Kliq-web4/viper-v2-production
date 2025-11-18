@@ -68,11 +68,11 @@ OR
 
 
 export const AGENT_CONFIG: AgentConfig = {
-    // Planning / selection should be cheap and fast – use a small Workers model
+    // Planning / selection – use Workers AI llama-4-scout as primary, vision model as fallback
     templateSelection: {
-        name: AIModels.CF_LLAMA_3_2_3B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         max_tokens: 2000,
-        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B, // Upgrade to more powerful model
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
         temperature: 0.6,
     },
     // Bootstrapping and blueprint - KEEP GEMINI (excellent at structured JSON output)
@@ -80,94 +80,94 @@ export const AGENT_CONFIG: AgentConfig = {
         name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'medium',
         max_tokens: 64000,
-        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B, // Fallback to Workers AI if Gemini fails
+        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B, // Fallback unchanged per request (blueprint only)
         temperature: 0.7,
     },
-    // Use Workers AI for project setup and template customization
+    // Project setup and template customization – Workers AI llama-4-scout with vision fallback
     projectSetup: {
-        name: AIModels.CF_MISTRAL_SMALL_24B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         reasoning_effort: 'low',
         max_tokens: 10000,
         temperature: 0.2,
-        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B,
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
     },
-    // Phase planning – medium-sized Workers model with strong fallback
+    // Phase planning – Workers AI llama-4-scout with vision fallback
     phaseGeneration: {
-        name: AIModels.CF_LLAMA_3_2_3B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.7,
-        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B,
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
     },
-    // Main code generation – heavy Workers AI model for implementation phases
+    // Main code generation – implementation phases
     firstPhaseImplementation: {
-        name: AIModels.CF_OPENAI_GPT_OSS_120B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         reasoning_effort: 'medium',
         max_tokens: 64000,
         temperature: 0.3,
-        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
     },
     phaseImplementation: {
-        name: AIModels.CF_OPENAI_GPT_OSS_120B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         reasoning_effort: 'high',
         max_tokens: 64000,
         temperature: 0.3,
-        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
     },
-    // Realtime code fixer – use strong coder model with Workers-only fallback
+    // Realtime code fixer – same Workers AI models
     realtimeCodeFixer: {
-        name: AIModels.CF_OPENAI_GPT_OSS_120B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         reasoning_effort: 'high',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
     },
-    // Not used right now – keep in Workers ecosystem
+    // Fast code fixer – same pair
     fastCodeFixer: {
-        name: AIModels.CF_MISTRAL_SMALL_24B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         reasoning_effort: undefined,
         max_tokens: 64000,
         temperature: 0.0,
-        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B,
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
     },
-    // Chat / conversational responses – smaller model primary, larger as fallback
+    // Chat / conversational responses – llama-4-scout primary
     conversationalResponse: {
-        name: AIModels.CF_LLAMA_3_2_3B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.8,
-        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B,
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
     },
-    // Deep debugger – heavy model for analysis with smaller fallback
+    // Deep debugger – analysis on llama-4-scout
     deepDebugger: {
-        name: AIModels.CF_OPENAI_GPT_OSS_120B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
     },
-    // Code review – balanced Workers config
+    // Code review – same Workers AI pair
     codeReview: {
-        name: AIModels.CF_OPENAI_GPT_OSS_120B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         reasoning_effort: 'medium',
         max_tokens: 32000,
         temperature: 0.1,
-        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
     },
     fileRegeneration: {
-        name: AIModels.CF_OPENAI_GPT_OSS_120B,
+        name: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
         reasoning_effort: 'high',
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.CF_MISTRAL_SMALL_24B,
+        fallbackModel: AIModels.CF_LLAMA_3_2_11B_VISION,
     },
-    // Screenshot analysis – lighter model with upgrade path
+    // Screenshot analysis – use the vision model primarily
     screenshotAnalysis: {
-        name: AIModels.CF_LLAMA_3_2_3B,
+        name: AIModels.CF_LLAMA_3_2_11B_VISION,
         reasoning_effort: 'medium',
         max_tokens: 8000,
         temperature: 0.1,
-        fallbackModel: AIModels.CF_OPENAI_GPT_OSS_120B,
+        fallbackModel: AIModels.CF_LLAMA_4_SCOUT_17B_16E,
     },
 };
 

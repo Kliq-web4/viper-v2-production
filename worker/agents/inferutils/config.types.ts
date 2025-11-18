@@ -9,13 +9,18 @@ import { ReasoningEffort } from "openai/resources.mjs";
 export enum AIModels {
     DISABLED = 'disabled',
 
-    // Cloudflare Workers AI models (use these only)
+    // Cloudflare Workers AI models
     CF_LLAMA_3_1_8B = '@cf/meta/llama-3.1-8b-instruct',
     CF_LLAMA_3_1_70B = '@cf/meta/llama-3.1-70b-instruct',
     CF_QWEN_2_5_CODER_32B = '@cf/qwen/qwen2.5-coder-32b-instruct',
     CF_DEEPSEEK_R1_DISTILL_32B = '@cf/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B',
 
-    // New Workers AI models available in this environment
+    // Preferred Workers AI models for code generation in this deployment
+    CF_LLAMA_4_SCOUT_17B_16E = '@cf/meta/llama-4-scout-17b-16e-instruct',
+    CF_LLAMA_3_2_11B_VISION = '@cf/meta/llama-3.2-11b-vision-instruct',
+    CF_LLAMA_GUARD_3_8B = '@cf/meta/llama-guard-3-8b',
+
+    // Legacy / unused models (kept for backwards compatibility)
     CF_OPENAI_GPT_OSS_120B = '@cf/openai/gpt-oss-120b',
     CF_LLAMA_3_2_3B = '@cf/meta/llama-3.2-3b-instruct',
     CF_MISTRAL_SMALL_24B = '@cf/mistralai/mistral-small-3.1-24b-instruct',
