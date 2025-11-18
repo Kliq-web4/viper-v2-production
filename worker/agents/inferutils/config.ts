@@ -98,20 +98,23 @@ export const AGENT_CONFIG: AgentConfig = {
         temperature: 0.7,
         fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // Great at planning
     },
-    // Main code generation uses a stronger coder model
+    // Main code generation uses Gemini via google-ai-studio for phase implementation
+    // This is still invoked from within Workers, but routes to the Gemini OpenAI-compatible endpoint.
     firstPhaseImplementation: {
-        name: AIModels.CF_QWEN_2_5_CODER_32B,
-        reasoning_effort: 'low',
+        name: 'google-ai-studio/gemini-2.5-flash',
+        reasoning_effort: 'medium',
         max_tokens: 64000,
-        temperature: 0.2,
-        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // DeepSeek excellent at coding
+        temperature: 0.3,
+        // Fall back to a strong Workers AI coder model if Gemini fails
+        fallbackModel: AIModels.CF_QWEN_2_5_CODER_32B,
     },
     phaseImplementation: {
-        name: AIModels.CF_QWEN_2_5_CODER_32B,
+        name: 'google-ai-studio/gemini-2.5-flash',
         reasoning_effort: 'high',
         max_tokens: 64000,
         temperature: 0.3,
-        fallbackModel: AIModels.CF_DEEPSEEK_R1_DISTILL_32B, // DeepSeek excellent at coding
+        // Fall back to a strong Workers AI coder model if Gemini fails
+        fallbackModel: AIModels.CF_QWEN_2_5_CODER_32B,
     },
     realtimeCodeFixer: {
         name: AIModels.CF_QWEN_2_5_CODER_32B,
