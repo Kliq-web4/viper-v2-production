@@ -321,10 +321,6 @@ export default function Home() {
 
 					{/* Main Input Area - Purple Design */}
 					<div className="max-w-3xl mx-auto mt-16 md:mt-20">
-						<EntropyDemo />
-						<p className="text-xs font-mono text-purple-400 mb-6 max-w-2xl mx-auto mt-6 text-center">
-							Our engineers are actively enhancing Web4.sbs for an even smoother experience — but everything is fully functional and ready to use.
-						</p>
 						<form
 							method="POST"
 							onSubmit={(e) => {
@@ -400,6 +396,11 @@ export default function Home() {
 								</div>
 							</div>
 						</form>
+
+						<EntropyDemo />
+						<p className="text-xs font-mono text-purple-400 mb-6 max-w-2xl mx-auto mt-6 text-center">
+							Our engineers are actively enhancing Web4.sbs for an even smoother experience — but everything is fully functional and ready to use.
+						</p>
 
 						{/* External CTA - Purple */}
 						<div className="mt-8 flex justify-center">
