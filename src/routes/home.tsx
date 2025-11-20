@@ -20,6 +20,7 @@ import { PixelTrail } from '@/components/ui/pixel-trail';
 import { useScreenSize } from '@/components/hooks/use-screen-size';
 import { EntropyDemo } from '@/components/ui/entropy-demo';
 import { LampContainer } from '@/components/ui/lamp';
+import { GlowingEffectDemo } from '@/components/ui/glowing-effect-demo';
 import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -171,25 +172,6 @@ export default function Home() {
 			description: 'Profiles, posts and connections',
 			icon: Share2,
 			prompt: 'Ask Kliq AI to create a professional networking application with user profiles featuring bio, skills, and experience, a feed system for posting updates and sharing content, connection requests and messaging, search functionality to find people by skills or industry, and event creation for networking meetups. Include notifications and activity feeds.'
-		},
-	] as const;
-
-
-	const features = [
-		{
-			title: 'Create at the speed of thought',
-			description: 'Tell us your idea, and watch it transform into a working app—complete with all the necessary components, pages, flows and features.',
-			icon: Rocket
-		},
-		{
-			title: 'The backend\'s built-in automatically',
-			description: 'Everything your idea needs to function, like letting users sign in, saving their data, or creating role-based permissions is taken care of behind the scenes.',
-			icon: Puzzle
-		},
-		{
-			title: 'Ready to use, instantly.',
-			description: 'Our platform comes with built-in hosting, so when your app is ready the only thing left to do is publish, put it to use, and share it with your friends or community.',
-			icon: Sparkles
 		},
 	] as const;
 
@@ -508,27 +490,8 @@ export default function Home() {
 						<h2 className="text-3xl md:text-4xl lg:text-5xl font-mono font-light mb-4 text-purple-100 tracking-tight">Consider yourself limitless.</h2>
 						<p className="text-sm md:text-base font-mono text-purple-400 uppercase tracking-wider">If you can describe it, you can build it.</p>
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-						{features.map(({ title, description, icon: Icon }) => (
-							<motion.div
-								key={title}
-								initial={{ opacity: 0, y: 30 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								viewport={{ once: true }}
-								transition={{ duration: 0.5 }}
-								whileHover={{ y: -8, scale: 1.02 }}
-							>
-								<Card className="group relative overflow-hidden h-full">
-									<CardHeader className="pb-6 relative z-10">
-										<div className="size-16 border border-purple-700/60 bg-purple-800/40 text-purple-300 flex items-center justify-center mb-6 group-hover:border-purple-600 group-hover:bg-purple-700/40 group-hover:scale-110 transition-all duration-300 rounded-lg shadow-lg shadow-purple-950/30">
-											<Icon className="size-8" />
-										</div>
-										<CardTitle className="text-xl md:text-2xl font-mono font-light mb-4 text-purple-50 group-hover:text-purple-100 transition-colors">{title}</CardTitle>
-										<CardDescription className="text-sm md:text-base font-mono text-purple-300 leading-relaxed">{description}</CardDescription>
-									</CardHeader>
-								</Card>
-							</motion.div>
-						))}
+					<div className="w-full">
+						<GlowingEffectDemo />
 					</div>
 				</section>
 
