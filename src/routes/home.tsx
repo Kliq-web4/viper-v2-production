@@ -17,6 +17,7 @@ import { ImageUploadButton } from '@/components/image-upload-button';
 import { ImageAttachmentPreview } from '@/components/image-attachment-preview';
 import { SUPPORTED_IMAGE_MIME_TYPES } from '@/api-types';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
+import { EntropyDemo } from '@/components/ui/entropy-demo';
 import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -52,37 +53,37 @@ export default function Home() {
 		accept: [...SUPPORTED_IMAGE_MIME_TYPES],
 	});
 
-const placeholderSuffixes = useMemo(() => [
-	'build a landing page',
-	'build a game',
-	'create a dashboard',
-	'launch a blog',
-	'make a booking system',
-], []);
-const [placeholderIndex, setPlaceholderIndex] = useState(0);
-const [placeholderText, setPlaceholderText] = useState('');
-const [placeholderTyping, setPlaceholderTyping] = useState(true);
+	const placeholderSuffixes = useMemo(() => [
+		'build a landing page',
+		'build a game',
+		'create a dashboard',
+		'launch a blog',
+		'make a booking system',
+	], []);
+	const [placeholderIndex, setPlaceholderIndex] = useState(0);
+	const [placeholderText, setPlaceholderText] = useState('');
+	const [placeholderTyping, setPlaceholderTyping] = useState(true);
 
-useEffect(() => {
-	const phrase = placeholderSuffixes[placeholderIndex];
-	if (placeholderTyping) {
-		if (placeholderText.length < phrase.length) {
-			const t = setTimeout(() => setPlaceholderText(phrase.slice(0, placeholderText.length + 1)), 80);
-			return () => clearTimeout(t);
+	useEffect(() => {
+		const phrase = placeholderSuffixes[placeholderIndex];
+		if (placeholderTyping) {
+			if (placeholderText.length < phrase.length) {
+				const t = setTimeout(() => setPlaceholderText(phrase.slice(0, placeholderText.length + 1)), 80);
+				return () => clearTimeout(t);
+			} else {
+				const t = setTimeout(() => setPlaceholderTyping(false), 1500);
+				return () => clearTimeout(t);
+			}
 		} else {
-			const t = setTimeout(() => setPlaceholderTyping(false), 1500);
-			return () => clearTimeout(t);
+			if (placeholderText.length > 0) {
+				const t = setTimeout(() => setPlaceholderText(placeholderText.slice(0, -1)), 40);
+				return () => clearTimeout(t);
+			} else {
+				setPlaceholderIndex((i) => (i + 1) % placeholderSuffixes.length);
+				setPlaceholderTyping(true);
+			}
 		}
-	} else {
-		if (placeholderText.length > 0) {
-			const t = setTimeout(() => setPlaceholderText(placeholderText.slice(0, -1)), 40);
-			return () => clearTimeout(t);
-		} else {
-			setPlaceholderIndex((i) => (i + 1) % placeholderSuffixes.length);
-			setPlaceholderTyping(true);
-		}
-	}
-}, [placeholderText, placeholderIndex, placeholderTyping, placeholderSuffixes]);
+	}, [placeholderText, placeholderIndex, placeholderTyping, placeholderSuffixes]);
 
 	const {
 		apps,
@@ -138,33 +139,33 @@ useEffect(() => {
 	const discoverLinkRef = useRef<HTMLDivElement>(null);
 
 	const templates = [
-		{ 
-			title: 'Reporting Dashboard', 
-			description: 'KPIs, charts and filters', 
+		{
+			title: 'Reporting Dashboard',
+			description: 'KPIs, charts and filters',
 			icon: LayoutDashboard,
 			prompt: 'Ask Kliq AI to create a comprehensive reporting dashboard with key performance indicators (KPIs), interactive charts for data visualization, advanced filtering options, date range selectors, and export functionality. Include a clean layout with sidebar navigation, summary cards at the top showing key metrics, and detailed data tables below.'
 		},
-		{ 
-			title: 'Gaming Platform', 
-			description: 'Lobby, matchmaking, leaderboards', 
+		{
+			title: 'Gaming Platform',
+			description: 'Lobby, matchmaking, leaderboards',
 			icon: Gamepad2,
 			prompt: 'Ask Kliq AI to build a full-featured gaming platform with a lobby system where players can create and join rooms, real-time matchmaking functionality, comprehensive leaderboards showing top players with rankings and statistics, player profiles with game history, and a chat system for players to communicate. Include game session management and score tracking.'
 		},
-		{ 
-			title: 'Onboarding Portal', 
-			description: 'Sign-up flows and checklists', 
+		{
+			title: 'Onboarding Portal',
+			description: 'Sign-up flows and checklists',
 			icon: Users,
 			prompt: 'Ask Kliq AI to create an onboarding portal with multi-step sign-up forms, user verification flows, interactive checklists to guide new users through setup, progress tracking, and welcome tutorials. Include email verification, profile completion steps, and a dashboard that shows onboarding progress with clear next steps.'
 		},
-		{ 
-			title: 'Room Visualizer', 
-			description: 'Interactive layout editor', 
+		{
+			title: 'Room Visualizer',
+			description: 'Interactive layout editor',
 			icon: Box,
 			prompt: 'Ask Kliq AI to build an interactive room visualizer where users can drag and drop furniture, adjust room dimensions, apply different floor plans, change wall colors and textures, save multiple room designs, and export layouts as images. Include a toolbar with furniture items, measurement tools, and a 3D preview option.'
 		},
-		{ 
-			title: 'Networking App', 
-			description: 'Profiles, posts and connections', 
+		{
+			title: 'Networking App',
+			description: 'Profiles, posts and connections',
 			icon: Share2,
 			prompt: 'Ask Kliq AI to create a professional networking application with user profiles featuring bio, skills, and experience, a feed system for posting updates and sharing content, connection requests and messaging, search functionality to find people by skills or industry, and event creation for networking meetups. Include notifications and activity feeds.'
 		},
@@ -172,81 +173,81 @@ useEffect(() => {
 
 
 	const features = [
-		{ 
-			title: 'Create at the speed of thought', 
-			description: 'Tell us your idea, and watch it transform into a working app—complete with all the necessary components, pages, flows and features.', 
-			icon: Rocket 
+		{
+			title: 'Create at the speed of thought',
+			description: 'Tell us your idea, and watch it transform into a working app—complete with all the necessary components, pages, flows and features.',
+			icon: Rocket
 		},
-		{ 
-			title: 'The backend\'s built-in automatically', 
-			description: 'Everything your idea needs to function, like letting users sign in, saving their data, or creating role-based permissions is taken care of behind the scenes.', 
-			icon: Puzzle 
+		{
+			title: 'The backend\'s built-in automatically',
+			description: 'Everything your idea needs to function, like letting users sign in, saving their data, or creating role-based permissions is taken care of behind the scenes.',
+			icon: Puzzle
 		},
-		{ 
-			title: 'Ready to use, instantly.', 
-			description: 'Our platform comes with built-in hosting, so when your app is ready the only thing left to do is publish, put it to use, and share it with your friends or community.', 
-			icon: Sparkles 
+		{
+			title: 'Ready to use, instantly.',
+			description: 'Our platform comes with built-in hosting, so when your app is ready the only thing left to do is publish, put it to use, and share it with your friends or community.',
+			icon: Sparkles
 		},
 	] as const;
 
 	const testimonials = [
-		{ 
-			quote: "This platform has completely transformed how I build apps. No iterations, no changes, just pure magic.", 
-			author: "Hasan Toor", 
-			handle: "@hasantoxr" 
+		{
+			quote: "This platform has completely transformed how I build apps. No iterations, no changes, just pure magic.",
+			author: "Hasan Toor",
+			handle: "@hasantoxr"
 		},
-		{ 
-			quote: "Just built this awesome web app! I'm blown away by how fast and intuitive the process is.", 
-			author: "Maria Martin", 
-			handle: "@marias_martin" 
+		{
+			quote: "Just built this awesome web app! I'm blown away by how fast and intuitive the process is.",
+			author: "Maria Martin",
+			handle: "@marias_martin"
 		},
-		{ 
-			quote: "What makes this different is that the interaction with the AI is seamless and the results are production-ready.", 
-			author: "Gleb Konon", 
-			handle: "" 
+		{
+			quote: "What makes this different is that the interaction with the AI is seamless and the results are production-ready.",
+			author: "Gleb Konon",
+			handle: ""
 		},
-		{ 
-			quote: "One of the best AI Coders out there. I tried many of them. What sets this apart is the quality and speed.", 
-			author: "Richard Manisa", 
-			handle: "" 
+		{
+			quote: "One of the best AI Coders out there. I tried many of them. What sets this apart is the quality and speed.",
+			author: "Richard Manisa",
+			handle: ""
 		},
-		{ 
-			quote: "Perfect for founders who want to build fast without compromising on quality. Highly recommended!", 
-			author: "Masiar Ighani", 
-			handle: "" 
+		{
+			quote: "Perfect for founders who want to build fast without compromising on quality. Highly recommended!",
+			author: "Masiar Ighani",
+			handle: ""
 		},
-		{ 
-			quote: "Amazing understanding of user needs and thorough handling of complex requirements. Impressive work!", 
-			author: "Ariel MI", 
-			handle: "" 
+		{
+			quote: "Amazing understanding of user needs and thorough handling of complex requirements. Impressive work!",
+			author: "Ariel MI",
+			handle: ""
 		},
-		{ 
-			quote: "Start building in minutes. See results immediately. Great!", 
-			author: "Thatweb3guy", 
-			handle: "@myfootyfantasy" 
+		{
+			quote: "Start building in minutes. See results immediately. Great!",
+			author: "Thatweb3guy",
+			handle: "@myfootyfantasy"
 		},
-		{ 
-			quote: "Fastest Aha! moment I have ever had.", 
-			author: "Roy Kotzer", 
-			handle: "" 
+		{
+			quote: "Fastest Aha! moment I have ever had.",
+			author: "Roy Kotzer",
+			handle: ""
 		},
-		{ 
-			quote: "This revolutionizes app development by enabling users to create production-ready applications in minutes.", 
-			author: "Erel Cohen", 
-			handle: "" 
+		{
+			quote: "This revolutionizes app development by enabling users to create production-ready applications in minutes.",
+			author: "Erel Cohen",
+			handle: ""
 		},
-] as const;
+	] as const;
 
 	// Pricing plans loaded from API
 	const [plans, setPlans] = useState<Array<{ slug: string; name: string; monthlyCredits: number; dailyFreeCredits: number; rolloverLimit: number; resetCycleDays: number; priceUsd: number; checkoutUrl?: string | null }>>([]);
-const [, setPlansLoading] = useState(true);
+	const [, setPlansLoading] = useState(true);
 	useEffect(() => {
 		let mounted = true;
 		apiClient.getBillingPlans()
 			.then((res) => {
 				if (mounted && res.success && res.data) setPlans((res.data as any).plans);
 			})
-			.catch(() => {})
+			.catch(() => { })
 			.finally(() => mounted && setPlansLoading(false));
 		return () => { mounted = false };
 	}, []);
@@ -290,17 +291,17 @@ const [, setPlansLoading] = useState(true);
 		<div className="relative flex flex-col min-h-screen">
 			{/* Background */}
 			<div className="fixed inset-0 z-0 pointer-events-none">
-					<EtheralShadow
-						className="w-full h-full"
-						color="rgba(139, 92, 246, 0.65)"
-						animation={{ scale: isMobile ? 0 : 80, speed: isMobile ? 0 : 75 }}
-						noise={{ opacity: 0.45, scale: 1 }}
-						sizing="fill"
-					/>
+				<EtheralShadow
+					className="w-full h-full"
+					color="rgba(139, 92, 246, 0.65)"
+					animation={{ scale: isMobile ? 0 : 80, speed: isMobile ? 0 : 75 }}
+					noise={{ opacity: 0.45, scale: 1 }}
+					sizing="fill"
+				/>
 			</div>
 
-				<MarketingHeader />
-			
+			<MarketingHeader />
+
 			<main className="relative z-10 flex-1">
 				{/* Hero Section */}
 				<section id="product" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12 md:pt-32 md:pb-16">
@@ -324,6 +325,7 @@ const [, setPlansLoading] = useState(true);
 
 					{/* Main Input Area */}
 					<div className="max-w-3xl mx-auto mt-8 md:mt-12">
+						<EntropyDemo />
 						<form
 							method="POST"
 							onSubmit={(e) => {
@@ -333,7 +335,7 @@ const [, setPlansLoading] = useState(true);
 							}}
 							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[120px] bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl border-2 border-accent/20 dark:border-accent/30 rounded-2xl shadow-xl shadow-accent/10 p-5 md:p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-accent/15 hover:border-accent/30 dark:hover:border-accent/40 focus-within:border-accent/40 dark:focus-within:border-accent/50"
 						>
-							<div 
+							<div
 								className={clsx(
 									"flex-1 flex flex-col relative",
 									isDragging && "ring-2 ring-accent ring-offset-2 rounded-lg"
@@ -349,9 +351,9 @@ const [, setPlansLoading] = useState(true);
 									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-text-secondary/50 text-text-primary bg-transparent text-base"
 									name="query"
 									value={query}
-placeholder={`Ask Kliq AI to ${placeholderText}`}
+									placeholder={`Ask Kliq AI to ${placeholderText}`}
 									ref={textareaRef}
-onChange={(e) => {
+									onChange={(e) => {
 										setQuery(e.target.value);
 										adjustTextareaHeight();
 									}}
@@ -430,7 +432,7 @@ onChange={(e) => {
 								whileHover={{ y: -4 }}
 								className="w-full"
 							>
-								<Card 
+								<Card
 									className="group relative overflow-hidden border-2 border-accent/15 dark:border-accent/25 bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur-lg supports-backdrop:backdrop-blur-lg hover:bg-bg-4/90 dark:hover:bg-bg-2/90 transition-all duration-300 cursor-pointer hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1 flex flex-col h-[210px] sm:h-[220px] md:h-[240px] rounded-2xl"
 									onClick={() => handleCreateApp(prompt, agentMode)}
 									role="button"
@@ -487,8 +489,8 @@ onChange={(e) => {
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 						{features.map(({ title, description, icon: Icon }) => (
-							<motion.div 
-								key={title} 
+							<motion.div
+								key={title}
 								initial={{ opacity: 0, y: 30 }}
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
@@ -582,7 +584,7 @@ onChange={(e) => {
 							<CardHeader className="pb-4 relative z-10">
 								<CardTitle className="text-xl md:text-2xl mb-1 font-bold">Pro</CardTitle>
 								<div className="flex items-baseline gap-2">
-									<span className="text-4xl md:text-5xl font-bold text-text-primary">${plans.find(p=>p.slug==='pro')?.priceUsd ?? 25}</span>
+									<span className="text-4xl md:text-5xl font-bold text-text-primary">${plans.find(p => p.slug === 'pro')?.priceUsd ?? 25}</span>
 									<span className="text-sm md:text-base text-text-secondary">/ mo</span>
 								</div>
 							</CardHeader>
@@ -592,8 +594,8 @@ onChange={(e) => {
 									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Rollover up to 100 credits</li>
 									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Monthly reset</li>
 								</ul>
-								<a href={(plans.find(p=>p.slug==='pro')?.checkoutUrl) || '#'} target={plans.find(p=>p.slug==='pro')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
-									<Button variant="outline" size="lg" className="w-full" disabled={!plans.find(p=>p.slug==='pro')?.checkoutUrl}>
+								<a href={(plans.find(p => p.slug === 'pro')?.checkoutUrl) || '#'} target={plans.find(p => p.slug === 'pro')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
+									<Button variant="outline" size="lg" className="w-full" disabled={!plans.find(p => p.slug === 'pro')?.checkoutUrl}>
 										Upgrade to Pro
 									</Button>
 								</a>
@@ -606,7 +608,7 @@ onChange={(e) => {
 							<CardHeader className="pb-4 relative z-10">
 								<CardTitle className="text-xl md:text-2xl mb-1 font-bold">Business</CardTitle>
 								<div className="flex items-baseline gap-2">
-									<span className="text-4xl md:text-5xl font-bold text-text-primary">${plans.find(p=>p.slug==='business')?.priceUsd ?? 79}</span>
+									<span className="text-4xl md:text-5xl font-bold text-text-primary">${plans.find(p => p.slug === 'business')?.priceUsd ?? 79}</span>
 									<span className="text-sm md:text-base text-text-secondary">/ mo</span>
 								</div>
 							</CardHeader>
@@ -616,8 +618,8 @@ onChange={(e) => {
 									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Rollover up to 500 credits</li>
 									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Monthly reset</li>
 								</ul>
-								<a href={(plans.find(p=>p.slug==='business')?.checkoutUrl) || '#'} target={plans.find(p=>p.slug==='business')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
-									<Button variant="outline" size="lg" className="w-full" disabled={!plans.find(p=>p.slug==='business')?.checkoutUrl}>
+								<a href={(plans.find(p => p.slug === 'business')?.checkoutUrl) || '#'} target={plans.find(p => p.slug === 'business')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
+									<Button variant="outline" size="lg" className="w-full" disabled={!plans.find(p => p.slug === 'business')?.checkoutUrl}>
 										Upgrade to Business
 									</Button>
 								</a>
