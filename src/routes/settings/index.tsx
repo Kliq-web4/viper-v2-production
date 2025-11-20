@@ -4,11 +4,11 @@ import {
 	Eye,
 	EyeOff,
 	Github,
-    Smartphone,
+	Smartphone,
 	Trash2,
 	Key,
 	Lock,
-    Settings,
+	Settings,
 } from 'lucide-react';
 import { ModelConfigTabs } from '@/components/model-config-tabs';
 import type {
@@ -397,17 +397,17 @@ export default function SettingsPage() {
 
 			const payload = isCustomSecret
 				? {
-						name: newSecret.name,
-						envVarName: newSecret.envVarName,
-						value: newSecret.value,
-						environment: newSecret.environment,
-						description: newSecret.description,
-					}
+					name: newSecret.name,
+					envVarName: newSecret.envVarName,
+					value: newSecret.value,
+					environment: newSecret.environment,
+					description: newSecret.description,
+				}
 				: {
-						templateId: selectedTemplate || undefined,
-						value: newSecret.value,
-						environment: newSecret.environment,
-					};
+					templateId: selectedTemplate || undefined,
+					value: newSecret.value,
+					environment: newSecret.environment,
+				};
 
 			await apiClient.storeSecret(payload);
 			toast.success('Secret saved successfully');
@@ -509,12 +509,12 @@ export default function SettingsPage() {
 		if (user) {
 			loadActiveSessions();
 			loadModelConfigs();
-            loadSecretTemplates();
+			loadSecretTemplates();
 		}
 	}, [user]);
 
 	return (
-		<div className="min-h-screen bg-bg-3 relative">
+		<div className="min-h-screen bg-black relative">
 			<main className="container mx-auto px-4 py-8 max-w-4xl">
 				<div className="space-y-8">
 					{/* Page Header */}
@@ -618,7 +618,7 @@ export default function SettingsPage() {
 					<Card>
 						<CardContent className="px-6 py-6">
 							{/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
-<BillingWidget />
+							<BillingWidget />
 						</CardContent>
 					</Card>
 
@@ -900,12 +900,12 @@ export default function SettingsPage() {
 										size="sm"
 										variant="outline"
 										onClick={() => setByokModalOpen(true)}
-                                        disabled // DISABLED: BYOK Disabled for security reasons
+										disabled // DISABLED: BYOK Disabled for security reasons
 										className="gap-2"
 									>
 										<Key className="h-4 w-4" />
 										{/* Manage BYOK Keys */}
-                                        Coming Soon
+										Coming Soon
 									</Button>
 								</div>
 
@@ -924,7 +924,7 @@ export default function SettingsPage() {
 												<p className="text-sm text-text-tertiary">
 													{/* Add your LLM keys to use
 													your own billing */}
-                                                    Coming Soon: You would be able to add your own LLM keys to bypass rate limits from here.
+													Coming Soon: You would be able to add your own LLM keys to bypass rate limits from here.
 												</p>
 											</div>
 										);
@@ -939,7 +939,7 @@ export default function SettingsPage() {
 														{byokSecrets.length}{' '}
 														provider
 														{byokSecrets.length !==
-														1
+															1
 															? 's'
 															: ''}{' '}
 														configured
@@ -965,19 +965,17 @@ export default function SettingsPage() {
 													return (
 														<div
 															key={secret.id}
-															className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
-																secret.isActive
+															className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${secret.isActive
 																	? 'bg-white/50 dark:bg-gray-800/50'
 																	: 'bg-bg-3/20 border-dashed opacity-70'
-															}`}
+																}`}
 														>
 															<div className="flex items-center gap-3">
 																<div
-																	className={`flex items-center justify-center w-8 h-8 rounded-md border shadow-sm ${
-																		secret.isActive
+																	className={`flex items-center justify-center w-8 h-8 rounded-md border shadow-sm ${secret.isActive
 																			? 'bg-white'
 																			: 'bg-bg-3 border-dashed opacity-60'
-																	}`}
+																		}`}
 																>
 																	{getProviderLogo(
 																		secret.provider,
@@ -1612,41 +1610,41 @@ export default function SettingsPage() {
 										{/* Environment Selection (for both template and custom) */}
 										{(selectedTemplate ||
 											isCustomSecret) && (
-											<div>
-												<Label htmlFor="environment">
-													Environment
-												</Label>
-												<Select
-													value={
-														newSecret.environment
-													}
-													onValueChange={(value) =>
-														setNewSecret(
-															(prev) => ({
-																...prev,
-																environment:
-																	value,
-															}),
-														)
-													}
-												>
-													<SelectTrigger>
-														<SelectValue />
-													</SelectTrigger>
-													<SelectContent>
-														<SelectItem value="production">
-															Production
-														</SelectItem>
-														<SelectItem value="sandbox">
-															Sandbox
-														</SelectItem>
-														<SelectItem value="test">
-															Test
-														</SelectItem>
-													</SelectContent>
-												</Select>
-											</div>
-										)}
+												<div>
+													<Label htmlFor="environment">
+														Environment
+													</Label>
+													<Select
+														value={
+															newSecret.environment
+														}
+														onValueChange={(value) =>
+															setNewSecret(
+																(prev) => ({
+																	...prev,
+																	environment:
+																		value,
+																}),
+															)
+														}
+													>
+														<SelectTrigger>
+															<SelectValue />
+														</SelectTrigger>
+														<SelectContent>
+															<SelectItem value="production">
+																Production
+															</SelectItem>
+															<SelectItem value="sandbox">
+																Sandbox
+															</SelectItem>
+															<SelectItem value="test">
+																Test
+															</SelectItem>
+														</SelectContent>
+													</Select>
+												</div>
+											)}
 									</div>
 
 									<DialogFooter>
@@ -1658,21 +1656,21 @@ export default function SettingsPage() {
 										</Button>
 										{(selectedTemplate ||
 											isCustomSecret) && (
-											<Button
-												onClick={handleSaveSecret}
-												disabled={
-													!newSecret.value ||
-													(isCustomSecret &&
-														(!newSecret.name ||
-															!newSecret.envVarName)) ||
-													isSavingSecret
-												}
-											>
-												{isSavingSecret
-													? 'Saving...'
-													: 'Save Secret'}
-											</Button>
-										)}
+												<Button
+													onClick={handleSaveSecret}
+													disabled={
+														!newSecret.value ||
+														(isCustomSecret &&
+															(!newSecret.name ||
+																!newSecret.envVarName)) ||
+														isSavingSecret
+													}
+												>
+													{isSavingSecret
+														? 'Saving...'
+														: 'Save Secret'}
+												</Button>
+											)}
 									</DialogFooter>
 								</DialogContent>
 							</Dialog>

@@ -206,9 +206,9 @@ export default function AppView() {
 						setApp((prev) =>
 							prev
 								? {
-										...prev,
-										starCount: response.data?.starCount || 0,
-									}
+									...prev,
+									starCount: response.data?.starCount || 0,
+								}
 								: null,
 						);
 						toast.success(
@@ -389,27 +389,27 @@ export default function AppView() {
 		try {
 			setIsDeploying(true);
 			setDeploymentProgress('Connecting to agent...');
-            const response = await apiClient.deployPreview(app.id);
-            if (response.success && response.data) {
-                const data = response.data;
-                if (data.previewURL || data.tunnelURL) {
-                    const newUrl = getPreviewUrl(
-                        data.previewURL,
-                        data.tunnelURL,
-                    );
-                    setApp((prev) =>
-                        prev
-                            ? {
-                                    ...prev,
-                                    cloudflareUrl: newUrl,
-                                    previewUrl: newUrl,
-                                }
-                            : null,
-                    );
-                    setDeploymentProgress('Deployment complete!');
-                }
-            }
-            setIsDeploying(false);
+			const response = await apiClient.deployPreview(app.id);
+			if (response.success && response.data) {
+				const data = response.data;
+				if (data.previewURL || data.tunnelURL) {
+					const newUrl = getPreviewUrl(
+						data.previewURL,
+						data.tunnelURL,
+					);
+					setApp((prev) =>
+						prev
+							? {
+								...prev,
+								cloudflareUrl: newUrl,
+								previewUrl: newUrl,
+							}
+							: null,
+					);
+					setDeploymentProgress('Deployment complete!');
+				}
+			}
+			setIsDeploying(false);
 		} catch (error) {
 			console.error('Error starting deployment:', error);
 			setDeploymentProgress('Failed to start deployment');
@@ -442,7 +442,7 @@ export default function AppView() {
 
 				toast.success(
 					response.data.message ||
-						`App is now ${newVisibility === 'private' ? 'private' : 'public'}`,
+					`App is now ${newVisibility === 'private' ? 'private' : 'public'}`,
 				);
 			} else {
 				throw new Error(
@@ -484,7 +484,7 @@ export default function AppView() {
 					// No history available, go to apps page
 					navigate('/apps');
 				}
-            }
+			}
 		} catch (error) {
 			console.error('Error deleting app:', error);
 			toast.error('An unexpected error occurred while deleting the app');
@@ -495,7 +495,7 @@ export default function AppView() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-bg-3 flex items-center justify-center">
+			<div className="min-h-screen bg-black flex items-center justify-center">
 				<div className="text-center">
 					<Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-text-tertiary" />
 					<p className="text-text-tertiary">Loading app...</p>
@@ -506,7 +506,7 @@ export default function AppView() {
 
 	if (error || !app) {
 		return (
-			<div className="min-h-screen bg-bg-3 flex items-center justify-center">
+			<div className="min-h-screen bg-black flex items-center justify-center">
 				<Card className="max-w-md">
 					<CardContent className="pt-6">
 						<div className="text-center">
@@ -533,7 +533,7 @@ export default function AppView() {
 	const createdDate = app.createdAt ? new Date(app.createdAt) : new Date();
 
 	return (
-		<div className="min-h-screen bg-bg-3 flex flex-col">
+		<div className="min-h-screen bg-black flex flex-col">
 			<div className="container mx-auto px-4 pb-6 space-y-6 flex flex-col flex-1">
 				{/* Back button */}
 				<button
@@ -643,8 +643,8 @@ export default function AppView() {
 										View on GitHub
 										{app.githubRepositoryVisibility ===
 											'private' && (
-											<Lock className="h-3 w-3 opacity-70" />
-										)}
+												<Lock className="h-3 w-3 opacity-70" />
+											)}
 									</Button>
 								)}
 
@@ -672,10 +672,10 @@ export default function AppView() {
 											Delete App
 										</Button>
 									</>
-								) 
-                                : (
-									<>
-										{/*
+								)
+									: (
+										<>
+											{/*
 										<Button
 											size="sm"
 											variant="secondary"
@@ -686,9 +686,9 @@ export default function AppView() {
 											Remix
 										</Button>
 										*/}
-									</>
-								)
-                                }
+										</>
+									)
+								}
 							</div>
 						</div>
 
@@ -710,8 +710,8 @@ export default function AppView() {
 								<span>
 									{isValid(createdDate)
 										? formatDistanceToNow(createdDate, {
-												addSuffix: true,
-											})
+											addSuffix: true,
+										})
 										: 'recently'}
 								</span>
 							</div>
@@ -735,38 +735,38 @@ export default function AppView() {
 					<div className="flex items-center gap-4">
 						{/* Using proper TabsList and TabsTrigger components */}
 						<TabsList className="inline-flex h-auto w-fit items-center gap-0.5 bg-bg-2 dark:bg-bg-1 rounded-md p-0.5 border border-border-primary/30">
-						<TabsTrigger 
-							value="preview" 
-							className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-bg-3 data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
-						>
-							<Eye className={cn(
-								"h-3.5 w-3.5 mr-1.5",
-								activeTab === 'preview' ? 'text-accent' : 'text-accent/60'
-							)} />
-							Preview
-						</TabsTrigger>
-						<TabsTrigger 
-							value="code" 
-							className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-bg-3 data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
-						>
-							<Code2 className={cn(
-								"h-3.5 w-3.5 mr-1.5",
-								activeTab === 'code' ? 'text-accent' : 'text-accent/60'
-							)} />
-							Code
-						</TabsTrigger>
-						<TabsTrigger 
-							value="prompt" 
-							className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-bg-3 data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
-						>
-							<MessageSquare className={cn(
-								"h-3.5 w-3.5 mr-1.5",
-								activeTab === 'prompt' ? 'text-accent' : 'text-accent/60'
-							)} />
-							Prompt
-						</TabsTrigger>
+							<TabsTrigger
+								value="preview"
+								className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-bg-3 data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
+							>
+								<Eye className={cn(
+									"h-3.5 w-3.5 mr-1.5",
+									activeTab === 'preview' ? 'text-accent' : 'text-accent/60'
+								)} />
+								Preview
+							</TabsTrigger>
+							<TabsTrigger
+								value="code"
+								className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-bg-3 data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
+							>
+								<Code2 className={cn(
+									"h-3.5 w-3.5 mr-1.5",
+									activeTab === 'code' ? 'text-accent' : 'text-accent/60'
+								)} />
+								Code
+							</TabsTrigger>
+							<TabsTrigger
+								value="prompt"
+								className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-bg-3 data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
+							>
+								<MessageSquare className={cn(
+									"h-3.5 w-3.5 mr-1.5",
+									activeTab === 'prompt' ? 'text-accent' : 'text-accent/60'
+								)} />
+								Prompt
+							</TabsTrigger>
 						</TabsList>
-						
+
 						{/* Git Clone - Inline with tabs */}
 						<div className="flex-shrink-0">
 							{app.visibility === 'public' ? (
@@ -1020,8 +1020,8 @@ export default function AppView() {
 								) : (
 									<div className="flex items-center justify-center h-[400px]">
 										<p className="text-muted-foreground">
-											{app?.agentSummary === null 
-												? 'Loading code...' 
+											{app?.agentSummary === null
+												? 'Loading code...'
 												: 'No code has been generated yet.'
 											}
 										</p>
@@ -1058,7 +1058,7 @@ export default function AppView() {
 												</p>
 											</div>
 										</div>
-										
+
 										{/* Copy button */}
 										<div className="mt-4 flex justify-end">
 											<Button
@@ -1082,8 +1082,8 @@ export default function AppView() {
 									<div className="flex items-center justify-center py-12 text-text-tertiary">
 										<MessageSquare className="h-8 w-8 mr-3" />
 										<p>
-											{app?.agentSummary === null 
-												? 'Loading prompt...' 
+											{app?.agentSummary === null
+												? 'Loading prompt...'
 												: 'No prompt available'
 											}
 										</p>

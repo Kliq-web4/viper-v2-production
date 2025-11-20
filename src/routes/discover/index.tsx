@@ -53,7 +53,7 @@ export default function DiscoverPage() {
 	});
 
 	return (
-		<div className="min-h-screen">
+		<div className="min-h-screen bg-black">
 			<div className="container mx-auto px-4 py-8">
 				<motion.div
 					initial={{ opacity: 0, y: -20 }}
@@ -62,10 +62,10 @@ export default function DiscoverPage() {
 				>
 					{/* Header */}
 					<div className="mb-8">
-						<h1 className="text-6xl font-bold mb-3 font-[departureMono] text-accent">
+						<h1 className="text-6xl font-bold mb-3 font-[departureMono] text-purple-400">
 							DISCOVER
 						</h1>
-						<p className="text-text-tertiary text-lg">
+						<p className="text-purple-300 text-lg">
 							Explore apps built by the community
 						</p>
 					</div>
@@ -83,21 +83,21 @@ export default function DiscoverPage() {
 							onFrameworkChange={handleFrameworkChange}
 							onPeriodChange={handlePeriodChange}
 							sortBy={sortBy}
-					/>
+						/>
 
 						{/* Sort Tabs */}
-					<AppSortTabs
-						value={sortBy}
-						onValueChange={(v) => {
-							handleSortChange(v);
-							// Persist to URL and localStorage
-							try { localStorage.setItem('discover.sort', v); } catch {}
-							const next = new URLSearchParams(searchParams);
-							next.set('sort', v);
-							setSearchParams(next, { replace: true });
-						}}
-						availableSorts={['recent', 'popular', 'trending', 'starred']}
-					/>
+						<AppSortTabs
+							value={sortBy}
+							onValueChange={(v) => {
+								handleSortChange(v);
+								// Persist to URL and localStorage
+								try { localStorage.setItem('discover.sort', v); } catch { }
+								const next = new URLSearchParams(searchParams);
+								next.set('sort', v);
+								setSearchParams(next, { replace: true });
+							}}
+							availableSorts={['recent', 'popular', 'trending', 'starred']}
+						/>
 					</div>
 
 					{/* Unified App List */}
