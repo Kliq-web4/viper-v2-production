@@ -290,9 +290,9 @@ export default function Home() {
 	] as const;
 
 	return (
-		<div className="relative flex flex-col min-h-screen">
-			{/* Background - PixelTrail replaces EtheralShadow */}
-			<div className="fixed inset-0 z-0">
+		<div className="relative flex flex-col min-h-screen bg-black">
+			{/* Background - PixelTrail on black background */}
+			<div className="fixed inset-0 z-0 bg-black">
 				<PixelTrail
 					pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
 					fadeDuration={800}
@@ -303,28 +303,26 @@ export default function Home() {
 
 			<MarketingHeader />
 
-			<main className="relative z-10 flex-1">
-				{/* Hero Section */}
-				<section id="product" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12 md:pt-32 md:pb-16">
-					<div className="flex flex-col items-center text-center">
-						<h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight tracking-tight mb-4 text-text-primary">
-							Build something
-						</h1>
-						<div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight tracking-tight mb-3 bg-gradient-to-r from-pink-400 via-fuchsia-400 to-pink-500 bg-clip-text text-transparent">
+			<main className="relative z-10 flex-1 bg-black">
+				{/* Hero Section - SignalScope Inspired */}
+				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pt-40 md:pb-32">
+					<div className="flex flex-col items-center text-center space-y-6">
+						{/* Minimal Typography */}
+						<h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-mono font-light tracking-tighter text-white leading-none">
 							web4.sbs
-						</div>
-						<p className="text-base sm:text-lg text-text-secondary mb-2">
-							Powered by Kliq AI
+						</h1>
+						<p className="text-sm md:text-base font-mono text-neutral-400 tracking-wider uppercase mt-4">
+							Build something with AI
 						</p>
-						<p className="text-sm sm:text-base text-text-secondary/80 mb-8 max-w-2xl">
+						<p className="text-xs md:text-sm font-mono text-neutral-500 mt-2 max-w-md">
 							Create apps and websites by chatting with AI
 						</p>
 					</div>
 
-					{/* Main Input Area */}
-					<div className="max-w-3xl mx-auto mt-8 md:mt-12">
+					{/* Main Input Area - Minimal Design */}
+					<div className="max-w-3xl mx-auto mt-16 md:mt-20">
 						<EntropyDemo />
-						<p className="text-xs sm:text-sm text-text-tertiary mb-2 max-w-2xl mx-auto mt-4 text-center">
+						<p className="text-xs font-mono text-neutral-500 mb-6 max-w-2xl mx-auto mt-6 text-center">
 							Our engineers are actively enhancing Web4.sbs for an even smoother experience — but everything is fully functional and ready to use.
 						</p>
 						<form
@@ -334,7 +332,7 @@ export default function Home() {
 								const query = textareaRef.current!.value;
 								handleCreateApp(query, agentMode);
 							}}
-							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[120px] bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl border-2 border-accent/20 dark:border-accent/30 rounded-2xl shadow-xl shadow-accent/10 p-5 md:p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-accent/15 hover:border-accent/30 dark:hover:border-accent/40 focus-within:border-accent/40 dark:focus-within:border-accent/50"
+							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[120px] bg-neutral-950 border border-neutral-800 rounded-none p-6 transition-all duration-300 hover:border-neutral-700 focus-within:border-neutral-600"
 						>
 							<div
 								className={clsx(
@@ -344,12 +342,12 @@ export default function Home() {
 								{...dragHandlers}
 							>
 								{isDragging && (
-									<div className="absolute inset-0 flex items-center justify-center bg-accent/10 backdrop-blur-sm rounded-lg z-30 pointer-events-none">
-										<p className="text-accent font-medium">Drop images here</p>
+									<div className="absolute inset-0 flex items-center justify-center bg-purple-900/20 backdrop-blur-sm z-30 pointer-events-none border-2 border-dashed border-purple-500/50">
+										<p className="text-purple-400 font-mono text-sm">Drop images here</p>
 									</div>
 								)}
 								<textarea
-									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-text-secondary/50 text-text-primary bg-transparent text-base"
+									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-neutral-600 text-white bg-transparent text-base font-mono"
 									name="query"
 									value={query}
 									placeholder={`Ask Kliq AI to ${placeholderText}`}
@@ -395,7 +393,7 @@ export default function Home() {
 									<button
 										type="submit"
 										disabled={!query.trim()}
-										className="bg-gradient-to-b from-accent to-accent/90 text-white p-2 rounded-lg *:size-5 transition-all duration-200 hover:shadow-lg hover:shadow-accent/30 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border border-accent/20"
+										className="bg-white text-black p-2 *:size-5 transition-all duration-200 hover:bg-neutral-200 active:bg-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white border border-neutral-700"
 									>
 										<ArrowRight />
 									</button>
@@ -403,25 +401,28 @@ export default function Home() {
 							</div>
 						</form>
 
-						{/* External CTA */}
-						<div className="mt-6 flex justify-center">
+						{/* External CTA - Minimal */}
+						<div className="mt-8 flex justify-center">
 							<a
 								href="http://www.kliqonline.com"
 								target="_blank"
 								rel="noopener noreferrer"
-								className="group relative inline-flex items-center gap-2.5 rounded-full border-2 border-accent/30 bg-bg-4/60 dark:bg-bg-2/60 px-5 py-2.5 text-sm font-semibold text-text-primary hover:bg-accent/10 hover:border-accent/50 transition-all duration-200 backdrop-blur-md supports-backdrop:backdrop-blur-md shadow-lg hover:shadow-xl hover:scale-105"
+								className="group relative inline-flex items-center gap-2.5 border border-neutral-700 bg-neutral-950 px-5 py-2.5 text-xs font-mono text-neutral-400 hover:text-white hover:border-neutral-600 transition-all duration-200"
 							>
-								<span className="font-semibold">Explore Our Kliq AI x Web4 Playground</span>
-								<ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-								<span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-white/10" />
+								<span>Explore Our Kliq AI x Web4 Playground</span>
+								<ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
 							</a>
 						</div>
 
 					</div>
 				</section>
 
-				{/* Templates Section */}
+				{/* Templates Section - Black Theme */}
 				<section id="templates" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+					<div className="text-center mb-12">
+						<h2 className="text-2xl md:text-3xl font-mono font-light text-white mb-2 tracking-tight">Templates</h2>
+						<p className="text-xs font-mono text-neutral-500 uppercase tracking-wider">Quick Start</p>
+					</div>
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
 						{templates.map(({ title, icon: Icon, prompt }) => (
 							<motion.div
@@ -434,7 +435,7 @@ export default function Home() {
 								className="w-full"
 							>
 								<Card
-									className="group relative overflow-hidden border-2 border-accent/15 dark:border-accent/25 bg-bg-4/70 dark:bg-bg-2/70 backdrop-blur-lg supports-backdrop:backdrop-blur-lg hover:bg-bg-4/90 dark:hover:bg-bg-2/90 transition-all duration-300 cursor-pointer hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1 flex flex-col h-[210px] sm:h-[220px] md:h-[240px] rounded-2xl"
+									className="group relative overflow-hidden border border-neutral-800 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 cursor-pointer hover:border-neutral-700 hover:-translate-y-1 flex flex-col h-[210px] sm:h-[220px] md:h-[240px] rounded-none"
 									onClick={() => handleCreateApp(prompt, agentMode)}
 									role="button"
 									tabIndex={0}
@@ -442,15 +443,15 @@ export default function Home() {
 									aria-label={`${title} template`}
 								>
 									<div className="absolute top-2.5 left-2.5 z-10">
-										<Badge variant="outline" className="text-[10px] px-2 py-0.5">Template</Badge>
+										<Badge variant="outline" className="text-[10px] px-2 py-0.5 bg-neutral-900 border-neutral-700 text-neutral-400 font-mono rounded-none">Template</Badge>
 									</div>
 									<CardHeader className="pb-4 pt-12">
 										<div className="flex flex-col items-center text-center gap-3">
-											<div className="size-11 md:size-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/30 text-accent flex items-center justify-center group-hover:from-accent/30 group-hover:to-accent/40 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent/10 ring-2 ring-accent/10 group-hover:ring-accent/20">
+											<div className="size-11 md:size-12 border border-neutral-700 bg-neutral-900 text-neutral-400 flex items-center justify-center group-hover:border-neutral-600 group-hover:scale-110 transition-all duration-300">
 												<Icon className="size-6" />
 											</div>
-											<CardTitle className="text-sm md:text-base font-semibold group-hover:text-accent transition-colors">{title}</CardTitle>
-											<div className="text-[10px] md:text-[11px] text-text-tertiary">Click to start</div>
+											<CardTitle className="text-sm md:text-base font-mono font-light text-white group-hover:text-neutral-300 transition-colors">{title}</CardTitle>
+											<div className="text-[10px] md:text-[11px] font-mono text-neutral-500 uppercase tracking-wider">Click to start</div>
 										</div>
 									</CardHeader>
 								</Card>
@@ -459,8 +460,8 @@ export default function Home() {
 					</div>
 				</section>
 
-				<section id="integrations" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-					<p className="text-sm text-text-tertiary text-center mb-8">Trusted by teams who use</p>
+				<section id="integrations" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-neutral-800">
+					<p className="text-xs font-mono text-neutral-500 text-center mb-8 uppercase tracking-wider">Trusted by teams who use</p>
 					<div className="logo-marquee overflow-hidden">
 						{/* Marquee track – duplicates for seamless loop */}
 						<div className="logo-marquee__inner flex items-center opacity-90 gap-[3em]">
@@ -483,10 +484,10 @@ export default function Home() {
 					</div>
 				</section>
 
-				<section id="features" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+				<section id="features" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-neutral-800">
 					<div className="text-center mb-16">
-						<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-text-primary">Consider yourself limitless.</h2>
-						<p className="text-lg md:text-xl text-text-secondary">If you can describe it, you can build it.</p>
+						<h2 className="text-3xl md:text-4xl lg:text-5xl font-mono font-light mb-4 text-white tracking-tight">Consider yourself limitless.</h2>
+						<p className="text-sm md:text-base font-mono text-neutral-400 uppercase tracking-wider">If you can describe it, you can build it.</p>
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 						{features.map(({ title, description, icon: Icon }) => (
@@ -498,14 +499,13 @@ export default function Home() {
 								transition={{ duration: 0.5 }}
 								whileHover={{ y: -8, scale: 1.02 }}
 							>
-								<Card className="group relative overflow-hidden border-2 border-accent/15 dark:border-accent/25 bg-gradient-to-b from-bg-4/90 to-bg-4/70 dark:from-bg-2/90 dark:to-bg-2/70 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-xl hover:shadow-2xl hover:shadow-accent/10 transition-all duration-300 h-full">
-									<div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 50%, transparent 100%)' }} />
+								<Card className="group relative overflow-hidden border border-neutral-800 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 h-full rounded-none">
 									<CardHeader className="pb-6 relative z-10">
-										<div className="size-16 rounded-2xl bg-gradient-to-br from-accent/25 to-accent/40 text-accent flex items-center justify-center mb-6 ring-2 ring-accent/20 shadow-xl shadow-accent/20 group-hover:scale-110 group-hover:ring-accent/40 group-hover:shadow-accent/30 transition-all duration-300">
+										<div className="size-16 border border-neutral-700 bg-neutral-900 text-neutral-400 flex items-center justify-center mb-6 group-hover:border-neutral-600 group-hover:scale-110 transition-all duration-300">
 											<Icon className="size-8" />
 										</div>
-										<CardTitle className="text-xl md:text-2xl font-bold mb-4 group-hover:text-accent transition-colors">{title}</CardTitle>
-										<CardDescription className="text-sm md:text-base text-text-secondary leading-relaxed">{description}</CardDescription>
+										<CardTitle className="text-xl md:text-2xl font-mono font-light mb-4 text-white group-hover:text-neutral-300 transition-colors">{title}</CardTitle>
+										<CardDescription className="text-sm md:text-base font-mono text-neutral-400 leading-relaxed">{description}</CardDescription>
 									</CardHeader>
 								</Card>
 							</motion.div>
@@ -513,10 +513,10 @@ export default function Home() {
 					</div>
 				</section>
 
-				<section id="testimonials" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+				<section id="testimonials" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-neutral-800">
 					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">"Okay, this has blown my mind."</h2>
-						<p className="text-lg text-text-secondary">And other great things our users say about us.</p>
+						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-white tracking-tight">"Okay, this has blown my mind."</h2>
+						<p className="text-sm font-mono text-neutral-400 uppercase tracking-wider">And other great things our users say about us.</p>
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
 						{testimonials.map((testimonial, index) => (
@@ -528,19 +528,19 @@ export default function Home() {
 								transition={{ duration: 0.5, delay: index * 0.1 }}
 								whileHover={{ y: -4 }}
 							>
-								<Card className="h-full border-2 border-accent/20 dark:border-accent/30 bg-bg-4/80 dark:bg-bg-2/80 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300">
+								<Card className="h-full border border-neutral-800 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 rounded-none">
 									<CardContent className="pt-6 pb-6">
-										<p className="text-text-secondary mb-6 text-base leading-relaxed">"{testimonial.quote}"</p>
+										<p className="text-neutral-300 mb-6 text-base leading-relaxed font-mono">"{testimonial.quote}"</p>
 										<div className="flex items-center gap-3">
-											<div className="h-10 w-10 rounded-full bg-gradient-to-br from-accent/25 to-accent/45 flex items-center justify-center ring-2 ring-accent/20 shadow-md">
-												<span className="text-sm font-semibold text-accent">
+											<div className="h-10 w-10 border border-neutral-700 bg-neutral-900 flex items-center justify-center">
+												<span className="text-sm font-mono text-neutral-400">
 													{testimonial.author.charAt(0)}
 												</span>
 											</div>
 											<div>
-												<p className="text-sm font-semibold text-text-primary">{testimonial.author}</p>
+												<p className="text-sm font-mono font-light text-white">{testimonial.author}</p>
 												{testimonial.handle && (
-													<p className="text-xs text-text-tertiary">{testimonial.handle}</p>
+													<p className="text-xs font-mono text-neutral-500">{testimonial.handle}</p>
 												)}
 											</div>
 										</div>
@@ -551,26 +551,26 @@ export default function Home() {
 					</div>
 				</section>
 
-				{/* Pricing Section */}
-				<section id="pricing" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+				{/* Pricing Section - Black Theme */}
+				<section id="pricing" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-neutral-800">
 					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">Pricing plans for every need</h2>
-						<p className="text-lg text-text-secondary">Scale as you go with plans designed to match your growth.</p>
+						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-white tracking-tight">Pricing plans for every need</h2>
+						<p className="text-sm font-mono text-neutral-400 uppercase tracking-wider">Scale as you go with plans designed to match your growth.</p>
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
 						{/* Free */}
-						<Card className="border-2 border-accent/15 dark:border-accent/25 bg-bg-4/90 dark:bg-bg-2/90 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-xl hover:shadow-2xl hover:border-accent/25 dark:hover:border-accent/35 transition-all duration-300">
+						<Card className="border border-neutral-800 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 rounded-none">
 							<CardHeader className="pb-4">
-								<CardTitle className="text-xl md:text-2xl mb-1 font-bold">Free</CardTitle>
-								<CardDescription className="text-sm text-text-secondary">$0 / mo</CardDescription>
+								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-white">Free</CardTitle>
+								<CardDescription className="text-sm font-mono text-neutral-400">$0 / mo</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<ul className="space-y-3 mb-6 text-sm">
-									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> 10 daily free credits</li>
-									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Core features</li>
-									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Built-in integrations</li>
+								<ul className="space-y-3 mb-6 text-sm font-mono">
+									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> 10 daily free credits</li>
+									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Core features</li>
+									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Built-in integrations</li>
 								</ul>
-								<Button size="lg" className="w-full" onClick={() => {
+								<Button size="lg" className="w-full bg-white text-black hover:bg-neutral-200 font-mono border-0 rounded-none" onClick={() => {
 									const intendedUrl = `/chat/new`;
 									if (requireAuth({ requireFullAuth: true, actionContext: 'to create applications', intendedUrl })) {
 										navigate(intendedUrl);
@@ -580,23 +580,22 @@ export default function Home() {
 						</Card>
 
 						{/* Pro */}
-						<Card className="border-2 border-accent/25 dark:border-accent/35 bg-gradient-to-br from-accent/8 to-accent/12 dark:from-accent/12 dark:to-accent/18 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-xl hover:shadow-2xl hover:border-accent/35 dark:hover:border-accent/45 transition-all duration-300 relative overflow-hidden">
-							<div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent pointer-events-none" />
+						<Card className="border border-neutral-700 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 relative overflow-hidden rounded-none">
 							<CardHeader className="pb-4 relative z-10">
-								<CardTitle className="text-xl md:text-2xl mb-1 font-bold">Pro</CardTitle>
+								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-white">Pro</CardTitle>
 								<div className="flex items-baseline gap-2">
-									<span className="text-4xl md:text-5xl font-bold text-text-primary">${plans.find(p => p.slug === 'pro')?.priceUsd ?? 25}</span>
-									<span className="text-sm md:text-base text-text-secondary">/ mo</span>
+									<span className="text-4xl md:text-5xl font-mono font-light text-white">${plans.find(p => p.slug === 'pro')?.priceUsd ?? 25}</span>
+									<span className="text-sm md:text-base font-mono text-neutral-400">/ mo</span>
 								</div>
 							</CardHeader>
 							<CardContent className="relative z-10">
-								<ul className="space-y-3 mb-6 text-sm">
-									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> 100 monthly credits</li>
-									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Rollover up to 100 credits</li>
-									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Monthly reset</li>
+								<ul className="space-y-3 mb-6 text-sm font-mono">
+									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> 100 monthly credits</li>
+									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Rollover up to 100 credits</li>
+									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Monthly reset</li>
 								</ul>
 								<a href={(plans.find(p => p.slug === 'pro')?.checkoutUrl) || '#'} target={plans.find(p => p.slug === 'pro')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
-									<Button variant="outline" size="lg" className="w-full" disabled={!plans.find(p => p.slug === 'pro')?.checkoutUrl}>
+									<Button variant="outline" size="lg" className="w-full bg-white text-black hover:bg-neutral-200 font-mono border-0 rounded-none" disabled={!plans.find(p => p.slug === 'pro')?.checkoutUrl}>
 										Upgrade to Pro
 									</Button>
 								</a>
@@ -604,23 +603,22 @@ export default function Home() {
 						</Card>
 
 						{/* Business */}
-						<Card className="border-2 border-accent/25 dark:border-accent/35 bg-gradient-to-br from-accent/8 to-accent/12 dark:from-accent/12 dark:to-accent/18 backdrop-blur-xl supports-backdrop:backdrop-blur-xl shadow-xl hover:shadow-2xl hover:border-accent/35 dark:hover:border-accent/45 transition-all duration-300 relative overflow-hidden">
-							<div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent pointer-events-none" />
+						<Card className="border border-neutral-700 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 relative overflow-hidden rounded-none">
 							<CardHeader className="pb-4 relative z-10">
-								<CardTitle className="text-xl md:text-2xl mb-1 font-bold">Business</CardTitle>
+								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-white">Business</CardTitle>
 								<div className="flex items-baseline gap-2">
-									<span className="text-4xl md:text-5xl font-bold text-text-primary">${plans.find(p => p.slug === 'business')?.priceUsd ?? 79}</span>
-									<span className="text-sm md:text-base text-text-secondary">/ mo</span>
+									<span className="text-4xl md:text-5xl font-mono font-light text-white">${plans.find(p => p.slug === 'business')?.priceUsd ?? 79}</span>
+									<span className="text-sm md:text-base font-mono text-neutral-400">/ mo</span>
 								</div>
 							</CardHeader>
 							<CardContent className="relative z-10">
-								<ul className="space-y-3 mb-6 text-sm">
-									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> 500 monthly credits</li>
-									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Rollover up to 500 credits</li>
-									<li className="flex items-center gap-2 text-text-secondary"><Check className="size-4 text-accent" /> Monthly reset</li>
+								<ul className="space-y-3 mb-6 text-sm font-mono">
+									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> 500 monthly credits</li>
+									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Rollover up to 500 credits</li>
+									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Monthly reset</li>
 								</ul>
 								<a href={(plans.find(p => p.slug === 'business')?.checkoutUrl) || '#'} target={plans.find(p => p.slug === 'business')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
-									<Button variant="outline" size="lg" className="w-full" disabled={!plans.find(p => p.slug === 'business')?.checkoutUrl}>
+									<Button variant="outline" size="lg" className="w-full bg-white text-black hover:bg-neutral-200 font-mono border-0 rounded-none" disabled={!plans.find(p => p.slug === 'business')?.checkoutUrl}>
 										Upgrade to Business
 									</Button>
 								</a>
@@ -629,18 +627,18 @@ export default function Home() {
 					</div>
 				</section>
 
-				{/* FAQs Section */}
-				<section id="docs" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+				{/* FAQs Section - Black Theme */}
+				<section id="docs" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-neutral-800">
 					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-bold mb-4 text-text-primary">FAQs</h2>
+						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-white tracking-tight">FAQs</h2>
 					</div>
 					<Accordion type="single" collapsible className="w-full">
 						{faqs.map((faq, index) => (
-							<AccordionItem key={index} value={`item-${index}`} className="border-accent/20">
-								<AccordionTrigger className="text-left text-text-primary hover:text-accent">
+							<AccordionItem key={index} value={`item-${index}`} className="border-neutral-800">
+								<AccordionTrigger className="text-left font-mono font-light text-white hover:text-neutral-300">
 									{faq.question}
 								</AccordionTrigger>
-								<AccordionContent className="text-text-secondary">
+								<AccordionContent className="font-mono text-neutral-400">
 									{faq.answer}
 								</AccordionContent>
 							</AccordionItem>

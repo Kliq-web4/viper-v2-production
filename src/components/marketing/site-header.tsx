@@ -35,13 +35,13 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
 
   return (
     <header className="pointer-events-none sticky top-0 z-40">
-      <div className="pointer-events-auto backdrop-blur supports-backdrop:backdrop-blur-md bg-bg-3/40 dark:bg-bg-2/40 border-b border-accent/20">
+      <div className="pointer-events-auto bg-black/80 backdrop-blur supports-backdrop:backdrop-blur-md border-b border-neutral-800">
         <div className="mx-auto max-w-7xl px-4">
           <div className="h-14 flex items-center justify-between gap-4">
             {/* Brand + Sidebar toggle */}
             <div className="flex items-center gap-2 select-none">
-              <SidebarTrigger className="hidden md:inline-flex text-text-secondary hover:text-text-primary" />
-              <div className="text-lg font-semibold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-violet-500 bg-clip-text text-transparent">web4.sbs</div>
+              <SidebarTrigger className="hidden md:inline-flex text-neutral-400 hover:text-white" />
+              <div className="text-lg font-mono font-light text-white tracking-tight">web4.sbs</div>
             </div>
 
             {/* Nav */}
@@ -85,7 +85,14 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
               {isAuthenticated && user ? (
                 <AuthButton />
               ) : (
-                <Button variant="secondary" size="sm" onClick={handleStart}>Start Building</Button>
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  onClick={handleStart}
+                  className="bg-white text-black hover:bg-neutral-200 font-mono border-0"
+                >
+                  Start Building
+                </Button>
               )}
             </div>
           </div>
