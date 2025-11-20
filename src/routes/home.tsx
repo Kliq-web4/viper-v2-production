@@ -290,39 +290,39 @@ export default function Home() {
 	] as const;
 
 	return (
-		<div className="relative flex flex-col min-h-screen bg-black">
-			{/* Background - PixelTrail on black background */}
-			<div className="fixed inset-0 z-0 bg-black">
+		<div className="relative flex flex-col min-h-screen bg-purple-950">
+			{/* Background - PixelTrail on purple background */}
+			<div className="fixed inset-0 z-0 bg-purple-950">
 				<PixelTrail
 					pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
-					fadeDuration={800}
-					delay={1200}
-					pixelClassName="rounded-full bg-[#9E5AFF]"
+					fadeDuration={500}
+					delay={800}
+					pixelClassName="rounded-full bg-[#9E5AFF] opacity-80"
 				/>
 			</div>
 
 			<MarketingHeader />
 
-			<main className="relative z-10 flex-1 bg-black">
-				{/* Hero Section - SignalScope Inspired */}
+			<main className="relative z-10 flex-1 bg-purple-950">
+				{/* Hero Section - Purple Dominant */}
 				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pt-40 md:pb-32">
 					<div className="flex flex-col items-center text-center space-y-6">
-						{/* Minimal Typography */}
-						<h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-mono font-light tracking-tighter text-white leading-none">
+						{/* Purple Typography */}
+						<h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-mono font-light tracking-tighter text-purple-100 leading-none">
 							web4.sbs
 						</h1>
-						<p className="text-sm md:text-base font-mono text-neutral-400 tracking-wider uppercase mt-4">
+						<p className="text-sm md:text-base font-mono text-purple-300 tracking-wider uppercase mt-4">
 							Build something with AI
 						</p>
-						<p className="text-xs md:text-sm font-mono text-neutral-500 mt-2 max-w-md">
+						<p className="text-xs md:text-sm font-mono text-purple-400 mt-2 max-w-md">
 							Create apps and websites by chatting with AI
 						</p>
 					</div>
 
-					{/* Main Input Area - Minimal Design */}
+					{/* Main Input Area - Purple Design */}
 					<div className="max-w-3xl mx-auto mt-16 md:mt-20">
 						<EntropyDemo />
-						<p className="text-xs font-mono text-neutral-500 mb-6 max-w-2xl mx-auto mt-6 text-center">
+						<p className="text-xs font-mono text-purple-400 mb-6 max-w-2xl mx-auto mt-6 text-center">
 							Our engineers are actively enhancing Web4.sbs for an even smoother experience — but everything is fully functional and ready to use.
 						</p>
 						<form
@@ -332,7 +332,7 @@ export default function Home() {
 								const query = textareaRef.current!.value;
 								handleCreateApp(query, agentMode);
 							}}
-							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[120px] bg-neutral-950 border border-neutral-800 rounded-none p-6 transition-all duration-300 hover:border-neutral-700 focus-within:border-neutral-600"
+							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[120px] bg-purple-900/50 border border-purple-700/50 rounded-lg p-6 transition-all duration-300 hover:border-purple-600 focus-within:border-purple-500 backdrop-blur-sm"
 						>
 							<div
 								className={clsx(
@@ -342,12 +342,12 @@ export default function Home() {
 								{...dragHandlers}
 							>
 								{isDragging && (
-									<div className="absolute inset-0 flex items-center justify-center bg-purple-900/20 backdrop-blur-sm z-30 pointer-events-none border-2 border-dashed border-purple-500/50">
-										<p className="text-purple-400 font-mono text-sm">Drop images here</p>
+									<div className="absolute inset-0 flex items-center justify-center bg-purple-800/30 backdrop-blur-sm z-30 pointer-events-none border-2 border-dashed border-purple-400/70">
+										<p className="text-purple-300 font-mono text-sm">Drop images here</p>
 									</div>
 								)}
 								<textarea
-									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-neutral-600 text-white bg-transparent text-base font-mono"
+									className="w-full resize-none ring-0 z-20 outline-0 placeholder:text-purple-500 text-purple-100 bg-transparent text-base font-mono"
 									name="query"
 									value={query}
 									placeholder={`Ask Kliq AI to ${placeholderText}`}
@@ -393,7 +393,7 @@ export default function Home() {
 									<button
 										type="submit"
 										disabled={!query.trim()}
-										className="bg-white text-black p-2 *:size-5 transition-all duration-200 hover:bg-neutral-200 active:bg-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white border border-neutral-700"
+										className="bg-purple-500 text-white p-2 *:size-5 transition-all duration-200 hover:bg-purple-400 active:bg-purple-600 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-purple-500 border border-purple-400 rounded-lg"
 									>
 										<ArrowRight />
 									</button>
@@ -401,13 +401,13 @@ export default function Home() {
 							</div>
 						</form>
 
-						{/* External CTA - Minimal */}
+						{/* External CTA - Purple */}
 						<div className="mt-8 flex justify-center">
 							<a
 								href="http://www.kliqonline.com"
 								target="_blank"
 								rel="noopener noreferrer"
-								className="group relative inline-flex items-center gap-2.5 border border-neutral-700 bg-neutral-950 px-5 py-2.5 text-xs font-mono text-neutral-400 hover:text-white hover:border-neutral-600 transition-all duration-200"
+								className="group relative inline-flex items-center gap-2.5 border border-purple-600 bg-purple-900/50 px-5 py-2.5 text-xs font-mono text-purple-200 hover:text-purple-100 hover:border-purple-500 transition-all duration-200 rounded-lg backdrop-blur-sm"
 							>
 								<span>Explore Our Kliq AI x Web4 Playground</span>
 								<ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
@@ -460,8 +460,8 @@ export default function Home() {
 					</div>
 				</section>
 
-				<section id="integrations" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-neutral-800">
-					<p className="text-xs font-mono text-neutral-500 text-center mb-8 uppercase tracking-wider">Trusted by teams who use</p>
+				<section id="integrations" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-purple-800/50">
+					<p className="text-xs font-mono text-purple-400 text-center mb-8 uppercase tracking-wider">Trusted by teams who use</p>
 					<div className="logo-marquee overflow-hidden">
 						{/* Marquee track – duplicates for seamless loop */}
 						<div className="logo-marquee__inner flex items-center opacity-90 gap-[3em]">
@@ -484,10 +484,10 @@ export default function Home() {
 					</div>
 				</section>
 
-				<section id="features" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-neutral-800">
+				<section id="features" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-purple-800/50">
 					<div className="text-center mb-16">
-						<h2 className="text-3xl md:text-4xl lg:text-5xl font-mono font-light mb-4 text-white tracking-tight">Consider yourself limitless.</h2>
-						<p className="text-sm md:text-base font-mono text-neutral-400 uppercase tracking-wider">If you can describe it, you can build it.</p>
+						<h2 className="text-3xl md:text-4xl lg:text-5xl font-mono font-light mb-4 text-purple-100 tracking-tight">Consider yourself limitless.</h2>
+						<p className="text-sm md:text-base font-mono text-purple-400 uppercase tracking-wider">If you can describe it, you can build it.</p>
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 						{features.map(({ title, description, icon: Icon }) => (
@@ -499,13 +499,13 @@ export default function Home() {
 								transition={{ duration: 0.5 }}
 								whileHover={{ y: -8, scale: 1.02 }}
 							>
-								<Card className="group relative overflow-hidden border border-neutral-800 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 h-full rounded-none">
+								<Card className="group relative overflow-hidden border border-purple-800/50 bg-purple-900/30 hover:bg-purple-900/50 transition-all duration-300 h-full rounded-lg backdrop-blur-sm">
 									<CardHeader className="pb-6 relative z-10">
-										<div className="size-16 border border-neutral-700 bg-neutral-900 text-neutral-400 flex items-center justify-center mb-6 group-hover:border-neutral-600 group-hover:scale-110 transition-all duration-300">
+										<div className="size-16 border border-purple-700/50 bg-purple-800/30 text-purple-300 flex items-center justify-center mb-6 group-hover:border-purple-600 group-hover:scale-110 transition-all duration-300 rounded-lg">
 											<Icon className="size-8" />
 										</div>
-										<CardTitle className="text-xl md:text-2xl font-mono font-light mb-4 text-white group-hover:text-neutral-300 transition-colors">{title}</CardTitle>
-										<CardDescription className="text-sm md:text-base font-mono text-neutral-400 leading-relaxed">{description}</CardDescription>
+										<CardTitle className="text-xl md:text-2xl font-mono font-light mb-4 text-purple-100 group-hover:text-purple-50 transition-colors">{title}</CardTitle>
+										<CardDescription className="text-sm md:text-base font-mono text-purple-300 leading-relaxed">{description}</CardDescription>
 									</CardHeader>
 								</Card>
 							</motion.div>
@@ -513,10 +513,10 @@ export default function Home() {
 					</div>
 				</section>
 
-				<section id="testimonials" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-neutral-800">
+				<section id="testimonials" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-purple-800/50">
 					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-white tracking-tight">"Okay, this has blown my mind."</h2>
-						<p className="text-sm font-mono text-neutral-400 uppercase tracking-wider">And other great things our users say about us.</p>
+						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-purple-100 tracking-tight">"Okay, this has blown my mind."</h2>
+						<p className="text-sm font-mono text-purple-400 uppercase tracking-wider">And other great things our users say about us.</p>
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
 						{testimonials.map((testimonial, index) => (
@@ -528,19 +528,19 @@ export default function Home() {
 								transition={{ duration: 0.5, delay: index * 0.1 }}
 								whileHover={{ y: -4 }}
 							>
-								<Card className="h-full border border-neutral-800 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 rounded-none">
+								<Card className="h-full border border-purple-800/50 bg-purple-900/30 hover:bg-purple-900/50 transition-all duration-300 rounded-lg backdrop-blur-sm">
 									<CardContent className="pt-6 pb-6">
-										<p className="text-neutral-300 mb-6 text-base leading-relaxed font-mono">"{testimonial.quote}"</p>
+										<p className="text-purple-200 mb-6 text-base leading-relaxed font-mono">"{testimonial.quote}"</p>
 										<div className="flex items-center gap-3">
-											<div className="h-10 w-10 border border-neutral-700 bg-neutral-900 flex items-center justify-center">
-												<span className="text-sm font-mono text-neutral-400">
+											<div className="h-10 w-10 border border-purple-700/50 bg-purple-800/30 flex items-center justify-center rounded-lg">
+												<span className="text-sm font-mono text-purple-300">
 													{testimonial.author.charAt(0)}
 												</span>
 											</div>
 											<div>
-												<p className="text-sm font-mono font-light text-white">{testimonial.author}</p>
+												<p className="text-sm font-mono font-light text-purple-100">{testimonial.author}</p>
 												{testimonial.handle && (
-													<p className="text-xs font-mono text-neutral-500">{testimonial.handle}</p>
+													<p className="text-xs font-mono text-purple-400">{testimonial.handle}</p>
 												)}
 											</div>
 										</div>
@@ -551,26 +551,26 @@ export default function Home() {
 					</div>
 				</section>
 
-				{/* Pricing Section - Black Theme */}
-				<section id="pricing" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-neutral-800">
+				{/* Pricing Section - Purple Theme */}
+				<section id="pricing" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-purple-800/50">
 					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-white tracking-tight">Pricing plans for every need</h2>
-						<p className="text-sm font-mono text-neutral-400 uppercase tracking-wider">Scale as you go with plans designed to match your growth.</p>
+						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-purple-100 tracking-tight">Pricing plans for every need</h2>
+						<p className="text-sm font-mono text-purple-400 uppercase tracking-wider">Scale as you go with plans designed to match your growth.</p>
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
 						{/* Free */}
-						<Card className="border border-neutral-800 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 rounded-none">
+						<Card className="border border-purple-800/50 bg-purple-900/30 hover:bg-purple-900/50 transition-all duration-300 rounded-lg backdrop-blur-sm">
 							<CardHeader className="pb-4">
-								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-white">Free</CardTitle>
-								<CardDescription className="text-sm font-mono text-neutral-400">$0 / mo</CardDescription>
+								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-purple-100">Free</CardTitle>
+								<CardDescription className="text-sm font-mono text-purple-300">$0 / mo</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<ul className="space-y-3 mb-6 text-sm font-mono">
-									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> 10 daily free credits</li>
-									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Core features</li>
-									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Built-in integrations</li>
+									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> 10 daily free credits</li>
+									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Core features</li>
+									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Built-in integrations</li>
 								</ul>
-								<Button size="lg" className="w-full bg-white text-black hover:bg-neutral-200 font-mono border-0 rounded-none" onClick={() => {
+								<Button size="lg" className="w-full bg-purple-500 text-white hover:bg-purple-400 font-mono border-0 rounded-lg" onClick={() => {
 									const intendedUrl = `/chat/new`;
 									if (requireAuth({ requireFullAuth: true, actionContext: 'to create applications', intendedUrl })) {
 										navigate(intendedUrl);
@@ -580,22 +580,22 @@ export default function Home() {
 						</Card>
 
 						{/* Pro */}
-						<Card className="border border-neutral-700 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 relative overflow-hidden rounded-none">
+						<Card className="border border-purple-700/70 bg-purple-900/50 hover:bg-purple-900/70 transition-all duration-300 relative overflow-hidden rounded-lg backdrop-blur-sm">
 							<CardHeader className="pb-4 relative z-10">
-								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-white">Pro</CardTitle>
+								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-purple-100">Pro</CardTitle>
 								<div className="flex items-baseline gap-2">
-									<span className="text-4xl md:text-5xl font-mono font-light text-white">${plans.find(p => p.slug === 'pro')?.priceUsd ?? 25}</span>
-									<span className="text-sm md:text-base font-mono text-neutral-400">/ mo</span>
+									<span className="text-4xl md:text-5xl font-mono font-light text-purple-100">${plans.find(p => p.slug === 'pro')?.priceUsd ?? 25}</span>
+									<span className="text-sm md:text-base font-mono text-purple-300">/ mo</span>
 								</div>
 							</CardHeader>
 							<CardContent className="relative z-10">
 								<ul className="space-y-3 mb-6 text-sm font-mono">
-									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> 100 monthly credits</li>
-									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Rollover up to 100 credits</li>
-									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Monthly reset</li>
+									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> 100 monthly credits</li>
+									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Rollover up to 100 credits</li>
+									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Monthly reset</li>
 								</ul>
 								<a href={(plans.find(p => p.slug === 'pro')?.checkoutUrl) || '#'} target={plans.find(p => p.slug === 'pro')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
-									<Button variant="outline" size="lg" className="w-full bg-white text-black hover:bg-neutral-200 font-mono border-0 rounded-none" disabled={!plans.find(p => p.slug === 'pro')?.checkoutUrl}>
+									<Button variant="outline" size="lg" className="w-full bg-purple-500 text-white hover:bg-purple-400 font-mono border-0 rounded-lg" disabled={!plans.find(p => p.slug === 'pro')?.checkoutUrl}>
 										Upgrade to Pro
 									</Button>
 								</a>
@@ -603,22 +603,22 @@ export default function Home() {
 						</Card>
 
 						{/* Business */}
-						<Card className="border border-neutral-700 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 relative overflow-hidden rounded-none">
+						<Card className="border border-purple-700/70 bg-purple-900/50 hover:bg-purple-900/70 transition-all duration-300 relative overflow-hidden rounded-lg backdrop-blur-sm">
 							<CardHeader className="pb-4 relative z-10">
-								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-white">Business</CardTitle>
+								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-purple-100">Business</CardTitle>
 								<div className="flex items-baseline gap-2">
-									<span className="text-4xl md:text-5xl font-mono font-light text-white">${plans.find(p => p.slug === 'business')?.priceUsd ?? 79}</span>
-									<span className="text-sm md:text-base font-mono text-neutral-400">/ mo</span>
+									<span className="text-4xl md:text-5xl font-mono font-light text-purple-100">${plans.find(p => p.slug === 'business')?.priceUsd ?? 79}</span>
+									<span className="text-sm md:text-base font-mono text-purple-300">/ mo</span>
 								</div>
 							</CardHeader>
 							<CardContent className="relative z-10">
 								<ul className="space-y-3 mb-6 text-sm font-mono">
-									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> 500 monthly credits</li>
-									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Rollover up to 500 credits</li>
-									<li className="flex items-center gap-2 text-neutral-400"><Check className="size-4 text-neutral-500" /> Monthly reset</li>
+									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> 500 monthly credits</li>
+									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Rollover up to 500 credits</li>
+									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Monthly reset</li>
 								</ul>
 								<a href={(plans.find(p => p.slug === 'business')?.checkoutUrl) || '#'} target={plans.find(p => p.slug === 'business')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
-									<Button variant="outline" size="lg" className="w-full bg-white text-black hover:bg-neutral-200 font-mono border-0 rounded-none" disabled={!plans.find(p => p.slug === 'business')?.checkoutUrl}>
+									<Button variant="outline" size="lg" className="w-full bg-purple-500 text-white hover:bg-purple-400 font-mono border-0 rounded-lg" disabled={!plans.find(p => p.slug === 'business')?.checkoutUrl}>
 										Upgrade to Business
 									</Button>
 								</a>
@@ -627,18 +627,18 @@ export default function Home() {
 					</div>
 				</section>
 
-				{/* FAQs Section - Black Theme */}
-				<section id="docs" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-neutral-800">
+				{/* FAQs Section - Purple Theme */}
+				<section id="docs" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-purple-800/50">
 					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-white tracking-tight">FAQs</h2>
+						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-purple-100 tracking-tight">FAQs</h2>
 					</div>
 					<Accordion type="single" collapsible className="w-full">
 						{faqs.map((faq, index) => (
-							<AccordionItem key={index} value={`item-${index}`} className="border-neutral-800">
-								<AccordionTrigger className="text-left font-mono font-light text-white hover:text-neutral-300">
+							<AccordionItem key={index} value={`item-${index}`} className="border-purple-800/50">
+								<AccordionTrigger className="text-left font-mono font-light text-purple-100 hover:text-purple-50">
 									{faq.question}
 								</AccordionTrigger>
-								<AccordionContent className="font-mono text-neutral-400">
+								<AccordionContent className="font-mono text-purple-300">
 									{faq.answer}
 								</AccordionContent>
 							</AccordionItem>

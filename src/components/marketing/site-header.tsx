@@ -35,13 +35,13 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
 
   return (
     <header className="pointer-events-none sticky top-0 z-40">
-      <div className="pointer-events-auto bg-black/80 backdrop-blur supports-backdrop:backdrop-blur-md border-b border-neutral-800">
+      <div className="pointer-events-auto bg-purple-950/90 backdrop-blur supports-backdrop:backdrop-blur-md border-b border-purple-800/50">
         <div className="mx-auto max-w-7xl px-4">
           <div className="h-14 flex items-center justify-between gap-4">
             {/* Brand + Sidebar toggle */}
             <div className="flex items-center gap-2 select-none">
-              <SidebarTrigger className="hidden md:inline-flex text-neutral-400 hover:text-white" />
-              <div className="text-lg font-mono font-light text-white tracking-tight">web4.sbs</div>
+              <SidebarTrigger className="hidden md:inline-flex text-purple-300 hover:text-purple-100" />
+              <div className="text-lg font-mono font-light text-purple-100 tracking-tight">web4.sbs</div>
             </div>
 
             {/* Nav */}
@@ -89,7 +89,7 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
                   variant="secondary" 
                   size="sm" 
                   onClick={handleStart}
-                  className="bg-white text-black hover:bg-neutral-200 font-mono border-0"
+                  className="bg-purple-500 text-white hover:bg-purple-400 font-mono border-0 rounded-lg"
                 >
                   Start Building
                 </Button>
