@@ -5,8 +5,8 @@ export function Hero() {
   const screenSize = useScreenSize()
 
   return (
-    <div className="w-full h-full relative overflow-hidden bg-[#000000]">
-      {/* Pixel Trail Background */}
+    <div className="relative w-full h-full min-h-[500px] bg-[#000000] text-white flex flex-col">
+      {/* Pixel Trail Background - Fully replaces all background effects */}
       <div className="absolute inset-0 z-0">
         <PixelTrail
           pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
@@ -16,11 +16,9 @@ export function Hero() {
         />
       </div>
 
-      {/* Content Overlay */}
-      <div className="relative z-10 h-full flex flex-col items-center justify-center pointer-events-none">
-        <div className="text-center">
-          {/* Empty overlay structure - text removed as requested */}
-        </div>
+      {/* Content Overlay - Empty overlay structure kept as requested */}
+      <div className="justify-center items-center flex flex-col w-full h-full z-10 pointer-events-none">
+        {/* Text removed - overlay structure maintained */}
       </div>
     </div>
   );
