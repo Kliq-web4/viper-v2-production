@@ -7,7 +7,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "bg-bg-4/90 dark:bg-bg-2/90 text-text-primary flex flex-col rounded-xl border border-accent/10 dark:border-accent/20 shadow-lg backdrop-blur-md supports-backdrop:backdrop-blur-md transition-all duration-200 hover:shadow-xl hover:border-accent/20 dark:hover:border-accent/30",
+        "bg-purple-900/40 text-purple-50 flex flex-col rounded-lg border border-purple-800/60 shadow-xl shadow-purple-950/50 backdrop-blur-xl supports-backdrop:backdrop-blur-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-900/30 hover:border-purple-700/80 hover:-translate-y-1",
         className
       )}
       {...props}
@@ -35,7 +35,7 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("font-semibold leading-none tracking-tight", className)}
+    className={cn("font-mono font-light leading-none tracking-tight text-purple-50", className)}
     {...props}
   />
 ))
@@ -47,7 +47,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm text-text-secondary", className)}
+    className={cn("text-sm font-mono text-purple-300", className)}
     {...props}
   />
 ))

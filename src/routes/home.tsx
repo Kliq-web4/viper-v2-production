@@ -295,9 +295,9 @@ export default function Home() {
 			<div className="fixed inset-0 z-0 bg-purple-950">
 				<PixelTrail
 					pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
-					fadeDuration={500}
+					fadeDuration={600}
 					delay={800}
-					pixelClassName="rounded-full bg-[#9E5AFF] opacity-80"
+					pixelClassName="rounded-full bg-[#6B21A8]"
 				/>
 			</div>
 
@@ -435,23 +435,23 @@ export default function Home() {
 								className="w-full"
 							>
 								<Card
-									className="group relative overflow-hidden border border-neutral-800 bg-neutral-950 hover:bg-neutral-900 transition-all duration-300 cursor-pointer hover:border-neutral-700 hover:-translate-y-1 flex flex-col h-[210px] sm:h-[220px] md:h-[240px] rounded-none"
+									className="group relative overflow-hidden cursor-pointer flex flex-col h-[210px] sm:h-[220px] md:h-[240px]"
 									onClick={() => handleCreateApp(prompt, agentMode)}
 									role="button"
 									tabIndex={0}
 									onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCreateApp(prompt, agentMode)}
 									aria-label={`${title} template`}
 								>
-									<div className="absolute top-2.5 left-2.5 z-10">
-										<Badge variant="outline" className="text-[10px] px-2 py-0.5 bg-neutral-900 border-neutral-700 text-neutral-400 font-mono rounded-none">Template</Badge>
+									<div className="absolute top-3 left-3 z-10">
+										<Badge variant="outline" className="text-[10px] px-2 py-0.5 bg-purple-800/50 border-purple-700/50 text-purple-200 font-mono rounded-md">Template</Badge>
 									</div>
 									<CardHeader className="pb-4 pt-12">
 										<div className="flex flex-col items-center text-center gap-3">
-											<div className="size-11 md:size-12 border border-neutral-700 bg-neutral-900 text-neutral-400 flex items-center justify-center group-hover:border-neutral-600 group-hover:scale-110 transition-all duration-300">
+											<div className="size-11 md:size-12 border border-purple-700/60 bg-purple-800/40 text-purple-300 flex items-center justify-center group-hover:border-purple-600 group-hover:scale-110 group-hover:bg-purple-700/40 transition-all duration-300 rounded-lg">
 												<Icon className="size-6" />
 											</div>
-											<CardTitle className="text-sm md:text-base font-mono font-light text-white group-hover:text-neutral-300 transition-colors">{title}</CardTitle>
-											<div className="text-[10px] md:text-[11px] font-mono text-neutral-500 uppercase tracking-wider">Click to start</div>
+											<CardTitle className="text-sm md:text-base font-mono font-light text-purple-50 group-hover:text-purple-100 transition-colors">{title}</CardTitle>
+											<div className="text-[10px] md:text-[11px] font-mono text-purple-400 uppercase tracking-wider">Click to start</div>
 										</div>
 									</CardHeader>
 								</Card>
@@ -499,12 +499,12 @@ export default function Home() {
 								transition={{ duration: 0.5 }}
 								whileHover={{ y: -8, scale: 1.02 }}
 							>
-								<Card className="group relative overflow-hidden border border-purple-800/50 bg-purple-900/30 hover:bg-purple-900/50 transition-all duration-300 h-full rounded-lg backdrop-blur-sm">
+								<Card className="group relative overflow-hidden h-full">
 									<CardHeader className="pb-6 relative z-10">
-										<div className="size-16 border border-purple-700/50 bg-purple-800/30 text-purple-300 flex items-center justify-center mb-6 group-hover:border-purple-600 group-hover:scale-110 transition-all duration-300 rounded-lg">
+										<div className="size-16 border border-purple-700/60 bg-purple-800/40 text-purple-300 flex items-center justify-center mb-6 group-hover:border-purple-600 group-hover:bg-purple-700/40 group-hover:scale-110 transition-all duration-300 rounded-lg shadow-lg shadow-purple-950/30">
 											<Icon className="size-8" />
 										</div>
-										<CardTitle className="text-xl md:text-2xl font-mono font-light mb-4 text-purple-100 group-hover:text-purple-50 transition-colors">{title}</CardTitle>
+										<CardTitle className="text-xl md:text-2xl font-mono font-light mb-4 text-purple-50 group-hover:text-purple-100 transition-colors">{title}</CardTitle>
 										<CardDescription className="text-sm md:text-base font-mono text-purple-300 leading-relaxed">{description}</CardDescription>
 									</CardHeader>
 								</Card>
@@ -528,17 +528,17 @@ export default function Home() {
 								transition={{ duration: 0.5, delay: index * 0.1 }}
 								whileHover={{ y: -4 }}
 							>
-								<Card className="h-full border border-purple-800/50 bg-purple-900/30 hover:bg-purple-900/50 transition-all duration-300 rounded-lg backdrop-blur-sm">
+								<Card className="h-full">
 									<CardContent className="pt-6 pb-6">
-										<p className="text-purple-200 mb-6 text-base leading-relaxed font-mono">"{testimonial.quote}"</p>
+										<p className="text-purple-100 mb-6 text-base leading-relaxed font-mono">"{testimonial.quote}"</p>
 										<div className="flex items-center gap-3">
-											<div className="h-10 w-10 border border-purple-700/50 bg-purple-800/30 flex items-center justify-center rounded-lg">
+											<div className="h-10 w-10 border border-purple-700/60 bg-purple-800/40 flex items-center justify-center rounded-lg shadow-md shadow-purple-950/30">
 												<span className="text-sm font-mono text-purple-300">
 													{testimonial.author.charAt(0)}
 												</span>
 											</div>
 											<div>
-												<p className="text-sm font-mono font-light text-purple-100">{testimonial.author}</p>
+												<p className="text-sm font-mono font-light text-purple-50">{testimonial.author}</p>
 												{testimonial.handle && (
 													<p className="text-xs font-mono text-purple-400">{testimonial.handle}</p>
 												)}
@@ -559,16 +559,16 @@ export default function Home() {
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
 						{/* Free */}
-						<Card className="border border-purple-800/50 bg-purple-900/30 hover:bg-purple-900/50 transition-all duration-300 rounded-lg backdrop-blur-sm">
+						<Card>
 							<CardHeader className="pb-4">
-								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-purple-100">Free</CardTitle>
+								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-purple-50">Free</CardTitle>
 								<CardDescription className="text-sm font-mono text-purple-300">$0 / mo</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<ul className="space-y-3 mb-6 text-sm font-mono">
-									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> 10 daily free credits</li>
-									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Core features</li>
-									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Built-in integrations</li>
+									<li className="flex items-center gap-2 text-purple-200"><Check className="size-4 text-purple-400" /> 10 daily free credits</li>
+									<li className="flex items-center gap-2 text-purple-200"><Check className="size-4 text-purple-400" /> Core features</li>
+									<li className="flex items-center gap-2 text-purple-200"><Check className="size-4 text-purple-400" /> Built-in integrations</li>
 								</ul>
 								<Button size="lg" className="w-full bg-purple-500 text-white hover:bg-purple-400 font-mono border-0 rounded-lg" onClick={() => {
 									const intendedUrl = `/chat/new`;
@@ -580,19 +580,20 @@ export default function Home() {
 						</Card>
 
 						{/* Pro */}
-						<Card className="border border-purple-700/70 bg-purple-900/50 hover:bg-purple-900/70 transition-all duration-300 relative overflow-hidden rounded-lg backdrop-blur-sm">
+						<Card className="relative overflow-hidden border-purple-700/80 bg-purple-900/60">
+							<div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/20 rounded-full blur-3xl"></div>
 							<CardHeader className="pb-4 relative z-10">
-								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-purple-100">Pro</CardTitle>
+								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-purple-50">Pro</CardTitle>
 								<div className="flex items-baseline gap-2">
-									<span className="text-4xl md:text-5xl font-mono font-light text-purple-100">${plans.find(p => p.slug === 'pro')?.priceUsd ?? 25}</span>
+									<span className="text-4xl md:text-5xl font-mono font-light text-purple-50">${plans.find(p => p.slug === 'pro')?.priceUsd ?? 25}</span>
 									<span className="text-sm md:text-base font-mono text-purple-300">/ mo</span>
 								</div>
 							</CardHeader>
 							<CardContent className="relative z-10">
 								<ul className="space-y-3 mb-6 text-sm font-mono">
-									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> 100 monthly credits</li>
-									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Rollover up to 100 credits</li>
-									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Monthly reset</li>
+									<li className="flex items-center gap-2 text-purple-200"><Check className="size-4 text-purple-400" /> 100 monthly credits</li>
+									<li className="flex items-center gap-2 text-purple-200"><Check className="size-4 text-purple-400" /> Rollover up to 100 credits</li>
+									<li className="flex items-center gap-2 text-purple-200"><Check className="size-4 text-purple-400" /> Monthly reset</li>
 								</ul>
 								<a href={(plans.find(p => p.slug === 'pro')?.checkoutUrl) || '#'} target={plans.find(p => p.slug === 'pro')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
 									<Button variant="outline" size="lg" className="w-full bg-purple-500 text-white hover:bg-purple-400 font-mono border-0 rounded-lg" disabled={!plans.find(p => p.slug === 'pro')?.checkoutUrl}>
@@ -603,19 +604,20 @@ export default function Home() {
 						</Card>
 
 						{/* Business */}
-						<Card className="border border-purple-700/70 bg-purple-900/50 hover:bg-purple-900/70 transition-all duration-300 relative overflow-hidden rounded-lg backdrop-blur-sm">
+						<Card className="relative overflow-hidden border-purple-700/80 bg-purple-900/60">
+							<div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/20 rounded-full blur-3xl"></div>
 							<CardHeader className="pb-4 relative z-10">
-								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-purple-100">Business</CardTitle>
+								<CardTitle className="text-xl md:text-2xl mb-1 font-mono font-light text-purple-50">Business</CardTitle>
 								<div className="flex items-baseline gap-2">
-									<span className="text-4xl md:text-5xl font-mono font-light text-purple-100">${plans.find(p => p.slug === 'business')?.priceUsd ?? 79}</span>
+									<span className="text-4xl md:text-5xl font-mono font-light text-purple-50">${plans.find(p => p.slug === 'business')?.priceUsd ?? 79}</span>
 									<span className="text-sm md:text-base font-mono text-purple-300">/ mo</span>
 								</div>
 							</CardHeader>
 							<CardContent className="relative z-10">
 								<ul className="space-y-3 mb-6 text-sm font-mono">
-									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> 500 monthly credits</li>
-									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Rollover up to 500 credits</li>
-									<li className="flex items-center gap-2 text-purple-300"><Check className="size-4 text-purple-400" /> Monthly reset</li>
+									<li className="flex items-center gap-2 text-purple-200"><Check className="size-4 text-purple-400" /> 500 monthly credits</li>
+									<li className="flex items-center gap-2 text-purple-200"><Check className="size-4 text-purple-400" /> Rollover up to 500 credits</li>
+									<li className="flex items-center gap-2 text-purple-200"><Check className="size-4 text-purple-400" /> Monthly reset</li>
 								</ul>
 								<a href={(plans.find(p => p.slug === 'business')?.checkoutUrl) || '#'} target={plans.find(p => p.slug === 'business')?.checkoutUrl ? '_blank' : undefined} rel="noreferrer">
 									<Button variant="outline" size="lg" className="w-full bg-purple-500 text-white hover:bg-purple-400 font-mono border-0 rounded-lg" disabled={!plans.find(p => p.slug === 'business')?.checkoutUrl}>
