@@ -292,13 +292,12 @@ export default function Home() {
 	return (
 		<div className="relative flex flex-col min-h-screen">
 			{/* Background - PixelTrail replaces EtheralShadow */}
-			<div className="fixed inset-0 z-0 pointer-events-none">
+			<div className="fixed inset-0 z-0">
 				<PixelTrail
 					pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
 					fadeDuration={800}
 					delay={1200}
 					pixelClassName="rounded-full bg-[#9E5AFF]"
-					className="pointer-events-auto"
 				/>
 			</div>
 
@@ -317,9 +316,6 @@ export default function Home() {
 						<p className="text-base sm:text-lg text-text-secondary mb-2">
 							Powered by Kliq AI
 						</p>
-						<p className="text-xs sm:text-sm text-text-tertiary mb-2 max-w-2xl">
-							Our engineers are actively enhancing Web4.sbs for an even smoother experience — but everything is fully functional and ready to use.
-						</p>
 						<p className="text-sm sm:text-base text-text-secondary/80 mb-8 max-w-2xl">
 							Create apps and websites by chatting with AI
 						</p>
@@ -328,6 +324,9 @@ export default function Home() {
 					{/* Main Input Area */}
 					<div className="max-w-3xl mx-auto mt-8 md:mt-12">
 						<EntropyDemo />
+						<p className="text-xs sm:text-sm text-text-tertiary mb-2 max-w-2xl mx-auto mt-4 text-center">
+							Our engineers are actively enhancing Web4.sbs for an even smoother experience — but everything is fully functional and ready to use.
+						</p>
 						<form
 							method="POST"
 							onSubmit={(e) => {
