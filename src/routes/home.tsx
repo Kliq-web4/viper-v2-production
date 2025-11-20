@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { ArrowRight, Info, LayoutDashboard, Gamepad2, Users, Box, Share2, Rocket, Puzzle, Sparkles, Check } from 'lucide-react';
+import { ArrowRight, Info, LayoutDashboard, Gamepad2, Users, Box, Share2, Check } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/contexts/auth-context';
 import {
