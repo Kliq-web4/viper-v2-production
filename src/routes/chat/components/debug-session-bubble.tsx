@@ -76,7 +76,7 @@ isActive && "border-accent/30",
 onClick={() => setIsExpanded(!isExpanded)}
 className={clsx(
 "w-full px-4 py-3 flex items-center justify-between",
-"hover:bg-bg-3/50 transition-colors",
+"hover:bg-black/50 transition-colors",
 isExpanded && "border-b border-border-primary/30"
 )}
 >
@@ -110,7 +110,7 @@ hasError && !isActive && "text-red-500",
 </span>
 )}
 {toolCallCount > 0 && (
-<span className="px-1.5 py-0.5 rounded bg-bg-3/50 font-medium">
+<span className="px-1.5 py-0.5 rounded bg-black/50 font-medium">
 {toolCallCount}
 </span>
 )}
@@ -177,7 +177,7 @@ exit={{ opacity: 0, y: 10 }}
 onClick={scrollToBottom}
 className={clsx(
 "absolute bottom-3 right-3 size-8 rounded-md",
-"bg-bg-3 hover:bg-bg-3/80 border border-border-primary/30",
+"bg-black hover:bg-black/80 border border-border-primary/30",
 "flex items-center justify-center",
 "transition-colors"
 )}

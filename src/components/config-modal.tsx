@@ -304,7 +304,7 @@ export function ConfigModal({
 
         <div className="space-y-6">
           {/* Current Status */}
-          <div className="flex items-center justify-between p-3 bg-bg-3/50 rounded-lg">
+          <div className="flex items-center justify-between p-3 bg-black/50 rounded-lg">
             <div>
               <p className="font-medium text-sm">Configuration Status</p>
               <p className="text-xs text-text-tertiary">

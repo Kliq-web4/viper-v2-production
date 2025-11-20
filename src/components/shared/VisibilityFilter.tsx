@@ -57,7 +57,7 @@ export const VisibilityFilter: React.FC<VisibilityFilterProps> = ({
               isActive
                 ? "text-text-primary"
                 : "text-text-tertiary hover:text-text-secondary",
-              !isActive && "hover:bg-bg-3/30"
+              !isActive && "hover:bg-black/30"
             )}
             whileHover={{ scale: isActive ? 1 : 1.01 }}
             whileTap={{ scale: 0.99 }}

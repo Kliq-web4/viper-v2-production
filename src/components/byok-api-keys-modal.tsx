@@ -455,14 +455,14 @@ export function ByokApiKeysModal({ isOpen, onClose, onKeyAdded }: ByokApiKeysMod
                       return (
                         <div key={secret.id} className={`flex items-center gap-4 p-4 rounded-lg border transition-colors ${
                           secret.isActive 
-                            ? 'hover:bg-bg-3/50' 
-                            : 'bg-bg-3/20 border-dashed hover:bg-bg-3/30'
+                            ? 'hover:bg-black/50' 
+                            : 'bg-black/20 border-dashed hover:bg-black/30'
                         }`}>
                           {/* Provider Logo */}
                           <div className={`flex items-center justify-center w-8 h-8 rounded-md border shadow-sm ${
                             secret.isActive 
                               ? 'bg-white' 
-                              : 'bg-bg-3 border-dashed opacity-60'
+                              : 'bg-black border-dashed opacity-60'
                           }`}>
                             <LogoComponent className={`h-5 w-5 ${secret.isActive ? '' : 'opacity-60'}`} />
                           </div>

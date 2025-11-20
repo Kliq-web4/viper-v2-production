@@ -148,8 +148,8 @@ export function DeploymentControls({
 		switch (state) {
 			case DeploymentState.WAITING_PHASE1:
 				return {
-					panelClass: "bg-bg-3/30 dark:bg-bg-3/20 border-border-primary/50 dark:border-border-primary/40",
-					iconClass: "bg-bg-3-foreground/40 dark:bg-bg-3-foreground/30 border-muted-foreground/40 dark:border-muted-foreground/30",
+					panelClass: "bg-black/30 dark:bg-black/20 border-border-primary/50 dark:border-border-primary/40",
+					iconClass: "bg-black-foreground/40 dark:bg-black-foreground/30 border-muted-foreground/40 dark:border-muted-foreground/30",
 					icon: null,
 					titleColor: "text-text-tertiary dark:text-text-tertiary",
 					subtitleColor: "text-text-tertiary/80 dark:text-text-tertiary/70",
@@ -157,7 +157,7 @@ export function DeploymentControls({
 					subtitle: "Deploy will be enabled after Phase 1 is implemented",
 					buttonDisabled: true,
 					buttonVariant: "secondary" as const,
-					buttonClass: "bg-bg-3 dark:bg-bg-3 text-text-tertiary dark:text-text-tertiary border-muted dark:border-muted cursor-not-allowed"
+					buttonClass: "bg-black dark:bg-black text-text-tertiary dark:text-text-tertiary border-muted dark:border-muted cursor-not-allowed"
 				};
 			
 			case DeploymentState.READY_TO_DEPLOY:
@@ -215,7 +215,7 @@ export function DeploymentControls({
 					buttonVariant: "primary" as const,
 					buttonClass: isPhase1Complete 
 						? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white border-orange-500 dark:border-orange-600 hover:scale-105"
-						: "bg-bg-3 dark:bg-bg-3 text-text-tertiary dark:text-text-tertiary border-muted dark:border-muted cursor-not-allowed"
+						: "bg-black dark:bg-black text-text-tertiary dark:text-text-tertiary border-muted dark:border-muted cursor-not-allowed"
 				};
 			
 			default:
@@ -311,7 +311,7 @@ export function DeploymentControls({
 					</div>
 					
 					{/* Elegant URL Display */}
-					<div className="bg-bg-3/60 dark:bg-bg-4/60 border border-green-200/40 dark:border-green-800/20 rounded-md p-3 mb-3">
+					<div className="bg-black/60 dark:bg-bg-4/60 border border-green-200/40 dark:border-green-800/20 rounded-md p-3 mb-3">
 						<div className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">Live URL:</div>
 						<div className="flex items-center gap-2">
 							<code className="flex-1 text-sm font-mono text-green-800 dark:text-green-200 bg-green-50/50 dark:bg-green-950/30 px-2 py-1 rounded text-ellipsis overflow-hidden">
@@ -326,7 +326,7 @@ export function DeploymentControls({
 									}
 								}}
 								variant="secondary"
-								className="h-7 px-2 text-xs bg-bg-3 dark:bg-bg-4 border border-green-300 dark:border-green-300/50 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950 hover:border-green-400 transition-all flex-shrink-0"
+								className="h-7 px-2 text-xs bg-black dark:bg-bg-4 border border-green-300 dark:border-green-300/50 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950 hover:border-green-400 transition-all flex-shrink-0"
 							>
 								{copyButtonText}
 							</Button>
@@ -385,7 +385,7 @@ export function DeploymentControls({
 									"h-10 text-sm font-medium transition-all duration-200 shadow-sm",
 									localVisibility === 'private'
 										? "bg-accent hover:bg-accent/90 text-white border-accent hover:shadow-md hover:scale-[1.02]"
-										: "bg-bg-3 hover:bg-bg-4 text-text-primary border-border-primary hover:shadow-sm hover:scale-[1.02]"
+										: "bg-black hover:bg-bg-4 text-text-primary border-border-primary hover:shadow-sm hover:scale-[1.02]"
 								)}
 							>
 								{isUpdatingVisibility ? (
@@ -417,7 +417,7 @@ export function DeploymentControls({
 									"h-10 text-sm font-medium transition-all duration-200 shadow-sm",
 									!isDeploying
 										? "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-blue-500 dark:border-blue-600 hover:shadow-md dark:hover:shadow-blue-900/50 hover:scale-[1.02]" 
-										: "bg-bg-3 dark:bg-bg-3 text-text-tertiary dark:text-text-tertiary border-muted dark:border-muted cursor-not-allowed"
+										: "bg-black dark:bg-black text-text-tertiary dark:text-text-tertiary border-muted dark:border-muted cursor-not-allowed"
 								)}
 							>
 								{isDeploying ? (

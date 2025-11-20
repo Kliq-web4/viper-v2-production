@@ -132,7 +132,7 @@ export function FileExplorer({
 	const fileTree = buildFileTree([...bootstrapFiles, ...files]);
 
 	return (
-		<div className="w-full max-w-[200px] bg-bg-3 border-r border-text/10 h-full overflow-y-auto">
+		<div className="w-full max-w-[200px] bg-black border-r border-text/10 h-full overflow-y-auto">
 			<div className="p-2 px-3 text-sm flex items-center gap-1 text-text-primary/50 font-medium">
 				<LucideNetwork className="size-4" />
 				Files

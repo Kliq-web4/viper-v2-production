@@ -259,7 +259,7 @@ export function AppSidebar() {
 								{expandedGroups.includes('apps') && (
 									<SidebarGroupContent>
 										{/* Search */}
-										<div className="relative bg-bg-3 mb-4 mt-2">
+										<div className="relative bg-black mb-4 mt-2">
 											<Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 											<Input
 												placeholder="Search apps..."

@@ -633,7 +633,7 @@ const handleAddSupabase = useCallback(async () => {
 												<Button
 													variant="ghost"
 													size="icon"
-													className="hover:bg-bg-3/80 cursor-pointer"
+													className="hover:bg-black/80 cursor-pointer"
 												>
 													<MoreHorizontal className="h-4 w-4" />
 													<span className="sr-only">Chat actions</span>
@@ -833,7 +833,7 @@ const handleAddSupabase = useCallback(async () => {
 									type="button"
 									onClick={() => imageInputRef.current?.click()}
 									disabled={isChatDisabled || isProcessing}
-									className="p-1.5 rounded-md hover:bg-bg-3 text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+									className="p-1.5 rounded-md hover:bg-black text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 									aria-label="Upload image"
 									title="Upload image"
 								>
@@ -865,7 +865,7 @@ const handleAddSupabase = useCallback(async () => {
 						transition={{ duration: 0.3, ease: 'easeInOut' }}
 					>
 							{view === 'preview' && previewUrl && (
-								<div className="flex-1 flex flex-col bg-bg-3 rounded-xl shadow-md shadow-bg-2 overflow-hidden border border-border-primary">
+								<div className="flex-1 flex flex-col bg-black rounded-xl shadow-md shadow-bg-2 overflow-hidden border border-border-primary">
 									<div className="grid grid-cols-3 px-2 h-10 border-b bg-bg-2">
 										<div className="flex items-center">
 											<ViewModeSwitch
@@ -920,7 +920,7 @@ const handleAddSupabase = useCallback(async () => {
 												className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 text-xs font-medium shadow-sm ${
 													isDeployReady
 														? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white'
-														: 'bg-bg-3 text-text-tertiary cursor-not-allowed'
+														: 'bg-black text-text-tertiary cursor-not-allowed'
 												}`}
 												onClick={isDeployReady ? () => handleDeployToCloudflare(effectiveAgentId || '') : undefined}
 												disabled={!isDeployReady || isDeploying}
@@ -1027,7 +1027,7 @@ const handleAddSupabase = useCallback(async () => {
 							)}
 
 							{view === 'blueprint' && (
-								<div className="flex-1 flex flex-col bg-bg-3 rounded-xl shadow-md shadow-bg-2 overflow-hidden border border-border-primary">
+								<div className="flex-1 flex flex-col bg-black rounded-xl shadow-md shadow-bg-2 overflow-hidden border border-border-primary">
 									{/* Toolbar */}
 									<div className="grid grid-cols-3 px-2 h-10 bg-bg-2 border-b">
 										<div className="flex items-center">
@@ -1054,7 +1054,7 @@ const handleAddSupabase = useCallback(async () => {
 											{/* Right side - can add actions here if needed */}
 										</div>
 									</div>
-									<div className="flex-1 overflow-y-auto bg-bg-3">
+									<div className="flex-1 overflow-y-auto bg-black">
 										<div className="py-12 mx-auto">
 											<Blueprint
 												blueprint={
@@ -1071,7 +1071,7 @@ const handleAddSupabase = useCallback(async () => {
 
                             {/* Disabled terminal for now */}
 							{/* {view === 'terminal' && (
-								<div className="flex-1 flex flex-col bg-bg-3 rounded-xl shadow-md shadow-bg-2 overflow-hidden border border-border-primary">
+								<div className="flex-1 flex flex-col bg-black rounded-xl shadow-md shadow-bg-2 overflow-hidden border border-border-primary">
 									<div className="grid grid-cols-3 px-2 h-10 bg-bg-2 border-b">
 										<div className="flex items-center">
 											<ViewModeSwitch
@@ -1140,7 +1140,7 @@ const handleAddSupabase = useCallback(async () => {
 							)} */}
 
 							{view === 'editor' && (
-								<div className="flex-1 flex flex-col bg-bg-3 rounded-xl shadow-md shadow-bg-2 overflow-hidden border border-border-primary">
+								<div className="flex-1 flex flex-col bg-black rounded-xl shadow-md shadow-bg-2 overflow-hidden border border-border-primary">
 									{activeFile && (
 										<div className="grid grid-cols-3 px-2 h-10 bg-bg-2 border-b">
 											<div className="flex items-center">

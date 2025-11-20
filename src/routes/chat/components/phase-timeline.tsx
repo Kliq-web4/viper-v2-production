@@ -96,7 +96,7 @@ function StatusIcon({ status, size = 'md', className }: StatusIconProps) {
 			return <Loader className={clsx(iconClasses, 'animate-spin text-accent', className)} />;
 		case 'pending':
 		default:
-			return <div className={clsx(iconClasses, 'bg-bg-3-foreground/40 dark:bg-bg-3-foreground/30 rounded-full', className)} />;
+			return <div className={clsx(iconClasses, 'bg-black-foreground/40 dark:bg-black-foreground/30 rounded-full', className)} />;
 	}
 }
 
@@ -443,7 +443,7 @@ export function PhaseTimeline({
 
 							{/* Main frosted panel - Hoverable and Expandable */}
 						<motion.div
-							className="relative bg-bg-4/95 dark:bg-bg-2/95 backdrop-blur-md border border-border-primary shadow-lg rounded-xl overflow-hidden mx-4 hover:bg-bg-3/95 dark:hover:bg-bg-1/95 transition-colors cursor-pointer group"
+							className="relative bg-bg-4/95 dark:bg-bg-2/95 backdrop-blur-md border border-border-primary shadow-lg rounded-xl overflow-hidden mx-4 hover:bg-black/95 dark:hover:bg-bg-1/95 transition-colors cursor-pointer group"
 							onClick={() => setIsCollapsedBarExpanded(!isCollapsedBarExpanded)}
 							initial={{ scale: 0.96 }}
 							animate={{ scale: 1 }}

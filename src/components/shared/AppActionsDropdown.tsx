@@ -55,8 +55,8 @@ export function AppActionsDropdown({
   };
 
   const buttonClasses = showOnHover 
-    ? `opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-bg-3/80 cursor-pointer ${className}`
-    : `hover:bg-bg-3/80 cursor-pointer ${className}`;
+    ? `opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/80 cursor-pointer ${className}`
+    : `hover:bg-black/80 cursor-pointer ${className}`;
 
   return (
     <>

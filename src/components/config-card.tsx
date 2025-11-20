@@ -25,7 +25,7 @@ const getModelDisplayName = (modelValue?: string) => {
 
 // Helper function to get provider badge info
 const getProviderInfo = (modelValue?: string) => {
-  if (!modelValue) return { name: 'Default', color: 'bg-bg-3 text-text-tertiary' };
+  if (!modelValue) return { name: 'Default', color: 'bg-black text-text-tertiary' };
   
   // Check specific prefixes first to avoid incorrect matches
   if (modelValue.includes('cerebras/')) {
@@ -92,11 +92,11 @@ export function ConfigCard({
   const reasoningEffort = userConfig?.reasoning_effort ?? defaultConfig?.reasoning_effort;
 
   return (
-    <Card className={`h-full min-h-[280px] min-w-[280px] flex flex-col overflow-hidden transition-all dark:!bg-bg-3 !bg-bg-3 hover:shadow-md !border-bg-1/40`}>
+    <Card className={`h-full min-h-[280px] min-w-[280px] flex flex-col overflow-hidden transition-all dark:!bg-black !bg-black hover:shadow-md !border-bg-1/40`}>
       <CardHeader className="pb- flex-shrink-0">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-start gap-2 min-w-0 flex-1 overflow-hidden">
-            <div className="p-1.5 rounded-md bg-bg-3 shrink-0">
+            <div className="p-1.5 rounded-md bg-black shrink-0">
               <AgentIcon className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1 overflow-hidden">

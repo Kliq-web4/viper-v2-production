@@ -556,7 +556,7 @@ export const AppCard = React.memo<AppCardProps>(
 									appId={app.id}
 									appTitle={app.title}
 									showOnHover={true}
-									className="h-6 w-6 text-text-tertiary hover:text-text-primary bg-bg-3/90 backdrop-blur-sm hover:bg-bg-3"
+									className="h-6 w-6 text-text-tertiary hover:text-text-primary bg-black/90 backdrop-blur-sm hover:bg-black"
 									size="sm"
 								/>
 							</div>
@@ -565,7 +565,7 @@ export const AppCard = React.memo<AppCardProps>(
 						{/* Visibility Badge for user apps (when not showing status overlays) */}
 						{(isUserApp(app) || isEnhancedApp(app)) &&
 							!deploymentStatus && (
-								<div className="absolute bottom-2 left-2 bg-bg-3/90 dark:bg-bg-4/90 backdrop-blur-sm rounded-md p-1">
+								<div className="absolute bottom-2 left-2 bg-black/90 dark:bg-bg-4/90 backdrop-blur-sm rounded-md p-1">
 									{getVisibilityIcon(app.visibility)}
 								</div>
 							)}
@@ -573,7 +573,7 @@ export const AppCard = React.memo<AppCardProps>(
 						{/* Visibility Badge positioned differently when status overlay exists */}
 						{(isUserApp(app) || isEnhancedApp(app)) &&
 							deploymentStatus && (
-								<div className="absolute bottom-2 left-2 bg-bg-3/90 dark:bg-bg-4/90 backdrop-blur-sm rounded-md p-1">
+								<div className="absolute bottom-2 left-2 bg-black/90 dark:bg-bg-4/90 backdrop-blur-sm rounded-md p-1">
 									{getVisibilityIcon(app.visibility)}
 								</div>
 							)}

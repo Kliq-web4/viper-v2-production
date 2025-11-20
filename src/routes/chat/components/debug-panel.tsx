@@ -537,7 +537,7 @@ function DebugPanelCore({ messages, onClear, chatSessionId }: DebugPanelProps) {
       {/* Debug Panel */}
       <div
         ref={panelRef}
-        className={`fixed right-0 top-0 h-full bg-bg-3 dark:bg-bg-4 shadow-2xl border-l border-border-primary z-[60] transform transition-all duration-300 ease-in-out flex flex-col ${
+        className={`fixed right-0 top-0 h-full bg-black dark:bg-bg-4 shadow-2xl border-l border-border-primary z-[60] transform transition-all duration-300 ease-in-out flex flex-col ${
           isMaximized ? 'w-[80vw]' : 'w-[600px]'
         } ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
@@ -558,7 +558,7 @@ function DebugPanelCore({ messages, onClear, chatSessionId }: DebugPanelProps) {
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
             {/* View Mode Toggle */}
-            <div className="flex bg-bg-3 dark:bg-zinc-800 rounded p-0.5">
+            <div className="flex bg-black dark:bg-zinc-800 rounded p-0.5">
               {[
                 { key: 'list' as const, icon: Bug, label: 'List' },
                 { key: 'analytics' as const, icon: BarChart3, label: 'Analytics' },
@@ -569,7 +569,7 @@ function DebugPanelCore({ messages, onClear, chatSessionId }: DebugPanelProps) {
                   onClick={() => setViewMode(key)}
                   className={`px-2 py-1 text-xs rounded transition-all flex items-center gap-1 ${
                     viewMode === key
-                      ? 'bg-bg-3 text-text-primary shadow-sm'
+                      ? 'bg-black text-text-primary shadow-sm'
                       : 'text-text-tertiary hover:text-text-primary'
                   }`}
                   title={`${label} view`}
@@ -602,20 +602,20 @@ function DebugPanelCore({ messages, onClear, chatSessionId }: DebugPanelProps) {
             <div className="flex items-center gap-2 w-full sm:w-auto pt-2 sm:pt-0">
               <button
                 onClick={() => setIsMaximized(!isMaximized)}
-                className="text-text-tertiary hover:text-text-primary p-1 hover:bg-bg-3 rounded transition-colors"
+                className="text-text-tertiary hover:text-text-primary p-1 hover:bg-black rounded transition-colors"
                 title={isMaximized ? 'Minimize panel' : 'Maximize panel'}
               >
                 {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </button>
               <button
                 onClick={onClear}
-                className="text-xs text-text-tertiary hover:text-text-primary px-2 py-1 hover:bg-bg-3 rounded transition-colors"
+                className="text-xs text-text-tertiary hover:text-text-primary px-2 py-1 hover:bg-black rounded transition-colors"
               >
                 Clear
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-text-tertiary hover:text-text-primary p-1 hover:bg-bg-3 rounded transition-colors"
+                className="text-text-tertiary hover:text-text-primary p-1 hover:bg-black rounded transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -624,7 +624,7 @@ function DebugPanelCore({ messages, onClear, chatSessionId }: DebugPanelProps) {
         </div>
 
         {/* Filters */}
-        <div className="p-3 border-b border-border-primary dark:border-border-primary bg-bg-3/30 dark:bg-bg-3/20">
+        <div className="p-3 border-b border-border-primary dark:border-border-primary bg-black/30 dark:bg-black/20">
           <div className="flex gap-2 mb-3">
             <input
               type="text"
@@ -653,7 +653,7 @@ function DebugPanelCore({ messages, onClear, chatSessionId }: DebugPanelProps) {
                 className={`px-3 py-1 text-xs rounded-full transition-all ${
                   filter === key
                     ? 'bg-blue-500 text-white'
-                    : 'bg-bg-3 text-text-primary hover:bg-bg-3 border border-border-primary'
+                    : 'bg-black text-text-primary hover:bg-black border border-border-primary'
                 }`}
               >
                 {label} ({count})
@@ -719,7 +719,7 @@ function DebugPanelCore({ messages, onClear, chatSessionId }: DebugPanelProps) {
                   
                   {/* Statistical Analysis */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-bg-3/50 p-4 rounded-lg">
+                    <div className="bg-black/50 p-4 rounded-lg">
                       <h4 className="font-medium text-text-primary mb-2">Response Time Statistics</h4>
                       <div className="space-y-1 text-sm">
                         <div>Average: <span className="font-mono">{analyticsData.intervals.avg}</span></div>
@@ -948,7 +948,7 @@ function DebugPanelCore({ messages, onClear, chatSessionId }: DebugPanelProps) {
                                     {lane.label}
                                   </span>
                                   {event.messageType && (
-                                    <span className="px-2 py-1 text-xs bg-bg-3 text-text-tertiary rounded font-mono">
+                                    <span className="px-2 py-1 text-xs bg-black text-text-tertiary rounded font-mono">
                                       {event.messageType}
                                     </span>
                                   )}
@@ -1058,7 +1058,7 @@ function DebugPanelCore({ messages, onClear, chatSessionId }: DebugPanelProps) {
                           {isExpanded ? 'Hide details' : 'Show details'}
                         </button>
                         {isExpanded && (
-                          <pre className="mt-2 text-xs bg-bg-3 dark:bg-zinc-900 p-2 rounded overflow-x-auto text-text-tertiary whitespace-pre-wrap max-h-40">
+                          <pre className="mt-2 text-xs bg-black dark:bg-zinc-900 p-2 rounded overflow-x-auto text-text-tertiary whitespace-pre-wrap max-h-40">
                             {message.details}
                           </pre>
                         )}

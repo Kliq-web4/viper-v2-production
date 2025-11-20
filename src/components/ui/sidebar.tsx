@@ -309,7 +309,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
     <main
       data-slot="sidebar-inset"
       className={cn(
-        "bg-bg-3 relative flex w-full flex-1 flex-col",
+        "bg-black relative flex w-full flex-1 flex-col",
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
         className
       )}
@@ -326,7 +326,7 @@ function SidebarInput({
     <Input
       data-slot="sidebar-input"
       data-sidebar="input"
-      className={cn("bg-bg-3 h-8 w-full shadow-none", className)}
+      className={cn("bg-black h-8 w-full shadow-none", className)}
       {...props}
     />
   )
@@ -469,7 +469,7 @@ const sidebarMenuButtonVariants = cva(
       variant: {
         default: "hover:bg-bg-2-accent hover:text-sidebar-accent-foreground",
         outline:
-          "bg-bg-3 shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-bg-2-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
+          "bg-black shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-bg-2-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
       size: {
         default: "text-sm",

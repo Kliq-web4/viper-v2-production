@@ -763,7 +763,7 @@ export default function SettingsPage() {
 													className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
 														secret.isActive
 															? 'bg-bg-4'
-															: 'bg-bg-3/20 border-dashed opacity-70'
+															: 'bg-black/20 border-dashed opacity-70'
 													}`}
 												>
 													<div className="flex items-center gap-3">
@@ -771,7 +771,7 @@ export default function SettingsPage() {
 															className={`flex items-center justify-center w-8 h-8 rounded-md border shadow-sm ${
 																secret.isActive
 																	? 'bg-white'
-																	: 'bg-bg-3 border-dashed opacity-60'
+																	: 'bg-black border-dashed opacity-60'
 															}`}
 														>
 															{getProviderLogo(
@@ -931,7 +931,7 @@ export default function SettingsPage() {
 									}
 
 									return (
-										<div className="rounded-lg bg-bg-3/50 p-4">
+										<div className="rounded-lg bg-black/50 p-4">
 											<div className="flex items-center justify-between mb-3">
 												<div className="flex items-center gap-2">
 													<div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -967,14 +967,14 @@ export default function SettingsPage() {
 															key={secret.id}
 															className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${secret.isActive
 																	? 'bg-white/50 dark:bg-gray-800/50'
-																	: 'bg-bg-3/20 border-dashed opacity-70'
+																	: 'bg-black/20 border-dashed opacity-70'
 																}`}
 														>
 															<div className="flex items-center gap-3">
 																<div
 																	className={`flex items-center justify-center w-8 h-8 rounded-md border shadow-sm ${secret.isActive
 																			? 'bg-white'
-																			: 'bg-bg-3 border-dashed opacity-60'
+																			: 'bg-black border-dashed opacity-60'
 																		}`}
 																>
 																	{getProviderLogo(
@@ -1256,7 +1256,7 @@ export default function SettingsPage() {
 															<span className="w-full border-t" />
 														</div>
 														<div className="relative flex justify-center text-xs uppercase">
-															<span className="bg-bg-3 px-2 text-text-tertiary">
+															<span className="bg-black px-2 text-text-tertiary">
 																Or
 															</span>
 														</div>
@@ -1310,7 +1310,7 @@ export default function SettingsPage() {
 
 													return (
 														<>
-															<div className="flex items-center gap-3 p-3 bg-bg-3/50 rounded-lg">
+															<div className="flex items-center gap-3 p-3 bg-black/50 rounded-lg">
 																<span className="text-xl">
 																	{
 																		template.icon
@@ -1363,14 +1363,14 @@ export default function SettingsPage() {
 																			template.envVarName
 																		}
 																		disabled
-																		className="bg-bg-3"
+																		className="bg-black"
 																	/>
 																	<p className="text-xs text-text-tertiary mt-1">
 																		This
 																		will be
 																		available
 																		as{' '}
-																		<code className="bg-bg-3 px-1 rounded text-xs">
+																		<code className="bg-black px-1 rounded text-xs">
 																			{
 																				template.envVarName
 																			}
@@ -1697,7 +1697,7 @@ export default function SettingsPage() {
 								</h4>
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
-										<div className="h-5 w-5 rounded-full bg-bg-3 flex items-center justify-center">
+										<div className="h-5 w-5 rounded-full bg-black flex items-center justify-center">
 											{user?.provider === 'google'
 												? '🇬'
 												: '🐙'}

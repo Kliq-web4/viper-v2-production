@@ -295,11 +295,11 @@ export default function Profile() {
                     {recentApps.slice(0, 5).map((app) => (
                       <div
                         key={app.id}
-                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-bg-3/50 transition-colors cursor-pointer"
+                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-black/50 transition-colors cursor-pointer"
                         onClick={() => navigate(`/app/${app.id}`)}
                       >
                         <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-lg bg-bg-3 flex items-center justify-center">
+                          <div className="h-12 w-12 rounded-lg bg-black flex items-center justify-center">
                             <Code2 className="h-6 w-6" />
                           </div>
                           <div>
@@ -352,7 +352,7 @@ export default function Profile() {
                       return (
                         <div key={index} className="p-4 rounded-lg border hover:shadow-md transition-shadow">
                           <div className="flex items-start gap-4">
-                            <div className="p-3 rounded-lg bg-bg-3 text-text-tertiary">
+                            <div className="p-3 rounded-lg bg-black text-text-tertiary">
                               <Trophy className="h-6 w-6" />
                             </div>
                             <div className="flex-1">

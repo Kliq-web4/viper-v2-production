@@ -95,7 +95,7 @@ const getModelDisplayName = (modelValue?: string) => {
 
 // Helper to get provider info
 const getProviderInfo = (modelValue?: string) => {
-  if (!modelValue) return { name: 'Default', color: 'bg-bg-3 text-text-tertiary' };
+  if (!modelValue) return { name: 'Default', color: 'bg-black text-text-tertiary' };
   
   if (modelValue.includes('cerebras/')) {
     return { name: 'Cerebras', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400' };
@@ -136,10 +136,10 @@ function ConfigInfoCard({
   const reasoningEffort = userConfig?.reasoning_effort ?? defaultConfig?.reasoning_effort;
 
   return (
-    <div className="p-4 border rounded-lg bg-bg-3/50 space-y-3">
+    <div className="p-4 border rounded-lg bg-black/50 space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-2 min-w-0 flex-1">
-          <div className="p-1 rounded-sm bg-bg-3">
+          <div className="p-1 rounded-sm bg-black">
             <Settings className="h-3 w-3" />
           </div>
           <div className="min-w-0 flex-1">

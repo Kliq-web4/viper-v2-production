@@ -564,7 +564,7 @@ export default function AppView() {
 											size="sm"
 											onClick={handleToggleVisibility}
 											disabled={isUpdatingVisibility}
-											className="h-6 w-6 p-0 hover:bg-bg-3/50 -ml-1.5 !mr-1.5"
+											className="h-6 w-6 p-0 hover:bg-black/50 -ml-1.5 !mr-1.5"
 											title={`Make ${app.visibility === 'private' ? 'public' : 'private'}`}
 										>
 											{isUpdatingVisibility ? (
@@ -737,7 +737,7 @@ export default function AppView() {
 						<TabsList className="inline-flex h-auto w-fit items-center gap-0.5 bg-bg-2 dark:bg-bg-1 rounded-md p-0.5 border border-border-primary/30">
 							<TabsTrigger
 								value="preview"
-								className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-bg-3 data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
+								className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-black data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
 							>
 								<Eye className={cn(
 									"h-3.5 w-3.5 mr-1.5",
@@ -747,7 +747,7 @@ export default function AppView() {
 							</TabsTrigger>
 							<TabsTrigger
 								value="code"
-								className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-bg-3 data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
+								className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-black data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
 							>
 								<Code2 className={cn(
 									"h-3.5 w-3.5 mr-1.5",
@@ -757,7 +757,7 @@ export default function AppView() {
 							</TabsTrigger>
 							<TabsTrigger
 								value="prompt"
-								className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-bg-3 data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
+								className="px-3 py-1.5 rounded text-xs font-medium data-[state=active]:bg-bg-4 dark:data-[state=active]:bg-black data-[state=active]:text-text-primary data-[state=active]:shadow-sm"
 							>
 								<MessageSquare className={cn(
 									"h-3.5 w-3.5 mr-1.5",
@@ -930,10 +930,10 @@ export default function AppView() {
 							</CardHeader>
 							<CardContent className="p-0 flex-1 flex flex-col overflow-hidden">
 								{files.length > 0 ? (
-									<div className="h-[450px] relative bg-bg-3 overflow-hidden">
+									<div className="h-[450px] relative bg-black overflow-hidden">
 										<div className="h-full flex">
-											<div className="w-full max-w-[250px] bg-bg-3 border-r border-text/10 h-full overflow-y-auto">
-												<div className="p-2 px-3 text-sm flex items-center gap-1 text-text-primary/50 font-medium border-b bg-bg-3">
+											<div className="w-full max-w-[250px] bg-black border-r border-text/10 h-full overflow-y-auto">
+												<div className="p-2 px-3 text-sm flex items-center gap-1 text-text-primary/50 font-medium border-b bg-black">
 													<Code2 className="size-4" />
 													Files
 												</div>
@@ -951,7 +951,7 @@ export default function AppView() {
 																activeFile?.filePath ===
 																	file.filePath
 																	? 'bg-blue-100 text-blue-900 border-r-2 border-blue-500'
-																	: 'hover:bg-bg-3 text-text-tertiary hover:text-text-primary',
+																	: 'hover:bg-black text-text-tertiary hover:text-text-primary',
 															)}
 														>
 															<Code2 className="h-4 w-4 flex-shrink-0" />
@@ -966,7 +966,7 @@ export default function AppView() {
 											<div className="flex-1 flex flex-col">
 												{activeFile ? (
 													<>
-														<div className="flex items-center justify-between p-3 border-b bg-bg-3">
+														<div className="flex items-center justify-between p-3 border-b bg-black">
 															<div className="flex items-center gap-2 flex-1">
 																<Code2 className="h-4 w-4" />
 																<span className="text-sm font-mono">
