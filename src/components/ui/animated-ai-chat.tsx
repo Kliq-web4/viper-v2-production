@@ -127,7 +127,6 @@ export function AnimatedAIChat({
     isProcessing = false
 }: AnimatedAIChatProps) {
     const [value, setValue] = useState("");
-    const [isTyping, setIsTyping] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 60,
@@ -308,7 +307,7 @@ export function AnimatedAIChat({
                                 onClick={handleSendMessage}
                                 whileHover={{ scale: 1.01 }}
                                 whileTap={{ scale: 0.98 }}
-                                disabled={isTyping || !value.trim() || isProcessing}
+                                disabled={!value.trim() || isProcessing}
                                 className={cn(
                                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                                     "flex items-center gap-2",
