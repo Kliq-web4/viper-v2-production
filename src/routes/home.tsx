@@ -295,7 +295,7 @@ export default function Home() {
 			<div className="fixed inset-0 z-0 pointer-events-none">
 				<PixelTrail
 					pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
-					fadeDuration={0}
+					fadeDuration={800}
 					delay={1200}
 					pixelClassName="rounded-full bg-[#9E5AFF]"
 					className="pointer-events-auto"

@@ -10,7 +10,7 @@ export function Hero() {
       <div className="absolute inset-0 z-0">
         <PixelTrail
           pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
-          fadeDuration={0}
+          fadeDuration={800}
           delay={1200}
           pixelClassName="rounded-full bg-[#9E5AFF]"
         />

@@ -94,9 +94,20 @@ const PixelDot: React.FC<PixelDotProps> = React.memo(
 		const controls = useAnimationControls()
 
 		const animatePixel = useCallback(() => {
+			// First, immediately set to visible (opacity 1)
+			controls.set({ opacity: 1 })
+			
+			// Then fade out after delay
+			const actualFadeDuration = fadeDuration > 0 ? fadeDuration / 1000 : 0.5
+			const actualDelay = delay > 0 ? delay / 1000 : 0
+			
 			controls.start({
-				opacity: [1, 0],
-				transition: { duration: fadeDuration / 1000, delay: delay / 1000 },
+				opacity: 0,
+				transition: { 
+					duration: actualFadeDuration, 
+					delay: actualDelay,
+					ease: "easeOut"
+				},
 			})
 		}, [controls, fadeDuration, delay])
 
