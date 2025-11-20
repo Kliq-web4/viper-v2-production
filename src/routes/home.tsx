@@ -16,7 +16,8 @@ import { useDragDrop } from '@/hooks/use-drag-drop';
 import { ImageUploadButton } from '@/components/image-upload-button';
 import { ImageAttachmentPreview } from '@/components/image-attachment-preview';
 import { SUPPORTED_IMAGE_MIME_TYPES } from '@/api-types';
-import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
+import { PixelTrail } from '@/components/ui/pixel-trail';
+import { useScreenSize } from '@/components/hooks/use-screen-size';
 import { EntropyDemo } from '@/components/ui/entropy-demo';
 import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
@@ -40,6 +41,7 @@ export default function Home() {
 	const [query, setQuery] = useState('');
 	const { user } = useAuth();
 	const isMobile = useIsMobile();
+	const screenSize = useScreenSize();
 
 	const { images, addImages, removeImage, clearImages, isProcessing } = useImageUpload({
 		onError: (error) => {
@@ -289,14 +291,14 @@ export default function Home() {
 
 	return (
 		<div className="relative flex flex-col min-h-screen">
-			{/* Background */}
+			{/* Background - PixelTrail replaces EtheralShadow */}
 			<div className="fixed inset-0 z-0 pointer-events-none">
-				<EtheralShadow
-					className="w-full h-full"
-					color="rgba(139, 92, 246, 0.65)"
-					animation={{ scale: isMobile ? 0 : 80, speed: isMobile ? 0 : 75 }}
-					noise={{ opacity: 0.45, scale: 1 }}
-					sizing="fill"
+				<PixelTrail
+					pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
+					fadeDuration={0}
+					delay={1200}
+					pixelClassName="rounded-full bg-[#9E5AFF]"
+					className="pointer-events-auto"
 				/>
 			</div>
 
