@@ -290,9 +290,9 @@ export default function Home() {
 	] as const;
 
 	return (
-		<div className="relative flex flex-col min-h-screen bg-purple-950">
+		<div className="relative flex flex-col min-h-screen bg-black">
 			{/* Background - PixelTrail on purple background */}
-			<div className="fixed inset-0 z-0 bg-purple-950">
+			<div className="fixed inset-0 z-0 bg-black">
 				<PixelTrail
 					pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
 					fadeDuration={600}
@@ -303,7 +303,7 @@ export default function Home() {
 
 			<MarketingHeader />
 
-			<main className="relative z-10 flex-1 bg-purple-950">
+			<main className="relative z-10 flex-1 bg-black">
 				{/* Hero Section - Purple Dominant */}
 				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pt-40 md:pb-32">
 					<div className="flex flex-col items-center text-center space-y-6">
