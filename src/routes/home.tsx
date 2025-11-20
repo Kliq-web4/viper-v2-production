@@ -19,6 +19,7 @@ import { SUPPORTED_IMAGE_MIME_TYPES } from '@/api-types';
 import { PixelTrail } from '@/components/ui/pixel-trail';
 import { useScreenSize } from '@/components/hooks/use-screen-size';
 import { EntropyDemo } from '@/components/ui/entropy-demo';
+import { LampContainer } from '@/components/ui/lamp';
 import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -306,17 +307,34 @@ export default function Home() {
 			<main className="relative z-10 flex-1 bg-black">
 				{/* Hero Section - Purple Dominant */}
 				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pt-40 md:pb-32">
-					<div className="flex flex-col items-center text-center space-y-6">
-						{/* Purple Typography */}
-						<h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-mono font-light tracking-tighter text-purple-100 leading-none">
-							web4.sbs
-						</h1>
-						<p className="text-sm md:text-base font-mono text-purple-300 tracking-wider uppercase mt-4">
-							Build something with AI
-						</p>
-						<p className="text-xs md:text-sm font-mono text-purple-400 mt-2 max-w-md">
-							Create apps and websites by chatting with AI
-						</p>
+					<div className="flex flex-col items-center text-center space-y-6 -mt-20">
+						<LampContainer className="pt-40">
+							<motion.h1
+								initial={{ opacity: 0.5, y: 100 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								transition={{
+									delay: 0.3,
+									duration: 0.8,
+									ease: "easeInOut",
+								}}
+								className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-mono font-light tracking-tighter text-purple-100 leading-none text-center bg-clip-text text-transparent bg-gradient-to-b from-purple-100 to-purple-500"
+							>
+								web4.sbs
+							</motion.h1>
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								transition={{ delay: 0.5, duration: 0.8 }}
+								className="flex flex-col items-center"
+							>
+								<p className="text-sm md:text-base font-mono text-purple-300 tracking-wider uppercase mt-4">
+									Build something with AI
+								</p>
+								<p className="text-xs md:text-sm font-mono text-purple-400 mt-2 max-w-md">
+									Create apps and websites by chatting with AI
+								</p>
+							</motion.div>
+						</LampContainer>
 					</div>
 
 					{/* Main Input Area - Purple Design */}
