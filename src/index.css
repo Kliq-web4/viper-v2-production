@@ -207,7 +207,7 @@
 		@apply border-border-primary outline-ring/50;
 	}
   	body {
-    	@apply bg-purple-950 text-purple-100 h-full;
+    	@apply bg-black text-purple-100 h-full;
     	font-family: 'JetBrains Mono', 'Space Mono', 'Courier New', monospace;
 	}
 	button {
