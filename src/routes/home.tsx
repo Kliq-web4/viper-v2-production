@@ -251,9 +251,9 @@ export default function Home() {
 
 			<main className="relative z-10 flex-1">
 				{/* Hero Section - Purple Dominant */}
-				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pt-40 md:pb-32">
-					<div className="flex flex-col items-center text-center space-y-6">
-						<LampContainer className="pt-40">
+				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-10 md:pt-24 md:pb-20">
+					<div className="flex flex-col items-center text-center space-y-4">
+						<LampContainer className="pt-24 min-h-[40vh]">
 							<motion.h1
 								initial={{ opacity: 0.5, y: 100 }}
 								whileInView={{ opacity: 1, y: 0 }}
@@ -283,7 +283,7 @@ export default function Home() {
 					</div>
 
 					{/* Main Input Area - Purple Design */}
-					<div className="max-w-3xl mx-auto mt-16 md:mt-20">
+					<div className="max-w-3xl mx-auto mt-8 md:mt-12">
 						<form
 							method="POST"
 							onSubmit={(e) => {
