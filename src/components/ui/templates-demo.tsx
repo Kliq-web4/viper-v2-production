@@ -2,7 +2,7 @@
 
 import { LayoutDashboard, Gamepad2, Users, Box, Share2 } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 
 export function TemplatesDemo({ onTemplateClick }: { onTemplateClick?: (prompt: string) => void }) {
@@ -46,7 +46,6 @@ export function TemplatesDemo({ onTemplateClick }: { onTemplateClick?: (prompt: 
                     key={index}
                     icon={template.icon}
                     title={template.title}
-                    description={template.description}
                     onClick={() => onTemplateClick?.(template.prompt)}
                 />
             ))}
@@ -57,11 +56,10 @@ export function TemplatesDemo({ onTemplateClick }: { onTemplateClick?: (prompt: 
 interface GridItemProps {
     icon: React.ReactNode;
     title: string;
-    description: React.ReactNode;
     onClick?: () => void;
 }
 
-const GridItem = ({ icon, title, description, onClick }: GridItemProps) => {
+const GridItem = ({ icon, title, onClick }: GridItemProps) => {
     return (
         <li className="list-none group cursor-pointer" onClick={onClick}>
             <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-purple-700/30 p-2 md:rounded-[1.5rem] md:p-3 transition-transform duration-300 hover:scale-[1.02]">
