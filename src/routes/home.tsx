@@ -371,9 +371,9 @@ export default function Home() {
 					</div>
 
 					{/* Entropy & CTA Section */}
-					<div className="max-w-7xl mx-auto mt-16 md:mt-20 px-4 sm:px-6 lg:px-8">
-						<div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
-							<div className="w-full md:flex-1">
+					<div className="max-w-5xl mx-auto mt-16 md:mt-20 px-4 sm:px-6 lg:px-8">
+						<div className="flex flex-col md:flex-row items-center justify-center md:items-start gap-8 md:gap-16">
+							<div className="flex-shrink-0">
 								<EntropyDemo />
 							</div>
 
