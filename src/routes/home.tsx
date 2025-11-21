@@ -23,6 +23,7 @@ import { LampContainer } from '@/components/ui/lamp';
 import { GlowingEffectDemo } from '@/components/ui/glowing-effect-demo';
 import { TemplatesDemo } from '@/components/ui/templates-demo';
 import { CompareDemo } from '@/components/ui/compare-demo';
+import { HoverPeek } from '@/components/ui/link-preview';
 import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -383,15 +384,21 @@ export default function Home() {
 									Our engineers are actively enhancing Web4.sbs for an even smoother experience — but everything is fully functional and ready to use.
 								</p>
 
-								<a
-									href="http://www.kliqonline.com"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="group relative inline-flex items-center gap-2.5 border border-purple-600 bg-purple-900/50 px-5 py-2.5 text-xs font-mono text-purple-200 hover:text-purple-100 hover:border-purple-500 transition-all duration-200 rounded-lg backdrop-blur-sm"
+								<HoverPeek
+									url="http://www.kliqonline.com"
+									peekWidth={300}
+									peekHeight={200}
 								>
-									<span>Explore Our Kliq AI x Web4 Playground</span>
-									<ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
-								</a>
+									<a
+										href="http://www.kliqonline.com"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="group relative inline-flex items-center gap-2.5 border border-purple-600 bg-purple-900/50 px-5 py-2.5 text-xs font-mono text-purple-200 hover:text-purple-100 hover:border-purple-500 transition-all duration-200 rounded-lg backdrop-blur-sm"
+									>
+										<span>Explore Our Kliq AI x Web4 Playground</span>
+										<ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
+									</a>
+								</HoverPeek>
 							</div>
 						</div>
 					</div>
