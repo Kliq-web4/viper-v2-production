@@ -251,9 +251,9 @@ export default function Home() {
 
 			<main className="relative z-10 flex-1">
 				{/* Hero Section - Purple Dominant */}
-				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-10 md:pb-20">
+				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-10 md:pt-24 md:pb-20">
 					<div className="flex flex-col items-center text-center space-y-4">
-						<LampContainer className="-mt-20 md:-mt-32 min-h-[40vh]">
+						<LampContainer className="min-h-[40vh]">
 							<motion.h1
 								initial={{ opacity: 0.5, y: 100 }}
 								whileInView={{ opacity: 1, y: 0 }}
