@@ -22,6 +22,7 @@ import { EntropyDemo } from '@/components/ui/entropy-demo';
 import { LampContainer } from '@/components/ui/lamp';
 import { GlowingEffectDemo } from '@/components/ui/glowing-effect-demo';
 import { TemplatesDemo } from '@/components/ui/templates-demo';
+import { CompareDemo } from '@/components/ui/compare-demo';
 import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -404,6 +405,41 @@ export default function Home() {
 					</div>
 					<div className="w-full">
 						<TemplatesDemo onTemplateClick={(prompt) => handleCreateApp(prompt, agentMode)} />
+					</div>
+				</section>
+
+				{/* Live Coding Section - Purple Theme */}
+				<section id="live-coding" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-purple-800/50">
+					<div className="text-center mb-12">
+						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-purple-100 tracking-tight">Watch AI Code in Real-Time</h2>
+						<p className="text-sm font-mono text-purple-400 uppercase tracking-wider">From idea to implementation, instantly</p>
+					</div>
+					<div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+						<div className="flex-shrink-0">
+							<CompareDemo />
+						</div>
+						<div className="max-w-md flex flex-col gap-6 text-center md:text-left">
+							<div>
+								<h3 className="text-xl md:text-2xl font-mono font-light text-purple-100 mb-3">Live Code Generation</h3>
+								<p className="text-sm font-mono text-purple-300 leading-relaxed">
+									See your ideas transform into production-ready code as you describe them. Our AI understands context, follows best practices, and writes clean, maintainable code.
+								</p>
+							</div>
+							<div className="flex flex-col gap-3">
+								<div className="flex items-start gap-3">
+									<Check className="size-5 text-purple-400 flex-shrink-0 mt-0.5" />
+									<p className="text-sm font-mono text-purple-200">Full-stack applications in minutes</p>
+								</div>
+								<div className="flex items-start gap-3">
+									<Check className="size-5 text-purple-400 flex-shrink-0 mt-0.5" />
+									<p className="text-sm font-mono text-purple-200">Modern frameworks & best practices</p>
+								</div>
+								<div className="flex items-start gap-3">
+									<Check className="size-5 text-purple-400 flex-shrink-0 mt-0.5" />
+									<p className="text-sm font-mono text-purple-200">Iterate and refine with natural language</p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</section>
 
