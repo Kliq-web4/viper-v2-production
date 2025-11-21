@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { ArrowRight, Info, LayoutDashboard, Gamepad2, Users, Box, Share2, Check } from 'lucide-react';
+import { ArrowRight, Info, Check } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/contexts/auth-context';
 import {
@@ -21,12 +21,12 @@ import { useScreenSize } from '@/components/hooks/use-screen-size';
 import { EntropyDemo } from '@/components/ui/entropy-demo';
 import { LampContainer } from '@/components/ui/lamp';
 import { GlowingEffectDemo } from '@/components/ui/glowing-effect-demo';
+import { TemplatesDemo } from '@/components/ui/templates-demo';
 import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { apiClient } from '@/lib/api-client';
 import openaiLogo from '@/assets/provider-logos/openai.svg';
@@ -142,39 +142,6 @@ export default function Home() {
 
 	const discoverLinkRef = useRef<HTMLDivElement>(null);
 
-	const templates = [
-		{
-			title: 'Reporting Dashboard',
-			description: 'KPIs, charts and filters',
-			icon: LayoutDashboard,
-			prompt: 'Ask Kliq AI to create a comprehensive reporting dashboard with key performance indicators (KPIs), interactive charts for data visualization, advanced filtering options, date range selectors, and export functionality. Include a clean layout with sidebar navigation, summary cards at the top showing key metrics, and detailed data tables below.'
-		},
-		{
-			title: 'Gaming Platform',
-			description: 'Lobby, matchmaking, leaderboards',
-			icon: Gamepad2,
-			prompt: 'Ask Kliq AI to build a full-featured gaming platform with a lobby system where players can create and join rooms, real-time matchmaking functionality, comprehensive leaderboards showing top players with rankings and statistics, player profiles with game history, and a chat system for players to communicate. Include game session management and score tracking.'
-		},
-		{
-			title: 'Onboarding Portal',
-			description: 'Sign-up flows and checklists',
-			icon: Users,
-			prompt: 'Ask Kliq AI to create an onboarding portal with multi-step sign-up forms, user verification flows, interactive checklists to guide new users through setup, progress tracking, and welcome tutorials. Include email verification, profile completion steps, and a dashboard that shows onboarding progress with clear next steps.'
-		},
-		{
-			title: 'Room Visualizer',
-			description: 'Interactive layout editor',
-			icon: Box,
-			prompt: 'Ask Kliq AI to build an interactive room visualizer where users can drag and drop furniture, adjust room dimensions, apply different floor plans, change wall colors and textures, save multiple room designs, and export layouts as images. Include a toolbar with furniture items, measurement tools, and a 3D preview option.'
-		},
-		{
-			title: 'Networking App',
-			description: 'Profiles, posts and connections',
-			icon: Share2,
-			prompt: 'Ask Kliq AI to create a professional networking application with user profiles featuring bio, skills, and experience, a feed system for posting updates and sharing content, connection requests and messaging, search functionality to find people by skills or industry, and event creation for networking meetups. Include notifications and activity feeds.'
-		},
-	] as const;
-
 	const testimonials = [
 		{
 			quote: "This platform has completely transformed how I build apps. No iterations, no changes, just pure magic.",
@@ -286,7 +253,7 @@ export default function Home() {
 
 			<MarketingHeader />
 
-			<main className="relative z-10 flex-1 bg-black">
+			<main className="relative z-10 flex-1">
 				{/* Hero Section - Purple Dominant */}
 				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pt-40 md:pb-32">
 					<div className="flex flex-col items-center text-center space-y-6 -mt-20">
@@ -424,40 +391,8 @@ export default function Home() {
 						<h2 className="text-2xl md:text-3xl font-mono font-light text-white mb-2 tracking-tight">Templates</h2>
 						<p className="text-xs font-mono text-neutral-500 uppercase tracking-wider">Quick Start</p>
 					</div>
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
-						{templates.map(({ title, icon: Icon, prompt }) => (
-							<motion.div
-								key={title}
-								initial={{ opacity: 0, y: 10 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								viewport={{ once: true, amount: 0.2 }}
-								transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-								whileHover={{ y: -4 }}
-								className="w-full"
-							>
-								<Card
-									className="group relative overflow-hidden cursor-pointer flex flex-col h-[210px] sm:h-[220px] md:h-[240px]"
-									onClick={() => handleCreateApp(prompt, agentMode)}
-									role="button"
-									tabIndex={0}
-									onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCreateApp(prompt, agentMode)}
-									aria-label={`${title} template`}
-								>
-									<div className="absolute top-3 left-3 z-10">
-										<Badge variant="outline" className="text-[10px] px-2 py-0.5 bg-purple-800/50 border-purple-700/50 text-purple-200 font-mono rounded-md">Template</Badge>
-									</div>
-									<CardHeader className="pb-4 pt-12">
-										<div className="flex flex-col items-center text-center gap-3">
-											<div className="size-11 md:size-12 border border-purple-700/60 bg-purple-800/40 text-purple-300 flex items-center justify-center group-hover:border-purple-600 group-hover:scale-110 group-hover:bg-purple-700/40 transition-all duration-300 rounded-lg">
-												<Icon className="size-6" />
-											</div>
-											<CardTitle className="text-sm md:text-base font-mono font-light text-purple-50 group-hover:text-purple-100 transition-colors">{title}</CardTitle>
-											<div className="text-[10px] md:text-[11px] font-mono text-purple-400 uppercase tracking-wider">Click to start</div>
-										</div>
-									</CardHeader>
-								</Card>
-							</motion.div>
-						))}
+					<div className="w-full">
+						<TemplatesDemo onTemplateClick={(prompt) => handleCreateApp(prompt, agentMode)} />
 					</div>
 				</section>
 
