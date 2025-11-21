@@ -2,20 +2,14 @@
 
 
 import { Entropy } from "@/components/ui/entropy"
-import { useIsMobile } from "@/hooks/use-mobile"
 
 export function EntropyDemo() {
-    const isMobile = useIsMobile()
-
-    // Bigger on desktop to cover more screen
-    const size = isMobile ? 400 : 900
-
     return (
         <div className="flex flex-col items-center justify-center w-full p-8">
             <div className="flex flex-col items-center relative">
                 {/* Entropy with gradient fade to blend into background */}
                 <div className="relative">
-                    <Entropy className="rounded-lg" size={size} />
+                    <Entropy className="rounded-lg" />
                     {/* Gradient overlay to fade edges into black background */}
                     <div
                         className="absolute inset-0 pointer-events-none rounded-lg"
