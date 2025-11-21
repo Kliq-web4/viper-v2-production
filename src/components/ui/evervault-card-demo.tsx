@@ -9,13 +9,13 @@ export function EvervaultCardDemo() {
             <Icon className="absolute h-6 w-6 -top-3 -right-3 dark:text-purple-200 text-purple-800" />
             <Icon className="absolute h-6 w-6 -bottom-3 -right-3 dark:text-purple-200 text-purple-800" />
 
-            <EvervaultCard text="hover" className="bg-purple-800/30" />
+            <EvervaultCard text="secure" className="bg-purple-800/30" />
 
             <h2 className="dark:text-purple-200 text-purple-800 mt-4 text-sm font-light">
-                Hover over this card to reveal an awesome effect.
+                Visualizing the encryption layer that protects your data.
             </h2>
             <p className="text-sm border font-light dark:border-purple-400/20 border-purple-800/20 rounded-full mt-4 text-purple-800 dark:text-purple-200 px-2 py-0.5">
-                Watch me hover
+                AES-256 Encryption
             </p>
         </div>
     );

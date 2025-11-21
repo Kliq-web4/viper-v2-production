@@ -442,8 +442,8 @@ export default function Home() {
 				{/* Evervault Card Demo Section */}
 				<section id="evervault-demo" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-purple-800/50 bg-purple-900/10">
 					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-purple-100 tracking-tight">Secure & Interactive Card</h2>
-						<p className="text-sm font-mono text-purple-400 uppercase tracking-wider">Hover to reveal encrypted data effect</p>
+						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-purple-100 tracking-tight">Uncompromising Security</h2>
+						<p className="text-sm font-mono text-purple-400 uppercase tracking-wider">Enterprise-grade protection built into every application.</p>
 					</div>
 					<div className="flex justify-center">
 						<EvervaultCardDemo />
