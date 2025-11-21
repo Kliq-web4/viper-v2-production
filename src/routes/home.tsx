@@ -145,53 +145,7 @@ export default function Home() {
 
 	const discoverLinkRef = useRef<HTMLDivElement>(null);
 
-	const testimonials = [
-		{
-			quote: "This platform has completely transformed how I build apps. No iterations, no changes, just pure magic.",
-			author: "Hasan Toor",
-			handle: "@hasantoxr"
-		},
-		{
-			quote: "Just built this awesome web app! I'm blown away by how fast and intuitive the process is.",
-			author: "Maria Martin",
-			handle: "@marias_martin"
-		},
-		{
-			quote: "What makes this different is that the interaction with the AI is seamless and the results are production-ready.",
-			author: "Gleb Konon",
-			handle: ""
-		},
-		{
-			quote: "One of the best AI Coders out there. I tried many of them. What sets this apart is the quality and speed.",
-			author: "Richard Manisa",
-			handle: ""
-		},
-		{
-			quote: "Perfect for founders who want to build fast without compromising on quality. Highly recommended!",
-			author: "Masiar Ighani",
-			handle: ""
-		},
-		{
-			quote: "Amazing understanding of user needs and thorough handling of complex requirements. Impressive work!",
-			author: "Ariel MI",
-			handle: ""
-		},
-		{
-			quote: "Start building in minutes. See results immediately. Great!",
-			author: "Thatweb3guy",
-			handle: "@myfootyfantasy"
-		},
-		{
-			quote: "Fastest Aha! moment I have ever had.",
-			author: "Roy Kotzer",
-			handle: ""
-		},
-		{
-			quote: "This revolutionizes app development by enabling users to create production-ready applications in minutes.",
-			author: "Erel Cohen",
-			handle: ""
-		},
-	] as const;
+
 
 	// Pricing plans loaded from API
 	const [plans, setPlans] = useState<Array<{ slug: string; name: string; monthlyCredits: number; dailyFreeCredits: number; rolloverLimit: number; resetCycleDays: number; priceUsd: number; checkoutUrl?: string | null }>>([]);
@@ -484,43 +438,7 @@ export default function Home() {
 					</div>
 				</section>
 
-				<section id="testimonials" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-purple-800/50">
-					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-purple-100 tracking-tight">"Okay, this has blown my mind."</h2>
-						<p className="text-sm font-mono text-purple-400 uppercase tracking-wider">And other great things our users say about us.</p>
-					</div>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-						{testimonials.map((testimonial, index) => (
-							<motion.div
-								key={index}
-								initial={{ opacity: 0, y: 20 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								viewport={{ once: true }}
-								transition={{ duration: 0.5, delay: index * 0.1 }}
-								whileHover={{ y: -4 }}
-							>
-								<Card className="h-full">
-									<CardContent className="pt-6 pb-6">
-										<p className="text-purple-100 mb-6 text-base leading-relaxed font-mono">"{testimonial.quote}"</p>
-										<div className="flex items-center gap-3">
-											<div className="h-10 w-10 border border-purple-700/60 bg-purple-800/40 flex items-center justify-center rounded-lg shadow-md shadow-purple-950/30">
-												<span className="text-sm font-mono text-purple-300">
-													{testimonial.author.charAt(0)}
-												</span>
-											</div>
-											<div>
-												<p className="text-sm font-mono font-light text-purple-50">{testimonial.author}</p>
-												{testimonial.handle && (
-													<p className="text-xs font-mono text-purple-400">{testimonial.handle}</p>
-												)}
-											</div>
-										</div>
-									</CardContent>
-								</Card>
-							</motion.div>
-						))}
-					</div>
-				</section>
+
 
 				{/* Pricing Section - Purple Theme */}
 				<section id="pricing" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-purple-800/50">
