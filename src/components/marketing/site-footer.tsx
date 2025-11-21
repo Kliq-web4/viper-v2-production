@@ -1,8 +1,12 @@
 import { Button } from '@/components/ui/button'
+import { GoogleGeminiEffectDemo } from '@/components/ui/google-gemini-effect-demo'
 
 export function MarketingFooter() {
   return (
     <footer className="mt-16 border-t border-purple-800/50 bg-purple-950 backdrop-blur supports-backdrop:backdrop-blur-md">
+      <div className="w-full">
+        <GoogleGeminiEffectDemo />
+      </div>
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
           <div>
@@ -18,7 +22,7 @@ export function MarketingFooter() {
             <div className="text-xs font-mono font-light mb-3 text-purple-300 uppercase tracking-wider">Resources</div>
             <ul className="space-y-2 text-xs font-mono text-purple-400">
               <li><a href="#docs" className="hover:underline">Docs & FAQs</a></li>
-<li><a href="/discover" className="hover:underline">Community</a></li>
+              <li><a href="/discover" className="hover:underline">Community</a></li>
               <li><a href="#blog" className="hover:underline">Blog</a></li>
               <li><a href="#changelog" className="hover:underline">Changelog</a></li>
             </ul>
