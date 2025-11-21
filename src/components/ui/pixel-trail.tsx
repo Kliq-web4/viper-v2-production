@@ -26,21 +26,46 @@ const PixelTrail: React.FC<PixelTrailProps> = ({
 	const dimensions = useDimensions(containerRef)
 	const trailId = useRef(uuidv4())
 
+	const rectRef = useRef<DOMRect | null>(null)
+	const rafRef = useRef<number | null>(null)
+
+	// Update rect on resize and scroll
+	const updateRect = useCallback(() => {
+		if (containerRef.current) {
+			rectRef.current = containerRef.current.getBoundingClientRect()
+		}
+	}, [])
+
+	useEffect(() => {
+		updateRect()
+		window.addEventListener("resize", updateRect)
+		window.addEventListener("scroll", updateRect)
+		return () => {
+			window.removeEventListener("resize", updateRect)
+			window.removeEventListener("scroll", updateRect)
+		}
+	}, [updateRect])
+
 	const handleMouseMove = useCallback(
 		(e: MouseEvent) => {
-			if (!containerRef.current) return
+			if (rafRef.current) return
 
-			const rect = containerRef.current.getBoundingClientRect()
-			const x = Math.floor((e.clientX - rect.left) / pixelSize)
-			const y = Math.floor((e.clientY - rect.top) / pixelSize)
+			rafRef.current = requestAnimationFrame(() => {
+				if (!rectRef.current) return
 
-			const pixelElement = document.getElementById(
-				`${trailId.current}-pixel-${x}-${y}`
-			)
-			if (pixelElement) {
-				const animatePixel = (pixelElement as any).__animatePixel
-				if (animatePixel) animatePixel()
-			}
+				const rect = rectRef.current
+				const x = Math.floor((e.clientX - rect.left) / pixelSize)
+				const y = Math.floor((e.clientY - rect.top) / pixelSize)
+
+				const pixelElement = document.getElementById(
+					`${trailId.current}-pixel-${x}-${y}`
+				)
+				if (pixelElement) {
+					const animatePixel = (pixelElement as any).__animatePixel
+					if (animatePixel) animatePixel()
+				}
+				rafRef.current = null
+			})
 		},
 		[pixelSize]
 	)
@@ -50,6 +75,7 @@ const PixelTrail: React.FC<PixelTrailProps> = ({
 		window.addEventListener('mousemove', handleMouseMove)
 		return () => {
 			window.removeEventListener('mousemove', handleMouseMove)
+			if (rafRef.current) cancelAnimationFrame(rafRef.current)
 		}
 	}, [handleMouseMove])
 
@@ -103,15 +129,15 @@ const PixelDot: React.FC<PixelDotProps> = React.memo(
 		const animatePixel = useCallback(() => {
 			// First, immediately set to visible (opacity 1)
 			controls.set({ opacity: 1 })
-			
+
 			// Then fade out after delay
 			const actualFadeDuration = fadeDuration > 0 ? fadeDuration / 1000 : 0.5
 			const actualDelay = delay > 0 ? delay / 1000 : 0
-			
+
 			controls.start({
 				opacity: 0,
-				transition: { 
-					duration: actualFadeDuration, 
+				transition: {
+					duration: actualFadeDuration,
 					delay: actualDelay,
 					ease: "easeOut"
 				},
@@ -122,7 +148,7 @@ const PixelDot: React.FC<PixelDotProps> = React.memo(
 		const ref = useCallback(
 			(node: HTMLDivElement | null) => {
 				if (node) {
-					;(node as any).__animatePixel = animatePixel
+					; (node as any).__animatePixel = animatePixel
 				}
 			},
 			[animatePixel]
@@ -136,6 +162,7 @@ const PixelDot: React.FC<PixelDotProps> = React.memo(
 				style={{
 					width: `${size}px`,
 					height: `${size}px`,
+					willChange: "opacity",
 				}}
 				initial={{ opacity: 0 }}
 				animate={controls}
