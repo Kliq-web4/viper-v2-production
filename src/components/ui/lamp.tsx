@@ -25,9 +25,11 @@ export function LampDemo() {
 export const LampContainer = ({
     children,
     className,
+    backgroundContent,
 }: {
     children: React.ReactNode;
     className?: string;
+    backgroundContent?: React.ReactNode;
 }) => {
     return (
         <div
@@ -95,6 +97,12 @@ export const LampContainer = ({
 
                 <div className="absolute inset-auto z-40 h-44 w-full -translate-y-[12.5rem] bg-black"></div>
             </div>
+
+            {backgroundContent && (
+                <div className="absolute inset-0 z-45 w-full h-full pointer-events-none">
+                    {backgroundContent}
+                </div>
+            )}
 
             <div className="relative z-50 flex -translate-y-32 flex-col items-center px-5">
                 {children}

@@ -242,14 +242,7 @@ export default function Home() {
 	return (
 		<div className="relative flex flex-col min-h-screen bg-black">
 			{/* Background - PixelTrail on purple background */}
-			<div className="fixed inset-0 z-0 bg-black">
-				<PixelTrail
-					pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
-					fadeDuration={600}
-					delay={800}
-					pixelClassName="rounded-full bg-[#6B21A8]"
-				/>
-			</div>
+
 
 			<MarketingHeader />
 
@@ -257,7 +250,18 @@ export default function Home() {
 				{/* Hero Section - Purple Dominant */}
 				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pt-40 md:pb-32">
 					<div className="flex flex-col items-center text-center space-y-6 -mt-20">
-						<LampContainer className="pt-40">
+						<LampContainer
+							className="pt-40"
+							backgroundContent={
+								<PixelTrail
+									pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
+									fadeDuration={600}
+									delay={800}
+									pixelClassName="rounded-full bg-[#6B21A8]"
+									className="fixed inset-0"
+								/>
+							}
+						>
 							<motion.h1
 								initial={{ opacity: 0.5, y: 100 }}
 								whileInView={{ opacity: 1, y: 0 }}
