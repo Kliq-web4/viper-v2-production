@@ -207,7 +207,7 @@ export default function Home() {
 				{/* Hero Section - Purple Dominant */}
 				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 md:pt-24 md:pb-20">
 					<div className="flex flex-col items-center text-center space-y-4">
-						<LampContainer className="min-h-[30vh] md:min-h-[40vh]">
+						<LampContainer className="min-h-[30vh] md:min-h-[40vh] -mt-10 md:mt-0">
 							<motion.h1
 								initial={{ opacity: 0.5, y: 100 }}
 								whileInView={{ opacity: 1, y: 0 }}
@@ -216,7 +216,7 @@ export default function Home() {
 									duration: 0.8,
 									ease: "easeInOut",
 								}}
-								className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-mono font-light tracking-tighter text-purple-100 leading-none text-center bg-clip-text text-transparent bg-gradient-to-b from-purple-100 to-purple-500"
+								className="text-4xl sm:text-7xl md:text-8xl lg:text-9xl font-mono font-light tracking-tighter text-purple-100 leading-none text-center bg-clip-text text-transparent bg-gradient-to-b from-purple-100 to-purple-500"
 							>
 								web4.sbs
 							</motion.h1>
@@ -237,7 +237,7 @@ export default function Home() {
 					</div>
 
 					{/* Main Input Area - Purple Design */}
-					<div className="max-w-3xl mx-auto mt-4 md:mt-12">
+					<div className="max-w-3xl mx-auto mt-4 md:mt-12 px-2 md:px-0">
 						<form
 							method="POST"
 							onSubmit={(e) => {
@@ -245,7 +245,7 @@ export default function Home() {
 								const query = textareaRef.current!.value;
 								handleCreateApp(query, agentMode);
 							}}
-							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[100px] md:min-h-[120px] bg-purple-900/50 border border-purple-700/50 rounded-lg p-4 md:p-6 transition-all duration-300 hover:border-purple-600 focus-within:border-purple-500 backdrop-blur-sm"
+							className="group relative overflow-hidden flex z-10 flex-col w-full min-h-[100px] md:min-h-[120px] bg-purple-900/50 border border-purple-700/50 rounded-lg p-3 md:p-6 transition-all duration-300 hover:border-purple-600 focus-within:border-purple-500 backdrop-blur-sm"
 						>
 							<div
 								className={clsx(

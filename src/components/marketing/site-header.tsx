@@ -119,7 +119,6 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
                 </NavigationMenuList>
               </NavigationMenu>
             </nav>
-
             {/* Right actions */}
             <div className="flex items-center gap-2">
               {isAuthenticated && user ? (
@@ -129,9 +128,10 @@ export function MarketingHeader({ onStart }: MarketingHeaderProps) {
                   variant="secondary"
                   size="sm"
                   onClick={handleStart}
-                  className="bg-purple-500 text-white hover:bg-purple-400 font-mono border-0 rounded-lg"
+                  className="bg-purple-500 text-white hover:bg-purple-400 font-mono border-0 rounded-lg px-3 h-8"
                 >
-                  Start Building
+                  <span className="md:hidden">Build</span>
+                  <span className="hidden md:inline">Start Building</span>
                 </Button>
               )}
             </div>
