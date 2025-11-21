@@ -16,14 +16,15 @@ import { useDragDrop } from '@/hooks/use-drag-drop';
 import { ImageUploadButton } from '@/components/image-upload-button';
 import { ImageAttachmentPreview } from '@/components/image-attachment-preview';
 import { SUPPORTED_IMAGE_MIME_TYPES } from '@/api-types';
-import { PixelTrail } from '@/components/ui/pixel-trail';
-import { useScreenSize } from '@/components/hooks/use-screen-size';
+
+
 import { EntropyDemo } from '@/components/ui/entropy-demo';
 import { LampContainer } from '@/components/ui/lamp';
 import { GlowingEffectDemo } from '@/components/ui/glowing-effect-demo';
 import { TemplatesDemo } from '@/components/ui/templates-demo';
 import { CompareDemo } from '@/components/ui/compare-demo';
 import { HoverPeek } from '@/components/ui/link-preview';
+import { EvervaultCardDemo } from '@/components/ui/evervault-card-demo';
 import { MarketingHeader } from '@/components/marketing/site-header';
 import { MarketingFooter } from '@/components/marketing/site-footer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -45,7 +46,7 @@ export default function Home() {
 	const [query, setQuery] = useState('');
 	const { user } = useAuth();
 	const isMobile = useIsMobile();
-	const screenSize = useScreenSize();
+
 
 	const { images, addImages, removeImage, clearImages, isProcessing } = useImageUpload({
 		onError: (error) => {
@@ -251,19 +252,8 @@ export default function Home() {
 			<main className="relative z-10 flex-1">
 				{/* Hero Section - Purple Dominant */}
 				<section id="product" className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pt-40 md:pb-32">
-					<div className="flex flex-col items-center text-center space-y-6 -mt-20">
-						<LampContainer
-							className="pt-40"
-							backgroundContent={
-								<PixelTrail
-									pixelSize={screenSize.lessThan(`md`) ? 48 : 80}
-									fadeDuration={600}
-									delay={800}
-									pixelClassName="rounded-full bg-[#6B21A8]"
-									className="fixed inset-0"
-								/>
-							}
-						>
+					<div className="flex flex-col items-center text-center space-y-6">
+						<LampContainer className="pt-40">
 							<motion.h1
 								initial={{ opacity: 0.5, y: 100 }}
 								whileInView={{ opacity: 1, y: 0 }}
@@ -447,6 +437,16 @@ export default function Home() {
 								</div>
 							</div>
 						</div>
+					</div>
+				</section>
+				{/* Evervault Card Demo Section */}
+				<section id="evervault-demo" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 border-t border-purple-800/50 bg-purple-900/10">
+					<div className="text-center mb-12">
+						<h2 className="text-3xl md:text-4xl font-mono font-light mb-4 text-purple-100 tracking-tight">Secure & Interactive Card</h2>
+						<p className="text-sm font-mono text-purple-400 uppercase tracking-wider">Hover to reveal encrypted data effect</p>
+					</div>
+					<div className="flex justify-center">
+						<EvervaultCardDemo />
 					</div>
 				</section>
 
