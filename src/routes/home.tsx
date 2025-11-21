@@ -368,24 +368,31 @@ export default function Home() {
 							</div>
 						</form>
 
-						<EntropyDemo />
-						<p className="text-xs font-mono text-purple-400 mb-6 max-w-2xl mx-auto mt-6 text-center">
-							Our engineers are actively enhancing Web4.sbs for an even smoother experience — but everything is fully functional and ready to use.
-						</p>
+					</div>
 
-						{/* External CTA - Purple */}
-						<div className="mt-8 flex justify-center">
-							<a
-								href="http://www.kliqonline.com"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="group relative inline-flex items-center gap-2.5 border border-purple-600 bg-purple-900/50 px-5 py-2.5 text-xs font-mono text-purple-200 hover:text-purple-100 hover:border-purple-500 transition-all duration-200 rounded-lg backdrop-blur-sm"
-							>
-								<span>Explore Our Kliq AI x Web4 Playground</span>
-								<ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
-							</a>
+					{/* Entropy & CTA Section */}
+					<div className="max-w-7xl mx-auto mt-16 md:mt-20 px-4 sm:px-6 lg:px-8">
+						<div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
+							<div className="w-full md:flex-1">
+								<EntropyDemo />
+							</div>
+
+							<div className="w-full md:w-80 flex flex-col items-center md:items-start text-center md:text-left shrink-0 pt-8 md:pt-20">
+								<p className="text-xs font-mono text-purple-400 mb-6 leading-relaxed">
+									Our engineers are actively enhancing Web4.sbs for an even smoother experience — but everything is fully functional and ready to use.
+								</p>
+
+								<a
+									href="http://www.kliqonline.com"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="group relative inline-flex items-center gap-2.5 border border-purple-600 bg-purple-900/50 px-5 py-2.5 text-xs font-mono text-purple-200 hover:text-purple-100 hover:border-purple-500 transition-all duration-200 rounded-lg backdrop-blur-sm"
+								>
+									<span>Explore Our Kliq AI x Web4 Playground</span>
+									<ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
+								</a>
+							</div>
 						</div>
-
 					</div>
 				</section>
 
